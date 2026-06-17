@@ -43,5 +43,5 @@ htmlcov/
 # Local Python version
 .python-version
 
-# docs
-.docs
+# Local API documents
+docs/
