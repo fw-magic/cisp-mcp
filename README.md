@@ -6,7 +6,7 @@
 
 ## 项目能力
 
-- 支持 Claude Code、Codex、Codex App、WorkBuddy 等 MCP 客户端接入。
+- 支持 Claude Code、Codex、Codex App、OpenClaw、WorkBuddy 等 MCP 客户端接入。
 - 每个 CISP 产品接口对应一个独立 MCP tool，工具名包含产品号，方便排查和定位。
 - 自动补充 `prodCode`，调用方只需要传业务参数。
 - 对 CISP 返回结果做统一归一化，保留原始返回 `raw_response`。
@@ -19,6 +19,15 @@
 - MCP Python SDK / FastMCP
 - httpx
 - python-dotenv
+
+## 运行环境要求
+
+推荐本机提前安装：
+
+- Python `3.11` 或更高版本
+- uv
+
+`uv` 可以管理 Python 版本；如果本机没有符合要求的 Python，`uv` 在部分环境下可以自动下载和管理。但在企业内网、代理或离线环境中，自动下载可能失败，因此建议提前安装好 Python `3.11+`。
 
 ## 项目结构
 
@@ -52,15 +61,21 @@ cd cisp-mcp
 cd /path/to/cisp-mcp
 ```
 
-### 2. 安装 uv
+### 2. 检查 Python 和 uv
 
-如果本机已经有 `uv`，可以跳过：
+检查 Python：
+
+```bash
+python3 --version
+```
+
+检查 uv：
 
 ```bash
 uv --version
 ```
 
-如果没有，可以按 uv 官方方式安装，或使用你本机已有的 Python 环境安装。
+如果没有安装 uv，可以按 uv 官方方式安装，或使用本机已有的 Python 环境安装。
 
 ### 3. 安装依赖
 
@@ -104,13 +119,13 @@ Discovered MCP tools:
 - p0010058_query_business_basic_deep
 ...
 - query_cisp_product
-Total: 11
+Total: 14
 Smoke test passed.
 ```
 
 ### stdio 模式
 
-stdio 是给 Claude Code、Codex、WorkBuddy 等 MCP 客户端使用的模式。
+stdio 是给 Claude Code、Codex、OpenClaw、WorkBuddy 等 MCP 客户端使用的模式。
 
 ```bash
 uv run cisp-mcp
@@ -157,6 +172,9 @@ URL: http://127.0.0.1:8000/mcp
 | `P0010075` | 企业作品著作权信息查询 | `p0010075_query_work_copyright_info` |
 | `P0010076` | 企业 ICP 备案信息查询 | `p0010076_query_icp_filing_info` |
 | `P0010078` | 企业专利信息查询 | `p0010078_query_patent_info` |
+| `P0050007` | 企业舆情信息列表查询 | `p0050007_query_public_opinion_list` |
+| `P0050008` | 企业舆情信息详情查询 | `p0050008_query_public_opinion_detail` |
+| `P0050007+P0050008` | 企业舆情信息查询（列表+详情） | `p0050007_p0050008_query_public_opinion_info` |
 | `P0060007` | 企业工商二要素验证 | `p0060007_verify_business_two_elements` |
 | `P0060008` | 企业工商三要素验证 | `p0060008_verify_business_three_elements` |
 | 通用 | CISP JSON 网关调试查询 | `query_cisp_product` |
@@ -183,6 +201,8 @@ URL: http://127.0.0.1:8000/mcp
 - `resultList`
 - `icpList`
 - `patentsList`
+- `infoList`
+- `infoDetail`
 - `matchList`
 
 ## 调用示例
@@ -230,6 +250,57 @@ p0010058_query_business_basic_deep
 ```text
 p0010078_query_patent_info
 ```
+
+### 查询企业舆情信息
+
+```json
+{
+  "ent_name": ["证通股份有限公司", "水滴科技服务有限公司"],
+  "page_no": "1",
+  "page_size": "10",
+  "max_details": 10
+}
+```
+
+对应工具：
+
+```text
+p0050007_p0050008_query_public_opinion_info
+```
+
+说明：该工具会先调用 `P0050007` 查询舆情列表，再用列表返回的 `entryId` 和用户传入的 `ent_name` 调用 `P0050008` 查询舆情详情。
+
+### 只查询企业舆情列表
+
+```json
+{
+  "ent_name": ["证通股份有限公司", "水滴科技服务有限公司"],
+  "page_no": "1",
+  "page_size": "10"
+}
+```
+
+对应工具：
+
+```text
+p0050007_query_public_opinion_list
+```
+
+### 查询企业舆情详情
+
+```json
+{
+  "entry_id": "替换成舆情列表返回的 entryId"
+}
+```
+
+对应工具：
+
+```text
+p0050008_query_public_opinion_detail
+```
+
+如果只传 `ent_name`，服务会先查询该企业第一页舆情列表，再取第一条 `entryId` 查询详情。
 
 ### 二要素验证
 
@@ -318,6 +389,55 @@ enabled = true
 ```
 
 确认 `cisp-mcp` 已连接。
+
+## 集成到 OpenClaw（小龙虾）
+
+OpenClaw 可以通过 `openclaw mcp set` 保存 MCP Server 定义。推荐使用 stdio 模式，让 OpenClaw 在需要时启动 `cisp-mcp`。
+
+### 本地项目方式
+
+先确保项目目录下已经配置好 `.env`，然后执行：
+
+```bash
+openclaw mcp set cisp-mcp '{"command":"uv","args":["--directory","/path/to/cisp-mcp","run","cisp-mcp"]}'
+```
+
+检查配置：
+
+```bash
+openclaw mcp list
+openclaw mcp show cisp-mcp --json
+```
+
+如果 OpenClaw Gateway 已经在运行，保存 MCP 配置后建议重启 Gateway 或新建会话：
+
+```bash
+openclaw gateway restart
+```
+
+### 直接配置环境变量
+
+如果不想依赖项目目录下的 `.env`，也可以把运行所需环境变量写入 OpenClaw MCP 配置：
+
+```bash
+openclaw mcp set cisp-mcp '{"command":"uv","args":["--directory","/path/to/cisp-mcp","run","cisp-mcp"],"env":{"CISP_ENDPOINT":"https://cisp.zenitera.com","CISP_REQUEST_URI":"/ectcispserver/api/entcreditapi/query","CISP_API_KEY":"填写自己的真实 API Key","CISP_TIMEOUT_SECONDS":"30","CISP_VERIFY_SSL":"true"}}'
+```
+
+### 直接从 GitHub 运行
+
+如果不想本地 clone 项目，可以使用 `uvx` 从 GitHub 运行：
+
+```bash
+openclaw mcp set cisp-mcp '{"command":"uvx","args":["--from","git+https://github.com/fw-magic/cisp-mcp.git","cisp-mcp"],"env":{"CISP_ENDPOINT":"https://cisp.zenitera.com","CISP_REQUEST_URI":"/ectcispserver/api/entcreditapi/query","CISP_API_KEY":"填写自己的真实 API Key","CISP_TIMEOUT_SECONDS":"30","CISP_VERIFY_SSL":"true"}}'
+```
+
+配置完成后，可以在 OpenClaw 中直接提问：
+
+```text
+查询一下证通股份有限公司的工商照面信息。
+
+查询证通股份有限公司和水滴科技服务有限公司的舆情信息。
+```
 
 ## 集成到 WorkBuddy
 

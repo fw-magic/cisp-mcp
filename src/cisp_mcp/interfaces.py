@@ -78,6 +78,22 @@ INTERFACES = {
         data_field="P0010078Data",
         shortcut_field="patentsList",
     ),
+    "P0050007": CispInterface(
+        product_code="P0050007",
+        name="企业舆情信息列表查询",
+        description="根据企业名称、三级标签、情感方向等条件查询企业舆情列表信息。",
+        status_field="P0050007Status",
+        data_field="P0050007Data",
+        shortcut_field="infoList",
+    ),
+    "P0050008": CispInterface(
+        product_code="P0050008",
+        name="企业舆情信息详情查询",
+        description="根据企业名称或舆情 ID 查询企业舆情详情信息。",
+        status_field="P0050008Status",
+        data_field="P0050008Data",
+        shortcut_field="infoDetail",
+    ),
     "P0060007": CispInterface(
         product_code="P0060007",
         name="企业工商二要素验证",
@@ -105,6 +121,8 @@ P0010074 = INTERFACES["P0010074"]
 P0010075 = INTERFACES["P0010075"]
 P0010076 = INTERFACES["P0010076"]
 P0010078 = INTERFACES["P0010078"]
+P0050007 = INTERFACES["P0050007"]
+P0050008 = INTERFACES["P0050008"]
 P0060007 = INTERFACES["P0060007"]
 P0060008 = INTERFACES["P0060008"]
 

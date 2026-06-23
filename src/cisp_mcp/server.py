@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import argparse
+import json
+import os
 from typing import Any
 
 from mcp.server.fastmcp import FastMCP
@@ -16,11 +18,22 @@ from .interfaces import (
     P0010075,
     P0010076,
     P0010078,
+    P0050007,
+    P0050008,
     P0060007,
     P0060008,
 )
 
-mcp = FastMCP("CISP MCP", json_response=True)
+def read_mcp_port() -> int:
+    return int(os.getenv("PORT") or os.getenv("MCP_PORT") or "8000")
+
+
+mcp = FastMCP(
+    "CISP MCP",
+    json_response=True,
+    host=os.getenv("MCP_HOST", "127.0.0.1"),
+    port=read_mcp_port(),
+)
 
 
 def get_client() -> CispApiClient:
@@ -43,6 +56,51 @@ def require_one_of(params: dict[str, Any], names: tuple[str, ...]) -> None:
     else:
         readable = ", ".join(names)
         raise ValueError(f"At least one of these parameters is required: {readable}")
+
+
+def normalize_public_opinion_ent_name(value: list[str] | str | None) -> str | None:
+    if value is None:
+        return None
+    if isinstance(value, str):
+        value = value.strip()
+        if not value:
+            return None
+        if value.startswith("["):
+            return value
+        return json.dumps([value], ensure_ascii=False)
+
+    cleaned = [item.strip() for item in value if item and item.strip()]
+    if not cleaned:
+        return None
+    return json.dumps(cleaned, ensure_ascii=False)
+
+
+def extract_first_value(value: Any, keys: tuple[str, ...]) -> str | None:
+    if isinstance(value, dict):
+        for key in keys:
+            item = value.get(key)
+            if item:
+                return str(item)
+        for item in value.values():
+            found = extract_first_value(item, keys)
+            if found:
+                return found
+    if isinstance(value, list):
+        for item in value:
+            found = extract_first_value(item, keys)
+            if found:
+                return found
+    return None
+
+
+def parse_positive_int(value: int | str | None, default: int) -> int:
+    if value is None:
+        return default
+    try:
+        parsed = int(value)
+    except (TypeError, ValueError):
+        return default
+    return parsed if parsed > 0 else default
 
 
 @mcp.tool()
@@ -221,6 +279,149 @@ async def p0010078_query_patent_info(
             extra_params,
         ),
     )
+
+
+@mcp.tool()
+async def p0050007_query_public_opinion_list(
+    ent_name: list[str] | str | None = None,
+    group_name: str | None = None,
+    info_label: str | None = None,
+    start_date: str | None = None,
+    end_date: str | None = None,
+    info_emotion: str | None = None,
+    page_no: str | None = None,
+    page_size: str | None = None,
+    extra_params: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """企业舆情信息列表查询。ent_name 使用企业名称数组，如 ["证通股份有限公司"]，支持多个企业。"""
+    client = get_client()
+    return await client.query_product(
+        prod_code=P0050007.product_code,
+        params=with_extra_params(
+            {
+                "entName": normalize_public_opinion_ent_name(ent_name),
+                "groupName": group_name,
+                "infoLabel": info_label,
+                "startDate": start_date,
+                "endDate": end_date,
+                "infoEmotion": info_emotion,
+                "pageNo": page_no,
+                "range": page_size,
+            },
+            extra_params,
+        ),
+    )
+
+
+@mcp.tool()
+async def p0050008_query_public_opinion_detail(
+    ent_name: list[str] | str | None = None,
+    entry_id: str | None = None,
+    extra_params: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """企业舆情信息详情查询。优先使用 entry_id；只传 ent_name 时会先查列表，再取第一条舆情详情。"""
+    client = get_client()
+    if not entry_id and ent_name:
+        list_result = await client.query_product(
+            prod_code=P0050007.product_code,
+            params={
+                "entName": normalize_public_opinion_ent_name(ent_name),
+                "pageNo": "1",
+                "range": "1",
+            },
+        )
+        entry_id = extract_first_value(list_result.get("infoList"), ("entryId",))
+
+    params = {
+        "entryId": entry_id,
+        "entName": normalize_public_opinion_ent_name(ent_name),
+    }
+    require_one_of(params, ("entryId",))
+    return await client.query_product(
+        prod_code=P0050008.product_code,
+        params=with_extra_params(params, extra_params),
+    )
+
+
+@mcp.tool()
+async def p0050007_p0050008_query_public_opinion_info(
+    ent_name: list[str] | str,
+    group_name: str | None = None,
+    info_label: str | None = None,
+    start_date: str | None = None,
+    end_date: str | None = None,
+    info_emotion: str | None = None,
+    page_no: str | None = "1",
+    page_size: str | None = "10",
+    max_details: int | None = 10,
+    extra_params: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """企业舆情信息查询。先查 P0050007 列表，再用 entryId 和 ent_name 调 P0050008 查询详情。"""
+    client = get_client()
+    normalized_ent_name = normalize_public_opinion_ent_name(ent_name)
+    list_result = await client.query_product(
+        prod_code=P0050007.product_code,
+        params=with_extra_params(
+            {
+                "entName": normalized_ent_name,
+                "groupName": group_name,
+                "infoLabel": info_label,
+                "startDate": start_date,
+                "endDate": end_date,
+                "infoEmotion": info_emotion,
+                "pageNo": page_no,
+                "range": page_size,
+            },
+            extra_params,
+        ),
+    )
+
+    info_list = list_result.get("infoList")
+    if not isinstance(info_list, list):
+        info_list = []
+
+    detail_limit = min(parse_positive_int(max_details, 10), len(info_list))
+    details = []
+    for list_item in info_list[:detail_limit]:
+        entry_id = extract_first_value(list_item, ("entryId",))
+        if not entry_id:
+            details.append(
+                {
+                    "entry_id": None,
+                    "list_item": list_item,
+                    "success": False,
+                    "error": "entryId not found in list item",
+                }
+            )
+            continue
+
+        detail_result = await client.query_product(
+            prod_code=P0050008.product_code,
+            params={
+                "entryId": entry_id,
+                "entName": normalized_ent_name,
+            },
+        )
+        details.append(
+            {
+                "entry_id": entry_id,
+                "list_item": list_item,
+                "success": detail_result.get("success"),
+                "detail": detail_result,
+            }
+        )
+
+    return {
+        "product_code": "P0050007+P0050008",
+        "interface_name": "企业舆情信息查询（列表+详情）",
+        "success": bool(list_result.get("success")) and all(item.get("success") for item in details),
+        "list_success": list_result.get("success"),
+        "list_has_result": list_result.get("has_result"),
+        "list_result": list_result,
+        "infoList": info_list,
+        "detail_count": len(details),
+        "details": details,
+    }
 
 
 @mcp.tool()
