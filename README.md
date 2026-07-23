@@ -119,7 +119,7 @@ Discovered MCP tools:
 - p0010058_query_business_basic_deep
 ...
 - query_cisp_product
-Total: 14
+Total: 17
 Smoke test passed.
 ```
 
@@ -172,11 +172,14 @@ URL: http://127.0.0.1:8000/mcp
 | `P0010075` | 企业作品著作权信息查询 | `p0010075_query_work_copyright_info` |
 | `P0010076` | 企业 ICP 备案信息查询 | `p0010076_query_icp_filing_info` |
 | `P0010078` | 企业专利信息查询 | `p0010078_query_patent_info` |
+| `P0010084` | 企业许可信息查询 | `p0010084_query_license_info` |
+| `P0020021` | 企业单点关联信息查询 | `p0020021_query_single_point_related_info` |
 | `P0050007` | 企业舆情信息列表查询 | `p0050007_query_public_opinion_list` |
 | `P0050008` | 企业舆情信息详情查询 | `p0050008_query_public_opinion_detail` |
 | `P0050007+P0050008` | 企业舆情信息查询（列表+详情） | `p0050007_p0050008_query_public_opinion_info` |
 | `P0060007` | 企业工商二要素验证 | `p0060007_verify_business_two_elements` |
 | `P0060008` | 企业工商三要素验证 | `p0060008_verify_business_three_elements` |
+| `P0110003` | 企业荣誉资质信息查询 | `p0110003_query_honor_qualification_info` |
 | 通用 | CISP JSON 网关调试查询 | `query_cisp_product` |
 
 ### 返回结构
@@ -201,9 +204,12 @@ URL: http://127.0.0.1:8000/mcp
 - `resultList`
 - `icpList`
 - `patentsList`
+- `detailList`
+- `entInvList`
 - `infoList`
 - `infoDetail`
 - `matchList`
+- `itemNameList`
 
 ## 调用示例
 
@@ -249,6 +255,59 @@ p0010058_query_business_basic_deep
 
 ```text
 p0010078_query_patent_info
+```
+
+### 查询企业投资和任职关联信息
+
+用户只需要描述查询意图，模型会选择对应的 `relation_direction`：
+
+- `"1"`：同时查询投资和任职关系
+- `"2"`：只查询投资关系
+- `"3"`：只查询任职关系
+
+```json
+{
+  "ent_info": "证通股份有限公司",
+  "relation_direction": "2"
+}
+```
+
+对应工具：
+
+```text
+p0020021_query_single_point_related_info
+```
+
+### 查询企业荣誉资质
+
+```json
+{
+  "ent_info": "证通股份有限公司"
+}
+```
+
+对应工具：
+
+```text
+p0110003_query_honor_qualification_info
+```
+
+### 查询企业许可
+
+```json
+{
+  "ent_info": "证通股份有限公司",
+  "license_type": "ylxk",
+  "province": "广东省",
+  "page_no": "1",
+  "page_size": "10"
+}
+```
+
+对应工具：
+
+```text
+p0010084_query_license_info
 ```
 
 ### 查询企业舆情信息
