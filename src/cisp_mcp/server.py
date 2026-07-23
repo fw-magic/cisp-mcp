@@ -329,6 +329,7 @@ async def p0020021_query_single_point_related_info(
     "2" 表示只查询投资关系；
     "3" 表示只查询任职关系。
     最终用户无需了解码值，由模型根据“投资”“任职”或“两者都查”的自然语言选择。
+    如果用户没有明确要查询投资、任职还是两者都查，必须先向用户确认，确认后再调用本工具。
     """
     client = get_client()
     return await client.query_product(

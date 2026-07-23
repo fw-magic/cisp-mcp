@@ -82,6 +82,20 @@ class NewInterfaceToolTests(unittest.IsolatedAsyncioTestCase):
         )
         self.assertEqual(result["prod_code"], "P0020021")
 
+    async def test_p0020021_schema_requires_clarifying_ambiguous_intent(self) -> None:
+        tools = await server.mcp.list_tools()
+        tool = next(
+            item
+            for item in tools
+            if item.name == "p0020021_query_single_point_related_info"
+        )
+
+        self.assertEqual(
+            tool.inputSchema["properties"]["relation_direction"]["enum"],
+            ["1", "2", "3"],
+        )
+        self.assertIn("必须先向用户确认", tool.description or "")
+
     async def test_p0110003_maps_enterprise_identifier(self) -> None:
         self.assertTrue(
             hasattr(server, "p0110003_query_honor_qualification_info")
