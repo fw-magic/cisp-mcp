@@ -3,7 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
-from typing import Any
+from typing import Any, Literal
 
 from mcp.server.fastmcp import FastMCP
 
@@ -18,10 +18,13 @@ from .interfaces import (
     P0010075,
     P0010076,
     P0010078,
+    P0010084,
+    P0020021,
     P0050007,
     P0050008,
     P0060007,
     P0060008,
+    P0110003,
 )
 
 def read_mcp_port() -> int:
@@ -282,6 +285,65 @@ async def p0010078_query_patent_info(
 
 
 @mcp.tool()
+async def p0010084_query_license_info(
+    ent_info: str,
+    license_type: str | None = None,
+    province: str | None = None,
+    page_no: str | None = None,
+    page_size: str | None = None,
+    extra_params: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """企业许可信息查询。
+
+    查询工商、质检、食药监、金融监管、环保、医疗等许可信息。
+    license_type 可选值包括 gs、zjzj、syj-xk、syj-old、syj-drug、yjh、
+    bjh、gdzj-gy、gdzj-dsj、pwxk、pwxk-dj、ylxk。
+    province 仅在 license_type 为 ylxk（医疗许可）时使用。
+    """
+    client = get_client()
+    return await client.query_product(
+        prod_code=P0010084.product_code,
+        params=with_extra_params(
+            {
+                "entInfo": ent_info,
+                "type": license_type,
+                "province": province,
+                "pageNo": page_no,
+                "range": page_size,
+            },
+            extra_params,
+        ),
+    )
+
+
+@mcp.tool()
+async def p0020021_query_single_point_related_info(
+    ent_info: str,
+    relation_direction: Literal["1", "2", "3"],
+    extra_params: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """企业单点关联信息查询。
+
+    根据用户意图选择 relation_direction：
+    "1" 表示同时查询投资和任职关系；
+    "2" 表示只查询投资关系；
+    "3" 表示只查询任职关系。
+    最终用户无需了解码值，由模型根据“投资”“任职”或“两者都查”的自然语言选择。
+    """
+    client = get_client()
+    return await client.query_product(
+        prod_code=P0020021.product_code,
+        params=with_extra_params(
+            {
+                "entInfo": ent_info,
+                "relationDirection": relation_direction,
+            },
+            extra_params,
+        ),
+    )
+
+
+@mcp.tool()
 async def p0050007_query_public_opinion_list(
     ent_name: list[str] | str | None = None,
     group_name: str | None = None,
@@ -463,6 +525,19 @@ async def p0060008_verify_business_three_elements(
             },
             extra_params,
         ),
+    )
+
+
+@mcp.tool()
+async def p0110003_query_honor_qualification_info(
+    ent_info: str,
+    extra_params: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """企业荣誉资质信息查询。根据企业名称、注册号、统一社会信用代码或企业 ID 查询荣誉、奖励和认定信息。"""
+    client = get_client()
+    return await client.query_product(
+        prod_code=P0110003.product_code,
+        params=with_extra_params({"entInfo": ent_info}, extra_params),
     )
 
 

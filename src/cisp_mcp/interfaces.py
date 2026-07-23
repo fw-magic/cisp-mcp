@@ -78,6 +78,22 @@ INTERFACES = {
         data_field="P0010078Data",
         shortcut_field="patentsList",
     ),
+    "P0010084": CispInterface(
+        product_code="P0010084",
+        name="企业许可信息查询",
+        description="根据企业名称、统一社会信用代码或注册号查询工商、食药监、质检、金融监管、环保、医疗等企业许可信息。",
+        status_field="P0010084Status",
+        data_field="P0010084Data",
+        shortcut_field="detailList",
+    ),
+    "P0020021": CispInterface(
+        product_code="P0020021",
+        name="企业单点关联信息查询",
+        description="根据企业名称、注册号、组织机构代码或统一社会信用代码查询企业投资和任职关联信息。",
+        status_field="P0020021Status",
+        data_field="P0020021Data",
+        shortcut_field="entInvList",
+    ),
     "P0050007": CispInterface(
         product_code="P0050007",
         name="企业舆情信息列表查询",
@@ -110,6 +126,14 @@ INTERFACES = {
         data_field="P0060008Data",
         shortcut_field="matchList",
     ),
+    "P0110003": CispInterface(
+        product_code="P0110003",
+        name="企业荣誉资质信息查询",
+        description="根据企业名称、注册号、统一社会信用代码或企业 ID 查询企业荣誉、奖励和认定信息。",
+        status_field="P0110003Status",
+        data_field="P0110003Data",
+        shortcut_field="itemNameList",
+    ),
 }
 
 
@@ -121,10 +145,13 @@ P0010074 = INTERFACES["P0010074"]
 P0010075 = INTERFACES["P0010075"]
 P0010076 = INTERFACES["P0010076"]
 P0010078 = INTERFACES["P0010078"]
+P0010084 = INTERFACES["P0010084"]
+P0020021 = INTERFACES["P0020021"]
 P0050007 = INTERFACES["P0050007"]
 P0050008 = INTERFACES["P0050008"]
 P0060007 = INTERFACES["P0060007"]
 P0060008 = INTERFACES["P0060008"]
+P0110003 = INTERFACES["P0110003"]
 
 
 RESULT_CODE_DESCRIPTIONS = {
