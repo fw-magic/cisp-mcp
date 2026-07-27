@@ -45,3 +45,14 @@ htmlcov/
 
 # Local API documents
 docs/
+
+# Generated company-profile artifacts
+output/
+tmp/pdfs/
+
+# Local assistant and planning directories
+.workbuddy/
+.codebuddy/
+.claude/
+fields_test/
+skills_plan/

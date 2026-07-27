@@ -1,0 +1,13 @@
+interface:
+  display_name: "CISP 企业一页纸画像"
+  short_description: "基于 CISP 公开数据生成聊天摘要与可归档 PDF 企业画像"
+  default_prompt: "使用 $cisp-company-profile 为目标企业生成标准版企业画像，并交付摘要与 PDF。"
+
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "cisp-mcp"
+      description: "查询 CISP 企业工商、关联、知产、许可、资质与舆情数据"
+
+policy:
+  allow_implicit_invocation: true

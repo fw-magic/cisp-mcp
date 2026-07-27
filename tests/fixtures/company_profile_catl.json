@@ -1,0 +1,348 @@
+{
+  "schema_version": "1.0",
+  "report": {
+    "title": "企业一页纸画像｜标准版",
+    "company_name": "宁德时代新能源科技股份有限公司",
+    "credit_code": "91350900587527783P",
+    "query_time": "2026-07-27 10:08:43",
+    "mode": "标准版",
+    "report_id": "CISP-CP-91350900587527783P-20260727-100843",
+    "data_source": "CISP MCP"
+  },
+  "summary": {
+    "one_sentence": "宁德时代新能源科技股份有限公司成立于2011年，登记状态为在营，主营动力及储能电池、电池管理系统和相关技术服务；本次查询返回较大规模的专利、商标和软件著作权记录，历史经营异常已移出，权利负担类历史登记的当前有效状态仍需逐项核验。",
+    "business_position": "锂离子电池制造及新能源储能系统相关研发、生产、销售和技术服务。",
+    "scale_and_tenure": "2011-12-16成立；注册资本456360.836500，CNY:人民币。",
+    "attention": [
+      "2026-06-30发生注册资本及董监高备案变更",
+      "历史经营异常记录1条，已于列入当日移出",
+      "股权出质及动产抵押存在历史登记，不能据此判断当前有效存量"
+    ]
+  },
+  "subject": {
+    "registration_status": "在营（开业）",
+    "legal_representative": "曾毓群",
+    "company_type": "股份有限公司（上市、自然人投资或控股）",
+    "established_date": "2011-12-16",
+    "registered_capital": "456360.836500，CNY:人民币",
+    "paid_in_capital": "",
+    "registered_address": "福建省宁德市蕉城区漳湾镇新港路2号",
+    "registration_authority": "宁德市市场监督管理局",
+    "industry": "制造业-电气机械和器材制造业-电池制造-锂离子电池制造",
+    "operating_period": "2011-12-16至长期",
+    "former_names": "宁德时代新能源科技有限公司",
+    "business_scope_summary": "动力及储能电池、燃料电池、超级电容器、电池管理系统、可充电电池包和风光电储能系统的开发、生产、销售及售后服务，并涉及新能源投资和相关技术、测试、咨询服务。"
+  },
+  "shareholders": [
+    {
+      "name": "厦门瑞庭投资有限公司",
+      "type": "企业法人",
+      "ratio": "22.040000%",
+      "subscription": ""
+    },
+    {
+      "name": "香港中央结算有限公司",
+      "type": "其他投资者",
+      "ratio": "19.330000%",
+      "subscription": ""
+    },
+    {
+      "name": "黄世霖",
+      "type": "自然人股东",
+      "ratio": "9.090000%",
+      "subscription": ""
+    },
+    {
+      "name": "宁波联合创新新能源投资管理合伙企业（有限合伙）",
+      "type": "企业法人",
+      "ratio": "4.890000%",
+      "subscription": ""
+    },
+    {
+      "name": "HKSCC NOMINEES LIMITED",
+      "type": "其他投资者",
+      "ratio": "4.720000%",
+      "subscription": ""
+    }
+  ],
+  "personnel": [
+    {
+      "name": "曾毓群",
+      "position": "董事长、总经理",
+      "note": "法定代表人"
+    },
+    {
+      "name": "周佳",
+      "position": "副董事长",
+      "note": ""
+    },
+    {
+      "name": "李平",
+      "position": "副董事长",
+      "note": ""
+    },
+    {
+      "name": "郑舒",
+      "position": "财务负责人",
+      "note": ""
+    },
+    {
+      "name": "蒋理",
+      "position": "副总经理、董事会秘书",
+      "note": "兼任"
+    }
+  ],
+  "network": [
+    {
+      "dimension": "对外投资",
+      "count_display": "153项",
+      "status": "success",
+      "examples": [
+        "广东邦普循环科技有限公司",
+        "宁德时代新能源供应链管理有限公司"
+      ]
+    },
+    {
+      "dimension": "分支机构",
+      "count_display": "8家",
+      "status": "success",
+      "examples": [
+        "南京分公司",
+        "厦门分公司",
+        "上海分公司"
+      ]
+    },
+    {
+      "dimension": "网站/网店",
+      "count_display": "8条",
+      "status": "success",
+      "examples": [
+        "宁德时代官方网站",
+        "CATL官网"
+      ]
+    }
+  ],
+  "assets": [
+    {
+      "dimension": "商标",
+      "status": "success",
+      "count": 1505,
+      "count_display": "1,505",
+      "records": [
+        {
+          "title": "图形",
+          "detail": "第36类，注册号81016022"
+        },
+        {
+          "title": "黑玉",
+          "detail": "第9类，注册号77394883"
+        }
+      ],
+      "note": "总量来自brandListMeta.totalCount"
+    },
+    {
+      "dimension": "专利",
+      "status": "success",
+      "count": 29132,
+      "count_display": "29,132",
+      "records": [
+        {
+          "title": "电池单体、电池装置及用电装置",
+          "detail": "公开日2026-07-24"
+        },
+        {
+          "title": "正极活性材料、正极极片、二次电池、电池模块、电池包和用电装置",
+          "detail": "状态：授权"
+        }
+      ],
+      "note": "总量来自patentsListMeta.totalCount"
+    },
+    {
+      "dimension": "软件著作权",
+      "status": "success",
+      "count": 511,
+      "count_display": "511",
+      "records": [
+        {
+          "title": "除铁器清洗计时模式切换软件",
+          "detail": "登记日期2026-07-23"
+        },
+        {
+          "title": "前工序立库集成监控系统",
+          "detail": "登记日期2026-07-08"
+        }
+      ],
+      "note": "总量来自swListMeta.totalCount"
+    },
+    {
+      "dimension": "作品著作权",
+      "status": "success",
+      "count": 24,
+      "count_display": "24",
+      "records": [
+        {
+          "title": "绝缘耐压管控手册",
+          "detail": "登记日期2026-06-09"
+        },
+        {
+          "title": "Lime Ning形象设计",
+          "detail": "登记日期2025-08-20"
+        }
+      ],
+      "note": "总量来自resultListMeta.totalCount"
+    },
+    {
+      "dimension": "行政许可",
+      "status": "success",
+      "count": 1666,
+      "count_display": "1,666",
+      "records": [
+        {
+          "title": "特种设备使用登记证",
+          "detail": "宁德市市场监督管理局"
+        },
+        {
+          "title": "特种设备使用登记注销申请准予许可决定书",
+          "detail": "宁德市市场监督管理局"
+        }
+      ],
+      "note": "总量来自detailListMeta.totalCount"
+    },
+    {
+      "dimension": "荣誉资质",
+      "status": "success",
+      "count": 53,
+      "count_display": "本次返回53项",
+      "records": [
+        {
+          "title": "博士后工作站",
+          "detail": "国家级，2024-01-01"
+        },
+        {
+          "title": "2025中国制造业民营企业500强名单",
+          "detail": "2025-08-28"
+        }
+      ],
+      "note": "接口无全量元数据"
+    },
+    {
+      "dimension": "ICP备案",
+      "status": "success",
+      "count": 11,
+      "count_display": "11",
+      "records": [
+        {
+          "title": "catl.com",
+          "detail": "闽ICP备14008486号"
+        },
+        {
+          "title": "catlbattery.com",
+          "detail": "闽ICP备14008486号"
+        }
+      ],
+      "note": "总量来自icpListMeta.totalCount"
+    }
+  ],
+  "risks": [
+    {
+      "topic": "经营状态",
+      "result": "在营",
+      "facts": [
+        "本次查询未返回注销、吊销或清算记录"
+      ],
+      "level": "neutral",
+      "scope": "目标企业自身"
+    },
+    {
+      "topic": "执行与失信",
+      "result": "企业自身均为0条",
+      "facts": [
+        "关联主体深圳盛德新能源科技有限公司返回失信线索2条，不等同于目标企业自身记录"
+      ],
+      "level": "attention",
+      "scope": "目标企业自身及关联主体"
+    },
+    {
+      "topic": "经营异常/严重违法",
+      "result": "异常历史1条；严重违法0条",
+      "facts": [
+        "2023-02-25因公示信息问题列入异常，当日因完成更正移出"
+      ],
+      "level": "attention",
+      "scope": "目标企业自身"
+    },
+    {
+      "topic": "行政处罚",
+      "result": "0条",
+      "facts": [
+        "本次查询未返回相关公开记录"
+      ],
+      "level": "neutral",
+      "scope": "目标企业自身"
+    },
+    {
+      "topic": "股权事项",
+      "result": "出质登记13条；冻结0条",
+      "facts": [
+        "部分状态及注销日期为空，不能判断当前有效存量"
+      ],
+      "level": "attention",
+      "scope": "目标企业自身及股东"
+    },
+    {
+      "topic": "动产抵押",
+      "result": "登记15条；注销记录1条",
+      "facts": [
+        "注销记录显示2018-08-24因主债权消灭注销",
+        "其他登记需进一步核验有效状态"
+      ],
+      "level": "attention",
+      "scope": "目标企业自身"
+    }
+  ],
+  "changes": [
+    {
+      "date": "2026-06-30",
+      "item": "注册资本变更",
+      "summary": "由440339.491100万元变更为456360.836500万元"
+    },
+    {
+      "date": "2026-06-30",
+      "item": "董事、监事、高级管理人员备案",
+      "summary": "接口返回董监高备案调整"
+    },
+    {
+      "date": "2026-06-30",
+      "item": "章程备案",
+      "summary": "旧章程变更为新章程"
+    }
+  ],
+  "evidence": {
+    "successful_dimensions": [
+      "工商深度",
+      "商标",
+      "专利",
+      "软件著作权",
+      "作品著作权",
+      "行政许可",
+      "荣誉资质",
+      "ICP备案"
+    ],
+    "empty_dimensions": [
+      "企业自身失信被执行",
+      "企业自身被执行",
+      "严重违法",
+      "行政处罚",
+      "股权冻结",
+      "司法协助",
+      "清算",
+      "简易注销"
+    ],
+    "failed_dimensions": [],
+    "limitations": [
+      "分页接口首批记录仅作为代表性示例",
+      "历史登记不代表查询时点仍然有效",
+      "荣誉资质数量仅表示本次接口返回项数"
+    ]
+  }
+}
