@@ -1,10 +1,14 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 from typing import Any, Literal
 
+from mcp.server.auth.middleware.auth_context import get_access_token
+from mcp.server.auth.provider import AccessToken
+from mcp.server.auth.settings import AuthSettings
 from mcp.server.fastmcp import FastMCP
 
 from .client import CispApiClient
@@ -31,16 +35,49 @@ def read_mcp_port() -> int:
     return int(os.getenv("PORT") or os.getenv("MCP_PORT") or "8000")
 
 
+class CispApiKeyTokenVerifier:
+    """Accept a CISP API key as the MCP Bearer credential.
+
+    The CISP API remains the authority that determines whether the opaque key is
+    active and billable. Locally we only reject malformed credentials and use a
+    one-way fingerprint as the MCP principal so the raw key is never used as an
+    identity or written to logs.
+    """
+
+    async def verify_token(self, token: str) -> AccessToken | None:
+        if not token or token != token.strip() or len(token) > 4096:
+            return None
+        if any(character.isspace() or ord(character) < 0x20 for character in token):
+            return None
+
+        fingerprint = hashlib.sha256(token.encode("utf-8")).hexdigest()
+        principal = f"cisp-key:{fingerprint[:24]}"
+        return AccessToken(
+            token=token,
+            client_id=principal,
+            subject=principal,
+            scopes=["cisp:query"],
+        )
+
+
 mcp = FastMCP(
     "CISP MCP",
     json_response=True,
     host=os.getenv("MCP_HOST", "127.0.0.1"),
     port=read_mcp_port(),
+    token_verifier=CispApiKeyTokenVerifier(),
+    auth=AuthSettings(
+        issuer_url=os.getenv("CISP_ENDPOINT", "https://cisp.zenitera.com"),
+        required_scopes=["cisp:query"],
+        resource_server_url=None,
+    ),
 )
 
 
 def get_client() -> CispApiClient:
-    return CispApiClient(load_settings())
+    access_token = get_access_token()
+    request_api_key = access_token.token if access_token is not None else None
+    return CispApiClient(load_settings(api_key=request_api_key))
 
 
 def with_extra_params(params: dict[str, Any], extra_params: dict[str, Any] | None) -> dict[str, Any]:

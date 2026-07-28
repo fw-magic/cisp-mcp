@@ -21,6 +21,8 @@ class CispApiClient:
         async with httpx.AsyncClient(
             timeout=self._settings.timeout_seconds,
             verify=self._settings.verify_ssl,
+            proxy=self._settings.endpoint_proxy,
+            trust_env=False,
         ) as client:
             response = await client.post(
                 self._settings.query_url,
