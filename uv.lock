@@ -212,7 +212,7 @@ dependencies = [
 requires-dist = [
     { name = "cryptography", specifier = "<49" },
     { name = "httpx", extras = ["socks"], specifier = ">=0.28.1" },
-    { name = "mcp", extras = ["cli"], specifier = ">=1.27.2" },
+    { name = "mcp", extras = ["cli"], specifier = ">=1.27.2,<2" },
     { name = "pypdf", specifier = ">=5" },
     { name = "python-dotenv", specifier = ">=1.2.2" },
     { name = "reportlab", specifier = ">=4.2" },

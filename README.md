@@ -10,6 +10,7 @@
 - 每个 CISP 产品接口对应一个独立 MCP tool，工具名包含产品号，方便排查和定位。
 - 自动补充 `prodCode`，调用方只需要传业务参数。
 - 对 CISP 返回结果做统一归一化，保留原始返回 `raw_response`。
+- Streamable HTTP 模式支持每个客户使用自己的 CISP API Key，便于后端按 Key 计费。
 - 支持本地 smoke test，验证 MCP 服务和工具注册是否正常。
 
 ## 技术栈
@@ -28,6 +29,12 @@
 - uv
 
 `uv` 可以管理 Python 版本；如果本机没有符合要求的 Python，`uv` 在部分环境下可以自动下载和管理。但在企业内网、代理或离线环境中，自动下载可能失败，因此建议提前安装好 Python `3.11+`。
+
+## 生产部署
+
+CentOS 7 联网构建、离线包制作、生产部署、升级、回滚和新增依赖的完整流程，请参阅：
+
+- [CISP MCP CentOS 7 离线生产部署与运维手册](OPERATIONS_CENTOS7.md)
 
 ## 项目结构
 
@@ -83,7 +90,7 @@ uv --version
 uv sync
 ```
 
-### 4. 配置环境变量
+### 4. 配置环境变量（本地 stdio 模式）
 
 复制模板：
 
@@ -96,16 +103,38 @@ cp .env.example .env
 ```text
 CISP_ENDPOINT=https://cisp.zenitera.com
 CISP_REQUEST_URI=/ectcispserver/api/entcreditapi/query
+# 可选；配置后仅 CISP 出站请求使用该代理
+# CISP_ENDPOINT_PROXY=http://proxy.example.internal:8080
 CISP_API_KEY=替换成真实 API Key
 CISP_TIMEOUT_SECONDS=30
 CISP_VERIFY_SSL=true
 ```
 
+`CISP_API_KEY` 只用于本地 stdio 模式。生产 Streamable HTTP 模式不在服务器保存统一 Key，而是要求每个客户发送：
+
+```http
+Authorization: Bearer <客户自己的CISP_API_KEY>
+```
+
+服务会将当前请求的 Bearer Token转换为调用 CISP 后台所需的：
+
+```http
+X-API-Key: <客户自己的CISP_API_KEY>
+```
+
+如果访问 `CISP_ENDPOINT` 必须经过代理，配置：
+
+```ini
+CISP_ENDPOINT_PROXY=http://proxy.example.internal:8080
+```
+
+也支持 `socks5://` 代理。未配置或配置为空时，CISP 请求直接连接目标地址；程序不会继承系统的 `HTTP_PROXY`、`HTTPS_PROXY` 或 `ALL_PROXY`，避免实际路由与配置不一致。
+
 ## 本地运行和调试
 
 ### smoke test
 
-这个测试只验证 MCP 服务能否启动、`tools/list` 是否能看到所有工具，不会调用真实 CISP API，也不会消耗接口次数。
+这个测试验证 MCP 服务能否启动、无 Bearer Key是否返回 `401`、不同客户能否隔离 MCP Session，以及 `tools/list` 是否能看到所有工具。它不会调用真实 CISP API，也不会消耗接口次数。
 
 ```bash
 uv run python scripts/smoke_test_mcp.py
@@ -158,6 +187,7 @@ npx -y @modelcontextprotocol/inspector
 ```text
 Transport: Streamable HTTP
 URL: http://127.0.0.1:8000/mcp
+Authorization: Bearer <测试用CISP_API_KEY>
 ```
 
 ## 工具列表
@@ -378,7 +408,29 @@ p0060007_verify_business_two_elements
 
 ## 集成到 Claude Code
 
-推荐使用 stdio 模式，让 Claude Code 自动启动 MCP 服务。
+生产环境使用远程 Streamable HTTP。在启动 Claude Code 的环境中设置客户自己的 Key：
+
+```bash
+export CISP_API_KEY='<客户自己的CISP_API_KEY>'
+```
+
+项目级 `.mcp.json`：
+
+```json
+{
+  "mcpServers": {
+    "cisp-mcp": {
+      "type": "http",
+      "url": "https://mcp.example.com/mcp",
+      "headers": {
+        "Authorization": "Bearer ${CISP_API_KEY}"
+      }
+    }
+  }
+}
+```
+
+本地开发也可以使用 stdio 模式，让 Claude Code 自动启动 MCP 服务；此时 Key来自项目 `.env`：
 
 ```bash
 claude mcp add --transport stdio --scope user cisp-mcp -- uv --directory /path/to/cisp-mcp run cisp-mcp
@@ -411,7 +463,24 @@ claude mcp get cisp-mcp
 
 ## 集成到 Codex CLI / Codex App
 
-Codex CLI 和 Codex App 使用同一份 MCP 配置。推荐用命令添加：
+Codex CLI 和 Codex App 使用同一份 MCP 配置。生产远程服务配置如下：
+
+```toml
+[mcp_servers.cisp-mcp]
+url = "https://mcp.example.com/mcp"
+bearer_token_env_var = "CISP_API_KEY"
+startup_timeout_sec = 20
+tool_timeout_sec = 120
+enabled = true
+```
+
+启动 Codex 前设置：
+
+```bash
+export CISP_API_KEY='<客户自己的CISP_API_KEY>'
+```
+
+本地开发可以使用 stdio 模式：
 
 ```bash
 codex mcp add cisp-mcp -- uv --directory /path/to/cisp-mcp run cisp-mcp
@@ -430,7 +499,7 @@ codex mcp get cisp-mcp
 ~/.codex/config.toml
 ```
 
-也可以手动配置：
+对应的本地手动配置：
 
 ```toml
 [mcp_servers.cisp-mcp]
@@ -500,7 +569,26 @@ openclaw mcp set cisp-mcp '{"command":"uvx","args":["--from","git+https://github
 
 ## 集成到 WorkBuddy
 
-如果 WorkBuddy 支持 MCP stdio server，推荐配置：
+生产环境进入“连接器 → 自定义连接器 → 配置 MCP”，填写：
+
+```json
+{
+  "mcpServers": {
+    "cisp-mcp": {
+      "type": "streamable-http",
+      "url": "https://mcp.example.com/mcp",
+      "headers": {
+        "Authorization": "Bearer <客户自己的CISP_API_KEY>"
+      },
+      "disabled": false
+    }
+  }
+}
+```
+
+WorkBuddy 未明确支持环境变量展开时，应使用其凭据输入框或直接填写 Key，不要填写字面量 `${CISP_API_KEY}`。
+
+本地开发且 WorkBuddy 支持 stdio server 时，可以配置：
 
 ```json
 {
@@ -518,19 +606,18 @@ openclaw mcp set cisp-mcp '{"command":"uvx","args":["--from","git+https://github
 }
 ```
 
-如果 WorkBuddy 只支持 HTTP MCP，可以先手动启动：
+本地 HTTP 调试可以先手动启动：
 
 ```bash
 uv run cisp-mcp --transport streamable-http
 ```
 
-然后在 WorkBuddy 中配置：
+然后在 WorkBuddy 中配置 URL 和请求头：
 
 ```text
-http://127.0.0.1:8000/mcp
+URL: http://127.0.0.1:8000/mcp
+Authorization: Bearer <客户自己的CISP_API_KEY>
 ```
-
-建议优先使用 stdio。stdio 不需要常驻端口，客户端会自动启动和管理进程。
 
 ## 新增接口开发流程
 
@@ -575,5 +662,10 @@ CISP_VERIFY_SSL=true
 ## 安全说明
 
 - 不要提交 `.env`。
-- 不要在代码、README、MCP 客户端配置里写死 API Key。
-- 建议通过环境变量或 `.env` 管理敏感配置。
+- Streamable HTTP 生产入口必须使用 HTTPS。
+- 不要在代码、README、日志或聊天消息中写入 API Key。
+- Claude Code、Codex 优先通过环境变量管理 Key；WorkBuddy 优先使用凭据管理界面。
+- Nginx 和应用日志不得记录 `Authorization` 或转发给 CISP 的 `X-API-Key`。
+- HTTP 模式下每个请求都必须携带 Bearer Key；缺失或格式错误时返回 `401`。
+- MCP 服务只做 Bearer格式校验；格式正确但已失效的 Key会在实际调用 CISP 时由 CISP 后台拒绝。
+- 代理账号密码属于敏感信息；如果 `CISP_ENDPOINT_PROXY` 包含凭据，不得提交 Git或打印到日志。

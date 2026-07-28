@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import socket
 import subprocess
 import sys
 import time
@@ -10,6 +11,7 @@ import urllib.request
 
 
 MCP_URL = "http://127.0.0.1:8000/mcp"
+SMOKE_TEST_API_KEY = "smoke-test-cisp-api-key"
 
 EXPECTED_TOOLS = {
     "p0010010_query_business_profile",
@@ -32,13 +34,19 @@ EXPECTED_TOOLS = {
 }
 
 
-def post_mcp(payload: dict, session_id: str | None = None) -> tuple[object, dict | None]:
+def post_mcp(
+    payload: dict,
+    session_id: str | None = None,
+    api_key: str | None = SMOKE_TEST_API_KEY,
+) -> tuple[object, dict | None]:
     headers = {
         "Content-Type": "application/json",
         "Accept": "application/json, text/event-stream",
     }
     if session_id:
         headers["Mcp-Session-Id"] = session_id
+    if api_key:
+        headers["Authorization"] = f"Bearer {api_key}"
 
     request = urllib.request.Request(
         MCP_URL,
@@ -104,6 +112,18 @@ def list_tools() -> list[str]:
 
 def assert_port_is_free() -> None:
     try:
+        with socket.create_connection(("127.0.0.1", 8000), timeout=1):
+            pass
+    except OSError:
+        return
+
+    raise RuntimeError(
+        f"{MCP_URL} is already serving an MCP server. Stop the existing server before running this smoke test."
+    )
+
+
+def assert_auth_is_required() -> None:
+    try:
         post_mcp(
             {
                 "jsonrpc": "2.0",
@@ -112,23 +132,54 @@ def assert_port_is_free() -> None:
                 "params": {
                     "protocolVersion": "2025-06-18",
                     "capabilities": {},
-                    "clientInfo": {"name": "cisp-mcp-port-check", "version": "0.1.0"},
+                    "clientInfo": {"name": "cisp-mcp-auth-check", "version": "0.1.0"},
                 },
-            }
+            },
+            api_key=None,
         )
-    except (urllib.error.URLError, TimeoutError, ConnectionError):
-        return
+    except urllib.error.HTTPError as exc:
+        if exc.code == 401:
+            return
+        raise RuntimeError(f"Expected HTTP 401 without a CISP API key, got {exc.code}") from exc
 
-    raise RuntimeError(
-        f"{MCP_URL} is already serving an MCP server. Stop the existing server before running this smoke test."
+    raise RuntimeError("MCP server accepted a request without a CISP API key")
+
+
+def assert_session_is_bound_to_api_key() -> None:
+    headers, _ = post_mcp(
+        {
+            "jsonrpc": "2.0",
+            "id": 1,
+            "method": "initialize",
+            "params": {
+                "protocolVersion": "2025-06-18",
+                "capabilities": {},
+                "clientInfo": {"name": "cisp-mcp-session-check", "version": "0.1.0"},
+            },
+        },
+        api_key="smoke-test-customer-a-key",
     )
+    session_id = headers["Mcp-Session-Id"]
+
+    try:
+        post_mcp(
+            {"jsonrpc": "2.0", "method": "notifications/initialized", "params": {}},
+            session_id,
+            api_key="smoke-test-customer-b-key",
+        )
+    except urllib.error.HTTPError as exc:
+        if exc.code in (401, 403, 404):
+            return
+        raise RuntimeError(f"Expected cross-customer session rejection, got HTTP {exc.code}") from exc
+
+    raise RuntimeError("A second CISP API key reused the first customer's MCP session")
 
 
 def main() -> int:
     assert_port_is_free()
 
     env = os.environ.copy()
-    env.setdefault("CISP_API_KEY", "smoke-test-key")
+    env.pop("CISP_API_KEY", None)
 
     process = subprocess.Popen(
         [sys.executable, "-m", "cisp_mcp.server", "--transport", "streamable-http"],
@@ -140,6 +191,8 @@ def main() -> int:
 
     try:
         wait_until_ready(process)
+        assert_auth_is_required()
+        assert_session_is_bound_to_api_key()
         tools = list_tools()
         tool_set = set(tools)
 
