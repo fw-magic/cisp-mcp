@@ -32,6 +32,7 @@ from .interfaces import (
     P0110003,
     P0130036,
     P0130038,
+    P0210004,
     P0980006,
     P0980008,
     P0980023,
@@ -106,6 +107,17 @@ P0130038AnalysisType = Literal[
     "indLocOprFin",
     "property",
     "financialRegionRank",
+]
+
+P0210004FinancialType = Literal[
+    "rgincome",
+    "rgcashflow",
+    "fncmfnin",
+    "rgbalance",
+    "mainfinadata",
+    "balance",
+    "income",
+    "cashflow",
 ]
 
 
@@ -784,6 +796,40 @@ async def p0130038_query_industry_analysis(
                 "regionLvl": region_lvl,
                 "regionId": region_id,
                 "nicId": nic_id,
+            },
+            extra_params,
+        ),
+    )
+
+
+@mcp.tool()
+async def p0210004_query_listed_company_financial_data(
+    ent_info: str,
+    financial_type: P0210004FinancialType,
+    start_date: str | None = None,
+    end_date: str | None = None,
+    extra_params: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """上市公司财务数据查询。
+
+    ent_info 支持企业名称、统一社会信用代码或企业注册号。
+    financial_type 可选：rgincome=通用类利润、rgcashflow=通用类现金流量、
+    fncmfnin=金融公司主要财务指标、rgbalance=通用类资产负债、
+    mainfinadata=主要会计数据和财务指标、balance=一般企业资产负债、
+    income=一般企业利润、cashflow=一般企业现金流量。
+    start_date 和 end_date 为可选报表起止日期，格式均为 YYYY-MM-DD。
+    不同类型分别返回 data.rgincomeInfo、rgcashflowInfo、fncmfninInfo、
+    rgbalanceInfo、mainfinadataInfo、balanceInfo、incomeInfo 或 cashflowInfo。
+    """
+    client = get_client()
+    return await client.query_product(
+        prod_code=P0210004.product_code,
+        params=with_extra_params(
+            {
+                "entInfo": ent_info,
+                "type": financial_type,
+                "startDate": start_date,
+                "endDate": end_date,
             },
             extra_params,
         ),

@@ -148,7 +148,7 @@ Discovered MCP tools:
 - p0010058_query_business_basic_deep
 ...
 - query_cisp_product
-Total: 25
+Total: 26
 Smoke test passed.
 ```
 
@@ -213,6 +213,7 @@ Authorization: Bearer <测试用CISP_API_KEY>
 | `P0110003` | 企业荣誉资质信息查询 | `p0110003_query_honor_qualification_info` |
 | `P0130036` | 企业土地信息查询 | `p0130036_query_land_info` |
 | `P0130038` | 企业画像-行业分析 | `p0130038_query_industry_analysis` |
+| `P0210004` | 上市公司财务数据查询 | `p0210004_query_listed_company_financial_data` |
 | `P0980006` | 企业高级筛选 | `p0980006_query_advanced_company_filter` |
 | `P0980008` | 纳税评级 | `p0980008_query_tax_rating` |
 | `P0980023` | 光大-近2年风险分析统计 | `p0980023_query_two_year_risk_summary` |
@@ -252,6 +253,10 @@ Authorization: Bearer <测试用CISP_API_KEY>
 - `entList`（`P0980006`）
 - `list`（`P0980008`、`P0980023`）
 - `data`（`P0980033`）
+
+`P0210004` 会根据 `financial_type` 在 `data` 中填充对应列表：
+`rgincomeInfo`、`rgcashflowInfo`、`fncmfninInfo`、`rgbalanceInfo`、
+`mainfinadataInfo`、`balanceInfo`、`incomeInfo` 或 `cashflowInfo`。
 
 ## 调用示例
 
@@ -463,6 +468,37 @@ p0130036_query_land_info
 
 ```text
 p0130038_query_industry_analysis
+```
+
+### 查询上市公司财务数据
+
+```json
+{
+  "ent_info": "证通股份有限公司",
+  "financial_type": "mainfinadata",
+  "start_date": "2024-01-01",
+  "end_date": "2025-12-31"
+}
+```
+
+`financial_type` 可选值：
+
+- `rgincome`：通用类利润
+- `rgcashflow`：通用类现金流量
+- `fncmfnin`：金融公司主要财务指标
+- `rgbalance`：通用类资产负债
+- `mainfinadata`：主要会计数据和财务指标
+- `balance`：一般企业资产负债
+- `income`：一般企业利润
+- `cashflow`：一般企业现金流量
+
+`start_date`、`end_date` 可选，格式为 `YYYY-MM-DD`。不同类型的结果列表位于
+返回值的 `data` 对应 `*Info` 字段中。
+
+对应工具：
+
+```text
+p0210004_query_listed_company_financial_data
 ```
 
 ### 查询供应商关联关系

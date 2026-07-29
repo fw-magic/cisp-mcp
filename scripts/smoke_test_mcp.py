@@ -33,6 +33,7 @@ EXPECTED_TOOLS = {
     "p0110003_query_honor_qualification_info",
     "p0130036_query_land_info",
     "p0130038_query_industry_analysis",
+    "p0210004_query_listed_company_financial_data",
     "p0980006_query_advanced_company_filter",
     "p0980008_query_tax_rating",
     "p0980023_query_two_year_risk_summary",

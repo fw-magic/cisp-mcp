@@ -157,6 +157,13 @@ INTERFACES = {
         status_field="P0130038Status",
         data_field="P0130038Data",
     ),
+    "P0210004": CispInterface(
+        product_code="P0210004",
+        name="上市公司财务数据查询",
+        description="根据企业名称、统一社会信用代码或注册号查询上市企业的利润、现金流量、资产负债和主要财务指标。",
+        status_field="P0210004Status",
+        data_field="P0210004Data",
+    ),
     "P0980006": CispInterface(
         product_code="P0980006",
         name="企业高级筛选",
@@ -218,6 +225,7 @@ P0060008 = INTERFACES["P0060008"]
 P0110003 = INTERFACES["P0110003"]
 P0130036 = INTERFACES["P0130036"]
 P0130038 = INTERFACES["P0130038"]
+P0210004 = INTERFACES["P0210004"]
 P0980006 = INTERFACES["P0980006"]
 P0980008 = INTERFACES["P0980008"]
 P0980023 = INTERFACES["P0980023"]

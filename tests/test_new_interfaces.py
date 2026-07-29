@@ -177,6 +177,54 @@ class NewInterfaceMetadataTests(unittest.TestCase):
         self.assertEqual(normalized["data"], industry_data)
         self.assertIs(normalized["raw_response"], raw_response)
 
+    def test_p0210004_metadata_and_normalized_response(self) -> None:
+        self.assertIn("P0210004", interfaces.INTERFACES)
+        interface = interfaces.INTERFACES["P0210004"]
+        self.assertEqual(interface.status_field, "P0210004Status")
+        self.assertEqual(interface.data_field, "P0210004Data")
+        self.assertIsNone(interface.shortcut_field)
+
+        financial_data = {
+            "fncmfninInfo": [
+                {
+                    "companyName": "测试银行股份有限公司",
+                    "reportDate": "2025-12-31",
+                    "totalAssets": "1000000.000000",
+                    "currency": "CNY",
+                }
+            ],
+            "mainfinadataInfo": [],
+            "incomeInfo": [],
+            "cashflowInfo": [],
+            "rgcashflowInfo": [],
+            "rgbalanceInfo": [],
+            "balanceInfo": [],
+            "rgincomeInfo": [],
+        }
+        raw_response = {
+            "orderNo": "order-P0210004",
+            "resultData": {
+                "P0210004Data": financial_data,
+                "P0210004Status": "4",
+            },
+            "packetCnt": 1,
+            "resultCode": "00000",
+            "resultDesc": "成功",
+            "isCompressed": 0,
+        }
+
+        normalized = client_module.normalize_interface_response(
+            raw_response,
+            interface,
+        )
+
+        self.assertEqual(normalized["product_code"], "P0210004")
+        self.assertTrue(normalized["success"])
+        self.assertTrue(normalized["has_result"])
+        self.assertEqual(normalized["data"], financial_data)
+        self.assertNotIn("fncmfninInfo", normalized)
+        self.assertIs(normalized["raw_response"], raw_response)
+
     def test_p0990022_metadata_and_normalized_response(self) -> None:
         self.assertIn("P0990022", interfaces.INTERFACES)
         interface = interfaces.INTERFACES["P0990022"]
@@ -417,6 +465,64 @@ class NewInterfaceToolTests(unittest.IsolatedAsyncioTestCase):
         )
         self.assertIn("不同分析类型返回的数据字段不同", tool.description or "")
 
+    async def test_p0210004_maps_financial_filters_and_extra_params(
+        self,
+    ) -> None:
+        self.assertTrue(
+            hasattr(server, "p0210004_query_listed_company_financial_data")
+        )
+
+        result = await server.p0210004_query_listed_company_financial_data(
+            ent_info="测试银行股份有限公司",
+            financial_type="fncmfnin",
+            start_date="2024-01-01",
+            end_date="2025-12-31",
+            extra_params={
+                "endDate": "2026-06-30",
+                "customParam": "custom-value",
+            },
+        )
+
+        self.assertEqual(
+            self.client.calls,
+            [
+                (
+                    "P0210004",
+                    {
+                        "entInfo": "测试银行股份有限公司",
+                        "type": "fncmfnin",
+                        "startDate": "2024-01-01",
+                        "endDate": "2026-06-30",
+                        "customParam": "custom-value",
+                    },
+                )
+            ],
+        )
+        self.assertEqual(result["prod_code"], "P0210004")
+
+    async def test_p0210004_schema_exposes_required_type_enum_and_dates(
+        self,
+    ) -> None:
+        tools = await server.mcp.list_tools()
+        tool = next(
+            item
+            for item in tools
+            if item.name == "p0210004_query_listed_company_financial_data"
+        )
+
+        self.assertIn("ent_info", tool.inputSchema["required"])
+        self.assertIn("financial_type", tool.inputSchema["required"])
+        self.assertNotIn("start_date", tool.inputSchema["required"])
+        self.assertNotIn("end_date", tool.inputSchema["required"])
+        self.assertEqual(
+            tool.inputSchema["properties"]["financial_type"]["enum"],
+            list(get_args(server.P0210004FinancialType)),
+        )
+        self.assertEqual(len(get_args(server.P0210004FinancialType)), 8)
+        self.assertIn("fncmfnin=金融公司主要财务指标", tool.description or "")
+        self.assertIn("格式均为 YYYY-MM-DD", tool.description or "")
+        self.assertIn("data.rgincomeInfo", tool.description or "")
+
     async def test_p0990022_maps_enterprise_identifier_and_extra_params(
         self,
     ) -> None:
@@ -651,16 +757,17 @@ class NewInterfaceToolTests(unittest.IsolatedAsyncioTestCase):
             ],
         )
 
-    async def test_mcp_lists_all_twenty_five_tools(self) -> None:
+    async def test_mcp_lists_all_twenty_six_tools(self) -> None:
         tools = await server.mcp.list_tools()
         names = {tool.name for tool in tools}
 
-        self.assertEqual(len(names), 25)
+        self.assertEqual(len(names), 26)
         self.assertTrue(
             {
                 "p0010059_query_business_basic_brief",
                 "p0130036_query_land_info",
                 "p0130038_query_industry_analysis",
+                "p0210004_query_listed_company_financial_data",
                 "p0980006_query_advanced_company_filter",
                 "p0980008_query_tax_rating",
                 "p0980023_query_two_year_risk_summary",

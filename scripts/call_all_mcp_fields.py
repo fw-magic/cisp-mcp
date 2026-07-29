@@ -146,6 +146,15 @@ CALL_SPECS: list[tuple[str, dict[str, Any]]] = [
         },
     ),
     (
+        "p0210004_query_listed_company_financial_data",
+        {
+            "ent_info": "中国银行股份有限公司",
+            "financial_type": "fncmfnin",
+            "start_date": "2024-01-01",
+            "end_date": "2025-12-31",
+        },
+    ),
+    (
         "p0980006_query_advanced_company_filter",
         {
             "eid": "1911000001000013428",

@@ -42,6 +42,15 @@ EXPECTED_BINDINGS = {
         "page_no",
         "page_size",
     },
+    "p0130038_query_industry_analysis": {
+        "ent_info",
+        "analysis_type",
+        "nic_lvl",
+        "region_lvl",
+        "region_id",
+        "nic_id",
+    },
+    "p0990022_query_supplier_relationships": {"ent_info"},
     "p0010073_query_trademark_info": {"ent_info"},
     "p0010078_query_patent_info": {"ent_info"},
     "p0010074_query_software_copyright_info": {"ent_info"},
@@ -95,6 +104,8 @@ class SkillToolBindingTests(unittest.IsolatedAsyncioTestCase):
             "p0010010_query_business_profile",
             "p0980033_query_listing_financing_bidding_ipr",
             "p0130036_query_land_info",
+            "p0130038_query_industry_analysis",
+            "p0990022_query_supplier_relationships",
             "p0010073_query_trademark_info",
             "p0010078_query_patent_info",
             "p0010074_query_software_copyright_info",
@@ -233,7 +244,7 @@ class SkillToolBindingTests(unittest.IsolatedAsyncioTestCase):
         self.assertIn("| 风险维度 | 关键事实 | 范围与待核实事项 |", skill_text)
         self.assertIn("资料范围：{{D.coverage_summary}}", skill_text)
         self.assertIn(
-            "`D.coverage_summary` 只用工商登记、股权、土地资产、知识产权",
+            "`D.coverage_summary` 只用工商登记、股权与关联关系、土地资产、行业统计与排名、知识产权",
             skill_text,
         )
         self.assertNotIn("六、需求识别与产品推荐", skill_text)
@@ -285,12 +296,24 @@ class SkillToolBindingTests(unittest.IsolatedAsyncioTestCase):
 
         self.assertNotIn("信息解读：", core_section)
         self.assertNotIn("AI辅助分析", skill_text)
-        self.assertEqual(report_template.count("**信息解读：**"), 7)
+        self.assertEqual(report_template.count("**信息解读：**"), 10)
         self.assertIn("**信息解读：** {{D.basic_interpretation}}", report_template)
         self.assertIn("**信息解读：** {{D.people_interpretation}}", report_template)
         self.assertIn("**信息解读：** {{D.equity_interpretation}}", report_template)
         self.assertIn("**信息解读：** {{D.assets_interpretation}}", report_template)
         self.assertIn("**信息解读：** {{D.operations_interpretation}}", report_template)
+        self.assertIn(
+            "**信息解读：** {{D.industry_climate_interpretation}}",
+            report_template,
+        )
+        self.assertIn(
+            "**信息解读：** {{D.industry_benchmark_interpretation}}",
+            report_template,
+        )
+        self.assertIn(
+            "**信息解读：** {{D.industry_risk_interpretation}}",
+            report_template,
+        )
         self.assertIn("**信息解读：** {{D.risk_interpretation}}", report_template)
         self.assertIn(
             "**信息解读：** 以下核验主题根据报告所列事实和信息缺口整理",
@@ -302,7 +325,10 @@ class SkillToolBindingTests(unittest.IsolatedAsyncioTestCase):
         )
         self.assertIn("可能表明", skill_text)
         self.assertIn("所有总结分析必须同时包含事实依据", skill_text)
-        self.assertIn("不得复制思迈特样稿中的强判断、估算值或模拟数据", skill_text)
+        self.assertIn(
+            "不得复制思迈特样稿中的市场规模、CAGR、竞争对手、政策判断、强判断、估算值或模拟数据",
+            skill_text,
+        )
 
     def test_skill_uses_natural_pagination_without_keep_together_guards(self) -> None:
         skill_text = SKILL_PATH.read_text(encoding="utf-8")
@@ -324,15 +350,19 @@ class SkillToolBindingTests(unittest.IsolatedAsyncioTestCase):
         self.assertIn("黑色正文必须使用宋体或等价中文宋体的常规字重", skill_text)
         self.assertIn("字体名含 `Black`、`Bold`、`Semibold`", skill_text)
         self.assertIn(
-            "仅主标题、客户名称、蓝色章节标题、表头行、执行摘要的",
+            "主标题、客户名称、蓝色章节标题和表头行必须加粗",
             skill_text,
         )
-        self.assertIn("除明确允许加粗的标题、标签和表格标签项外", skill_text)
+        self.assertIn("表头必须使用实际中文粗体字形", skill_text)
+        self.assertIn("业务标签项必须使用实际中文粗体字形", skill_text)
+        self.assertIn("只允许这些元素使用粗体", skill_text)
         self.assertIn("**核心价值判断：**", report_template)
         self.assertIn("**主要机会：**", report_template)
         self.assertIn("**主要风险：**", report_template)
         self.assertIn("**拜访建议：**", report_template)
         self.assertIn("**信息解读：**", report_template)
+        self.assertIn("**有形资产：**", report_template)
+        self.assertIn("**无形资产：**", report_template)
         self.assertIn("| **企业全称** |", report_template)
         self.assertIn("| **专利** |", report_template)
         self.assertIn("| **员工规模** |", report_template)
@@ -343,6 +373,38 @@ class SkillToolBindingTests(unittest.IsolatedAsyncioTestCase):
         self.assertNotIn("**{{name}}**", report_template)
         self.assertNotIn("**报告目的：**", report_template)
         self.assertIn("| 项目 | 内容 |", report_template)
+
+    def test_pdf_renderer_registers_distinct_chinese_bold_face(self) -> None:
+        skill_text = SKILL_PATH.read_text(encoding="utf-8")
+
+        self.assertIn("### 中文字体与加粗渲染（强制）", skill_text)
+        self.assertIn("STSongti-SC-Regular", skill_text)
+        self.assertIn("STSongti-SC-Bold", skill_text)
+        self.assertIn("subfontIndex=6", skill_text)
+        self.assertIn("subfontIndex=1", skill_text)
+        self.assertIn('TTFont("SongtiSC"', skill_text)
+        self.assertIn('TTFont("SongtiSC-Bold"', skill_text)
+        self.assertIn("pdfmetrics.registerFontFamily(", skill_text)
+        self.assertIn('normal="SongtiSC"', skill_text)
+        self.assertIn('bold="SongtiSC-Bold"', skill_text)
+        self.assertIn("不得把同一个 Regular 字形同时注册为 normal 和 bold", skill_text)
+        self.assertIn("不得依赖 PDF 阅读器合成粗体", skill_text)
+
+    def test_pdf_renderer_converts_labels_and_validates_required_bold(self) -> None:
+        skill_text = SKILL_PATH.read_text(encoding="utf-8")
+
+        self.assertIn("不得把带 `**` 的 Markdown 原样交给 ReportLab", skill_text)
+        self.assertIn("<b>核心价值判断：</b> {常规正文}", skill_text)
+        self.assertIn("动态正文先执行 XML 转义", skill_text)
+        self.assertIn(
+            'TableStyle(("FONTNAME", (0, 0), (-1, 0), "SongtiSC-Bold"))',
+            skill_text,
+        )
+        self.assertIn("生成仅含“正文测试”“粗体测试”的临时 PDF", skill_text)
+        self.assertIn("使用 `pdfplumber` 或等价工具逐字符检查字体元数据", skill_text)
+        self.assertIn("任一目标仍使用 Regular 即验收失败", skill_text)
+        self.assertIn("相邻的执行摘要内容、信息解读正文和表格数据必须映射到常规字形", skill_text)
+        self.assertIn("字体元数据通过后仍须检查逐页 PNG", skill_text)
 
     def test_spacing_uses_styles_without_blank_pdf_paragraphs(self) -> None:
         skill_text = SKILL_PATH.read_text(encoding="utf-8")
@@ -359,7 +421,7 @@ class SkillToolBindingTests(unittest.IsolatedAsyncioTestCase):
 
         self.assertIn('"section_numbers": {', skill_text)
         self.assertIn(
-            "当前骨架固定得到核心观点“一”、执行摘要“二”、客户全景画像“三”、需求识别与拜访核验“四”；风险章节显示时为“五”",
+            "产业画像显示时依次为“一、二、三、四、五”，风险章节显示时继续为“六”；产业画像隐藏时需求识别仍为“四”，风险章节显示时为“五”",
             skill_text,
         )
         self.assertIn(
@@ -372,6 +434,10 @@ class SkillToolBindingTests(unittest.IsolatedAsyncioTestCase):
         )
         self.assertIn(
             "## {{D.section_numbers.profile}}、客户全景画像",
+            report_template,
+        )
+        self.assertIn(
+            "## {{D.section_numbers.industry}}、产业画像与行业洞察",
             report_template,
         )
         self.assertIn(
@@ -500,14 +566,107 @@ class SkillToolBindingTests(unittest.IsolatedAsyncioTestCase):
             skill_text,
         )
         self.assertIn(
-            "`D.coverage_summary` 只用工商登记、股权、土地资产、知识产权",
+            "`D.coverage_summary` 只用工商登记、股权与关联关系、土地资产、行业统计与排名、知识产权",
             skill_text,
         )
 
-    def test_skill_targets_current_twenty_five_tool_server(self) -> None:
+    def test_industry_queries_use_province_level_three_digit_scope(self) -> None:
         skill_text = SKILL_PATH.read_text(encoding="utf-8")
-        self.assertIn("当前 25 工具版本", skill_text)
-        self.assertIn("**SKILL 版本**：v1.9", skill_text)
+        binding_rows = parse_tool_binding_rows(skill_text)
+        binding = binding_rows["p0130038_query_industry_analysis"]
+
+        for analysis_type in [
+            "financialRegionRank",
+            "locfin",
+            "property",
+            "indLocOpr",
+        ]:
+            with self.subTest(analysis_type=analysis_type):
+                self.assertIn(f'"{analysis_type}"', binding)
+
+        self.assertIn('nic_lvl="n3"', binding)
+        self.assertIn('region_lvl="r1"', binding)
+        self.assertIn("`regOrgCode` 严格匹配六位数字", skill_text)
+        self.assertIn("取前两位并追加四个 `0`", skill_text)
+        self.assertIn("取前三位数字作为三级行业 `nic_id`", skill_text)
+        self.assertIn("省略全部范围参数", skill_text)
+        self.assertIn("每种类型分别记录 `success/empty/failed`", skill_text)
+
+    def test_industry_alias_evidence_and_selection_rules_are_documented(self) -> None:
+        skill_text = SKILL_PATH.read_text(encoding="utf-8")
+        rules = skill_text.split("#### 产业画像生成规则", 1)[1]
+        rules = rules.split("### 4. 构建确定性企业简述", 1)[0]
+
+        self.assertIn("| `IND` | `p0130038_query_industry_analysis.data`", skill_text)
+        self.assertIn("| `REL` | `p0990022_query_supplier_relationships.data`", skill_text)
+        self.assertIn('"financialRegionRank": {"status": "success|empty|failed"', skill_text)
+        self.assertIn('"locfin": {"status": "success|empty|failed"', skill_text)
+        self.assertIn('"property": {"status": "success|empty|failed"', skill_text)
+        self.assertIn('"indLocOpr": {"status": "success|empty|failed"', skill_text)
+        self.assertIn(
+            "同时要求 `numEnts[]` 中存在相同年份且 `nument` 为正整数",
+            rules,
+        )
+        self.assertIn("早于报告生成年份的完整年度", rules)
+        self.assertIn("按年度倒序取最近两条正整数记录", rules)
+        self.assertIn("所有 `*RankFour` 字段直接省略", rules)
+        self.assertIn("只选择 `ancheYear` 最新", rules)
+        self.assertIn("行业风险最多展示四行", rules)
+        self.assertIn("优先使用近 12 个月字段", rules)
+        self.assertIn("任意精度十进制乘以 100", skill_text)
+        self.assertIn("不得四舍五入", skill_text)
+        self.assertIn('"industry_climate_rows": [', skill_text)
+        self.assertIn('"industry_benchmark_rows": [', skill_text)
+        self.assertIn('"industry_risk_rows": [', skill_text)
+
+    def test_supplier_relationships_are_redacted_and_not_misclassified(self) -> None:
+        skill_text = SKILL_PATH.read_text(encoding="utf-8")
+        rules = skill_text.split("#### 产业画像生成规则", 1)[1]
+        rules = rules.split("### 4. 构建确定性企业简述", 1)[0]
+
+        self.assertIn("在写入 `REL` 前递归删除所有 `legalPersonCard`", skill_text)
+        self.assertIn("Unicode NFKC", rules)
+        self.assertIn("名称相同且 `kgRatio` 与 `fundedRatio`", rules)
+        self.assertIn("不新增或重复展示", rules)
+        self.assertIn(
+            "不得称为供应商、客户、控股企业、上下游企业或交易对手",
+            rules,
+        )
+        self.assertIn("`REL` 单独成功或仅有工商行业字段时不得触发", rules)
+
+    def test_industry_chapter_is_conditional_and_business_bounded(self) -> None:
+        skill_text = SKILL_PATH.read_text(encoding="utf-8")
+        report_template = extract_report_template(skill_text)
+
+        self.assertIn("{{#if D.has_industry_insight}}", report_template)
+        self.assertIn("### （一）产业链定位", report_template)
+        self.assertIn("### （二）行业景气度", report_template)
+        self.assertIn("### （三）行业对标", report_template)
+        self.assertIn("### （四）行业风险", report_template)
+        self.assertIn("| 观察维度 | 公开统计 | 时间与范围 |", report_template)
+        self.assertIn(
+            "| 对标维度 | 企业行业位置 | 行业参考 | 时间与范围 |",
+            report_template,
+        )
+        self.assertIn("| 风险信号 | 公开统计 | 拜访核验方向 |", report_template)
+        self.assertIn("{{#if D.has_industry_risk}}", report_template)
+        self.assertIn("水滴 MCP（{{D.source_dimensions.industry}}）", report_template)
+
+        self.assertIn("不得把数量变化解释为市场规模", skill_text)
+        self.assertIn("禁止改写为“行业领先”“头部企业”“龙头企业”", skill_text)
+        self.assertIn(
+            "不得用公开搜索、模型知识或参考样稿补充市场规模、CAGR、竞争格局、政策",
+            skill_text,
+        )
+        self.assertIn(
+            "现有资料不能确认客户、供应商、采购金额、销售金额及交易集中度",
+            skill_text,
+        )
+
+    def test_skill_targets_current_twenty_six_tool_server(self) -> None:
+        skill_text = SKILL_PATH.read_text(encoding="utf-8")
+        self.assertIn("当前 26 工具版本", skill_text)
+        self.assertIn("**SKILL 版本**：v2.1", skill_text)
 
 
 if __name__ == "__main__":
