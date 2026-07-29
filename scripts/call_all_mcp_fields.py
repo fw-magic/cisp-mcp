@@ -22,6 +22,13 @@ CALL_SPECS: list[tuple[str, dict[str, Any]]] = [
         {"ent_name": "河南省宋河酒业股份有限公司"},
     ),
     (
+        "p0010059_query_business_basic_brief",
+        {
+            "ent_name": "中国银行股份有限公司",
+            "types": ["basic"],
+        },
+    ),
+    (
         "p0010068_fuzzy_search_company_name",
         {"ent_name": "宋河酒业"},
     ),
@@ -119,6 +126,47 @@ CALL_SPECS: list[tuple[str, dict[str, Any]]] = [
     ),
     (
         "p0110003_query_honor_qualification_info",
+        {"ent_info": "中国银行股份有限公司"},
+    ),
+    (
+        "p0130036_query_land_info",
+        {
+            "ent_info": "中国银行股份有限公司",
+            "page_no": "1",
+            "page_size": "5",
+        },
+    ),
+    (
+        "p0130038_query_industry_analysis",
+        {
+            "ent_info": "中国银行股份有限公司",
+            "analysis_type": "property",
+            "nic_lvl": "n3",
+            "region_lvl": "r2",
+        },
+    ),
+    (
+        "p0980006_query_advanced_company_filter",
+        {
+            "eid": "1911000001000013428",
+            "page_no": "1",
+            "page_size": "2",
+        },
+    ),
+    (
+        "p0980008_query_tax_rating",
+        {"eid": "1911000001000013428"},
+    ),
+    (
+        "p0980023_query_two_year_risk_summary",
+        {"eid": "1911000001000013428"},
+    ),
+    (
+        "p0980033_query_listing_financing_bidding_ipr",
+        {"ent_info": "中国银行股份有限公司"},
+    ),
+    (
+        "p0990022_query_supplier_relationships",
         {"ent_info": "中国银行股份有限公司"},
     ),
     (

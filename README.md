@@ -148,7 +148,7 @@ Discovered MCP tools:
 - p0010058_query_business_basic_deep
 ...
 - query_cisp_product
-Total: 17
+Total: 25
 Smoke test passed.
 ```
 
@@ -196,6 +196,7 @@ Authorization: Bearer <测试用CISP_API_KEY>
 | --- | --- | --- |
 | `P0010010` | 企业工商照面信息查询 | `p0010010_query_business_profile` |
 | `P0010058` | 企业工商基本信息查询（深度） | `p0010058_query_business_basic_deep` |
+| `P0010059` | 企业工商基本信息查询（简项） | `p0010059_query_business_basic_brief` |
 | `P0010068` | 企业名称模糊查询（简版） | `p0010068_fuzzy_search_company_name` |
 | `P0010073` | 企业商标信息查询 | `p0010073_query_trademark_info` |
 | `P0010074` | 企业软件著作权信息查询 | `p0010074_query_software_copyright_info` |
@@ -210,6 +211,13 @@ Authorization: Bearer <测试用CISP_API_KEY>
 | `P0060007` | 企业工商二要素验证 | `p0060007_verify_business_two_elements` |
 | `P0060008` | 企业工商三要素验证 | `p0060008_verify_business_three_elements` |
 | `P0110003` | 企业荣誉资质信息查询 | `p0110003_query_honor_qualification_info` |
+| `P0130036` | 企业土地信息查询 | `p0130036_query_land_info` |
+| `P0130038` | 企业画像-行业分析 | `p0130038_query_industry_analysis` |
+| `P0980006` | 企业高级筛选 | `p0980006_query_advanced_company_filter` |
+| `P0980008` | 纳税评级 | `p0980008_query_tax_rating` |
+| `P0980023` | 光大-近2年风险分析统计 | `p0980023_query_two_year_risk_summary` |
+| `P0980033` | 上市投融资招投标知识产权情况 | `p0980033_query_listing_financing_bidding_ipr` |
+| `P0990022` | 供应商关联关系 | `p0990022_query_supplier_relationships` |
 | 通用 | CISP JSON 网关调试查询 | `query_cisp_product` |
 
 ### 返回结构
@@ -234,12 +242,16 @@ Authorization: Bearer <测试用CISP_API_KEY>
 - `resultList`
 - `icpList`
 - `patentsList`
-- `detailList`
+- `detailList`（`P0010084`、`P0130036`）
 - `entInvList`
 - `infoList`
 - `infoDetail`
 - `matchList`
 - `itemNameList`
+- `suppList`（`P0990022`）
+- `entList`（`P0980006`）
+- `list`（`P0980008`、`P0980023`）
+- `data`（`P0980033`）
 
 ## 调用示例
 
@@ -269,6 +281,97 @@ p0010010_query_business_profile
 
 ```text
 p0010058_query_business_basic_deep
+```
+
+### 查询简项工商信息
+
+`ent_name`、`credit_code`、`reg_no`、`org_code` 严格四选一；`types` 用于选择需要返回的数据类型。
+
+```json
+{
+  "ent_name": "证通股份有限公司",
+  "types": ["basic", "person", "shareholder"]
+}
+```
+
+对应工具：
+
+```text
+p0010059_query_business_basic_brief
+```
+
+### 企业高级筛选
+
+```json
+{
+  "eid": "可选的 CISP 企业内部标识",
+  "area_prefix": "44",
+  "org_scale": "大型",
+  "page_no": "1",
+  "page_size": "10"
+}
+```
+
+对应工具：
+
+```text
+p0980006_query_advanced_company_filter
+```
+
+### 查询上市、投融资、招投标和知识产权概况
+
+```json
+{
+  "ent_info": "证通股份有限公司"
+}
+```
+
+对应工具：
+
+```text
+p0980033_query_listing_financing_bidding_ipr
+```
+
+### 查询纳税评级
+
+`eid` 是 CISP 企业内部标识。如果只有企业名称，应先调用
+`p0010010_query_business_profile`，从企业名称准确匹配的
+`basicList[].entId` 获取，并将其作为 `eid` 传入。不要根据统一社会信用代码自行推算
+`eid`。企业高级筛选查询成功时，也可以使用其返回的 `entList[].eid`。
+
+```json
+{
+  "ent_info": "证通股份有限公司"
+}
+```
+
+```json
+{
+  "eid": "替换成 p0010010 返回的 basicList[].entId"
+}
+```
+
+对应工具：
+
+```text
+p0980008_query_tax_rating
+```
+
+### 查询近2年风险分析统计
+
+如果只有企业名称，先调用 `p0010010_query_business_profile`，从企业名称准确匹配的
+`basicList[].entId` 获取企业内部标识。不要自行构造或推算 `eid`。
+
+```json
+{
+  "eid": "替换成 p0010010 返回的 basicList[].entId"
+}
+```
+
+对应工具：
+
+```text
+p0980023_query_two_year_risk_summary
 ```
 
 ### 查询专利信息
@@ -320,6 +423,60 @@ p0020021_query_single_point_related_info
 
 ```text
 p0110003_query_honor_qualification_info
+```
+
+### 查询企业土地信息
+
+```json
+{
+  "ent_info": "证通股份有限公司",
+  "land_type": "tddy",
+  "page_no": "1",
+  "page_size": "10"
+}
+```
+
+`land_type` 可选值：`tdgy`（土地供应）、`tdcr`（土地出让）、`dkgs`（地块公示）、`tddy`（土地抵押）。不传时由底层产品决定返回范围。
+
+对应工具：
+
+```text
+p0130036_query_land_info
+```
+
+### 查询企业画像行业分析
+
+```json
+{
+  "ent_info": "证通股份有限公司",
+  "analysis_type": "property",
+  "nic_lvl": "n3",
+  "region_lvl": "r2",
+  "region_id": "440300",
+  "nic_id": "C391"
+}
+```
+
+`analysis_type` 可选值：`finRank`、`finRankStock`、`entRegionRank`、`locfin`、`indLocOpr`、`indLocOprFin`、`property`、`financialRegionRank`。不同类型的结果字段不同，统一从返回的 `data` 中读取。
+
+对应工具：
+
+```text
+p0130038_query_industry_analysis
+```
+
+### 查询供应商关联关系
+
+```json
+{
+  "ent_info": "证通股份有限公司"
+}
+```
+
+对应工具：
+
+```text
+p0990022_query_supplier_relationships
 ```
 
 ### 查询企业许可

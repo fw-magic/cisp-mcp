@@ -16,6 +16,7 @@ SMOKE_TEST_API_KEY = "smoke-test-cisp-api-key"
 EXPECTED_TOOLS = {
     "p0010010_query_business_profile",
     "p0010058_query_business_basic_deep",
+    "p0010059_query_business_basic_brief",
     "p0010068_fuzzy_search_company_name",
     "p0010073_query_trademark_info",
     "p0010074_query_software_copyright_info",
@@ -30,6 +31,13 @@ EXPECTED_TOOLS = {
     "p0060007_verify_business_two_elements",
     "p0060008_verify_business_three_elements",
     "p0110003_query_honor_qualification_info",
+    "p0130036_query_land_info",
+    "p0130038_query_industry_analysis",
+    "p0980006_query_advanced_company_filter",
+    "p0980008_query_tax_rating",
+    "p0980023_query_two_year_risk_summary",
+    "p0980033_query_listing_financing_bidding_ipr",
+    "p0990022_query_supplier_relationships",
     "query_cisp_product",
 }
 

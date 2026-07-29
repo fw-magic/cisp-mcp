@@ -30,6 +30,14 @@ INTERFACES = {
         data_field="P0010058Data",
         shortcut_field="basicList",
     ),
+    "P0010059": CispInterface(
+        product_code="P0010059",
+        name="企业工商基本信息查询（简项）",
+        description="根据企业名称、工商注册号、统一社会信用代码或组织机构代码查询指定类型的企业工商信息。",
+        status_field="P0010059Status",
+        data_field="P0010059Data",
+        shortcut_field="basicList",
+    ),
     "P0010068": CispInterface(
         product_code="P0010068",
         name="企业名称模糊查询（简版）",
@@ -134,11 +142,67 @@ INTERFACES = {
         data_field="P0110003Data",
         shortcut_field="itemNameList",
     ),
+    "P0130036": CispInterface(
+        product_code="P0130036",
+        name="企业土地信息查询",
+        description="根据企业名称、统一社会信用代码或注册号查询土地供应、土地出让、地块公示和土地抵押信息。",
+        status_field="P0130036Status",
+        data_field="P0130036Data",
+        shortcut_field="detailList",
+    ),
+    "P0130038": CispInterface(
+        product_code="P0130038",
+        name="企业画像-行业分析",
+        description="根据企业、行业和地区条件查询企业排名、行业财务指标、综合经营指标和知识产权排名等行业分析信息。",
+        status_field="P0130038Status",
+        data_field="P0130038Data",
+    ),
+    "P0980006": CispInterface(
+        product_code="P0980006",
+        name="企业高级筛选",
+        description="通过多维度筛选条件查询符合条件的企业列表。",
+        status_field="P0980006Status",
+        data_field="P0980006Data",
+        shortcut_field="entList",
+    ),
+    "P0980008": CispInterface(
+        product_code="P0980008",
+        name="纳税评级",
+        description="根据企业内部 eid 查询企业纳税评级。",
+        status_field="P0980008Status",
+        data_field="P0980008Data",
+        shortcut_field="list",
+    ),
+    "P0980023": CispInterface(
+        product_code="P0980023",
+        name="光大-近2年风险分析统计",
+        description="根据企业内部 eid 查询企业近两年风险分析统计。",
+        status_field="P0980023Status",
+        data_field="P0980023Data",
+        shortcut_field="list",
+    ),
+    "P0980033": CispInterface(
+        product_code="P0980033",
+        name="上市投融资招投标知识产权情况",
+        description="根据企业名称、工商注册号或统一社会信用代码查询上市、投融资、招投标和知识产权情况。",
+        status_field="P0980033Status",
+        data_field="P0980033Data",
+        shortcut_field="data",
+    ),
+    "P0990022": CispInterface(
+        product_code="P0990022",
+        name="供应商关联关系",
+        description="根据企业名称、工商注册号、组织机构代码或统一社会信用代码查询供应商关联关系。",
+        status_field="P0990022Status",
+        data_field="P0990022Data",
+        shortcut_field="suppList",
+    ),
 }
 
 
 P0010010 = INTERFACES["P0010010"]
 P0010058 = INTERFACES["P0010058"]
+P0010059 = INTERFACES["P0010059"]
 P0010068 = INTERFACES["P0010068"]
 P0010073 = INTERFACES["P0010073"]
 P0010074 = INTERFACES["P0010074"]
@@ -152,6 +216,13 @@ P0050008 = INTERFACES["P0050008"]
 P0060007 = INTERFACES["P0060007"]
 P0060008 = INTERFACES["P0060008"]
 P0110003 = INTERFACES["P0110003"]
+P0130036 = INTERFACES["P0130036"]
+P0130038 = INTERFACES["P0130038"]
+P0980006 = INTERFACES["P0980006"]
+P0980008 = INTERFACES["P0980008"]
+P0980023 = INTERFACES["P0980023"]
+P0980033 = INTERFACES["P0980033"]
+P0990022 = INTERFACES["P0990022"]
 
 
 RESULT_CODE_DESCRIPTIONS = {
