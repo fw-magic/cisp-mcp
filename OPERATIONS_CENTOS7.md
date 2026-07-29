@@ -141,9 +141,9 @@ sudo -u app \
 预期：
 
 ```text
-Ran 18 tests
+Ran 58 tests
 OK
-Total: 17
+Total: 25
 Smoke test passed.
 ```
 
