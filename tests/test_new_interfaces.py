@@ -97,6 +97,48 @@ class NewInterfaceMetadataTests(unittest.TestCase):
         self.assertEqual(interface.data_field, "P0010084Data")
         self.assertEqual(interface.shortcut_field, "detailList")
 
+    def test_p0130025_metadata_and_normalized_response(self) -> None:
+        self.assertIn("P0130025", interfaces.INTERFACES)
+        interface = interfaces.INTERFACES["P0130025"]
+        self.assertEqual(interface.status_field, "P0130025Status")
+        self.assertEqual(interface.data_field, "P0130025Data")
+        self.assertEqual(interface.shortcut_field, "coreLndicatorInfo")
+
+        indicator_list = [
+            {
+                "reportYear": "2025",
+                "totalAss": "二十四档",
+                "totalLia": "二十三档",
+                "busIncome": "二十三档",
+                "empNum": "213",
+                "socialSecurityNum": "213",
+            }
+        ]
+        raw_response = {
+            "orderNo": "order-P0130025",
+            "resultData": {
+                "P0130025Data": {
+                    "coreLndicatorInfo": indicator_list,
+                },
+                "P0130025Status": "4",
+            },
+            "packetCnt": 1,
+            "resultCode": "00000",
+            "resultDesc": "成功",
+            "isCompressed": 0,
+        }
+
+        normalized = client_module.normalize_interface_response(
+            raw_response,
+            interface,
+        )
+
+        self.assertEqual(normalized["product_code"], "P0130025")
+        self.assertTrue(normalized["success"])
+        self.assertTrue(normalized["has_result"])
+        self.assertEqual(normalized["coreLndicatorInfo"], indicator_list)
+        self.assertIs(normalized["raw_response"], raw_response)
+
     def test_p0130036_metadata_and_normalized_response(self) -> None:
         self.assertIn("P0130036", interfaces.INTERFACES)
         interface = interfaces.INTERFACES["P0130036"]
@@ -338,6 +380,81 @@ class NewInterfaceToolTests(unittest.IsolatedAsyncioTestCase):
             ],
         )
         self.assertEqual(result["prod_code"], "P0110003")
+
+    async def test_p0130025_maps_indicator_type_and_extra_params(
+        self,
+    ) -> None:
+        self.assertTrue(
+            hasattr(server, "p0130025_query_company_key_indicators")
+        )
+
+        explicit_result = await server.p0130025_query_company_key_indicators(
+            ent_info="证通股份有限公司",
+            indicator_type="2",
+        )
+        default_result = await server.p0130025_query_company_key_indicators(
+            ent_info="证通股份有限公司",
+        )
+        override_result = await server.p0130025_query_company_key_indicators(
+            ent_info="证通股份有限公司",
+            extra_params={
+                "type": "2",
+                "customParam": "custom-value",
+            },
+        )
+
+        self.assertEqual(
+            self.client.calls,
+            [
+                (
+                    "P0130025",
+                    {
+                        "entInfo": "证通股份有限公司",
+                        "type": "2",
+                    },
+                ),
+                (
+                    "P0130025",
+                    {
+                        "entInfo": "证通股份有限公司",
+                        "type": "1",
+                    },
+                ),
+                (
+                    "P0130025",
+                    {
+                        "entInfo": "证通股份有限公司",
+                        "type": "2",
+                        "customParam": "custom-value",
+                    },
+                ),
+            ],
+        )
+        self.assertEqual(explicit_result["prod_code"], "P0130025")
+        self.assertEqual(default_result["prod_code"], "P0130025")
+        self.assertEqual(override_result["prod_code"], "P0130025")
+
+    async def test_p0130025_schema_exposes_default_type_enum(
+        self,
+    ) -> None:
+        tools = await server.mcp.list_tools()
+        tool = next(
+            item
+            for item in tools
+            if item.name == "p0130025_query_company_key_indicators"
+        )
+
+        self.assertIn("ent_info", tool.inputSchema["required"])
+        self.assertNotIn("indicator_type", tool.inputSchema["required"])
+        indicator_schema = tool.inputSchema["properties"]["indicator_type"]
+        self.assertEqual(
+            indicator_schema["enum"],
+            list(get_args(server.P0130025IndicatorType)),
+        )
+        self.assertEqual(indicator_schema["default"], "1")
+        self.assertIn("1=指标等级、2=指标金额", tool.description or "")
+        self.assertIn("coreLndicatorInfo", tool.description or "")
+        self.assertIn("底层接口原始拼写", tool.description or "")
 
     async def test_p0130036_maps_land_filter_pagination_and_extra_params(
         self,
@@ -757,14 +874,15 @@ class NewInterfaceToolTests(unittest.IsolatedAsyncioTestCase):
             ],
         )
 
-    async def test_mcp_lists_all_twenty_six_tools(self) -> None:
+    async def test_mcp_lists_all_twenty_seven_tools(self) -> None:
         tools = await server.mcp.list_tools()
         names = {tool.name for tool in tools}
 
-        self.assertEqual(len(names), 26)
+        self.assertEqual(len(names), 27)
         self.assertTrue(
             {
                 "p0010059_query_business_basic_brief",
+                "p0130025_query_company_key_indicators",
                 "p0130036_query_land_info",
                 "p0130038_query_industry_analysis",
                 "p0210004_query_listed_company_financial_data",

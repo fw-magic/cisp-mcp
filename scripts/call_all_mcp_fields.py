@@ -129,6 +129,13 @@ CALL_SPECS: list[tuple[str, dict[str, Any]]] = [
         {"ent_info": "中国银行股份有限公司"},
     ),
     (
+        "p0130025_query_company_key_indicators",
+        {
+            "ent_info": "中国银行股份有限公司",
+            "indicator_type": "2",
+        },
+    ),
+    (
         "p0130036_query_land_info",
         {
             "ent_info": "中国银行股份有限公司",

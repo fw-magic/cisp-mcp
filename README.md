@@ -148,7 +148,7 @@ Discovered MCP tools:
 - p0010058_query_business_basic_deep
 ...
 - query_cisp_product
-Total: 26
+Total: 27
 Smoke test passed.
 ```
 
@@ -211,6 +211,7 @@ Authorization: Bearer <测试用CISP_API_KEY>
 | `P0060007` | 企业工商二要素验证 | `p0060007_verify_business_two_elements` |
 | `P0060008` | 企业工商三要素验证 | `p0060008_verify_business_three_elements` |
 | `P0110003` | 企业荣誉资质信息查询 | `p0110003_query_honor_qualification_info` |
+| `P0130025` | 企业关键指标信息查询 | `p0130025_query_company_key_indicators` |
 | `P0130036` | 企业土地信息查询 | `p0130036_query_land_info` |
 | `P0130038` | 企业画像-行业分析 | `p0130038_query_industry_analysis` |
 | `P0210004` | 上市公司财务数据查询 | `p0210004_query_listed_company_financial_data` |
@@ -249,6 +250,7 @@ Authorization: Bearer <测试用CISP_API_KEY>
 - `infoDetail`
 - `matchList`
 - `itemNameList`
+- `coreLndicatorInfo`（`P0130025`，字段名沿用底层接口原始拼写）
 - `suppList`（`P0990022`）
 - `entList`（`P0980006`）
 - `list`（`P0980008`、`P0980023`）
@@ -428,6 +430,29 @@ p0020021_query_single_point_related_info
 
 ```text
 p0110003_query_honor_qualification_info
+```
+
+### 查询企业关键指标
+
+```json
+{
+  "ent_info": "证通股份有限公司",
+  "indicator_type": "2"
+}
+```
+
+`indicator_type` 可选值：
+
+- `"1"`：指标等级，默认值
+- `"2"`：指标金额
+
+结果列表通过 `coreLndicatorInfo` 快捷字段返回，包含报告年份、资产总额、负债总额、
+所有者权益、营业收入、主营业务收入、利润、纳税、从业人数和社保人数等年报关键指标。
+
+对应工具：
+
+```text
+p0130025_query_company_key_indicators
 ```
 
 ### 查询企业土地信息

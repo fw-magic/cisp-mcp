@@ -31,6 +31,7 @@ EXPECTED_TOOLS = {
     "p0060007_verify_business_two_elements",
     "p0060008_verify_business_three_elements",
     "p0110003_query_honor_qualification_info",
+    "p0130025_query_company_key_indicators",
     "p0130036_query_land_info",
     "p0130038_query_industry_analysis",
     "p0210004_query_listed_company_financial_data",

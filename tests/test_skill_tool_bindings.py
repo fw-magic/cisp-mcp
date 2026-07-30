@@ -36,6 +36,16 @@ EXPECTED_BINDINGS = {
     "p0980033_query_listing_financing_bidding_ipr": {"ent_info"},
     "p0980008_query_tax_rating": {"eid"},
     "p0980023_query_two_year_risk_summary": {"eid"},
+    "p0210004_query_listed_company_financial_data": {
+        "ent_info",
+        "financial_type",
+        "start_date",
+        "end_date",
+    },
+    "p0130025_query_company_key_indicators": {
+        "ent_info",
+        "indicator_type",
+    },
     "p0130036_query_land_info": {
         "ent_info",
         "land_type",
@@ -103,6 +113,8 @@ class SkillToolBindingTests(unittest.IsolatedAsyncioTestCase):
         ent_info_tools = {
             "p0010010_query_business_profile",
             "p0980033_query_listing_financing_bidding_ipr",
+            "p0210004_query_listed_company_financial_data",
+            "p0130025_query_company_key_indicators",
             "p0130036_query_land_info",
             "p0130038_query_industry_analysis",
             "p0990022_query_supplier_relationships",
@@ -241,10 +253,10 @@ class SkillToolBindingTests(unittest.IsolatedAsyncioTestCase):
         self.assertIn("| 核验主题 | 已知依据与现场问题 |", skill_text)
         self.assertIn("| 类型 | 数量 | 代表记录 |", skill_text)
         self.assertIn("| 指标 | 本次数据 | 数据口径 |", skill_text)
-        self.assertIn("| 风险维度 | 关键事实 | 范围与待核实事项 |", skill_text)
-        self.assertIn("资料范围：{{D.coverage_summary}}", skill_text)
+        self.assertIn("| 关注维度 | 关键事实 | 范围与待核实事项 |", skill_text)
+        self.assertNotIn("资料范围：{{D.coverage_summary}}", skill_text)
         self.assertIn(
-            "`D.coverage_summary` 只用工商登记、股权与关联关系、土地资产、行业统计与排名、知识产权",
+            "`D.coverage_summary` 只用工商登记、股权与关联关系、上市公司财务、土地资产、行业统计与排名、知识产权",
             skill_text,
         )
         self.assertNotIn("六、需求识别与产品推荐", skill_text)
@@ -254,6 +266,85 @@ class SkillToolBindingTests(unittest.IsolatedAsyncioTestCase):
         self.assertNotIn("| 风险维度 | 本次结果 | 关键事实 | 范围 |", skill_text)
         self.assertNotIn("认缴出资额（接口原值）", skill_text)
         self.assertNotIn("本次不评级", skill_text)
+
+    def test_core_operations_use_listed_financials_and_replace_old_signals(self) -> None:
+        skill_text = SKILL_PATH.read_text(encoding="utf-8")
+        report_template = extract_report_template(skill_text)
+        section = report_template.split("### （五）核心经营数据", 1)[1]
+        section = section.split("{{#if D.has_industry_insight}}", 1)[0]
+
+        self.assertIn("{{#if D.has_core_operation_rows}}", section)
+        self.assertIn(
+            "{{#each D.core_operation_rows}}| **{{metric}}** | {{value}} | {{period_basis}} |{{/each}}",
+            section,
+        )
+        self.assertNotIn("D.branch_summary", section)
+        self.assertNotIn("D.website_summary", section)
+        self.assertNotIn("D.recent_public_activity", section)
+        self.assertNotIn("工商登记公开记录", section)
+        self.assertNotIn("网站与 ICP", section)
+        self.assertIn(
+            "| `FIN_LISTED` | `p0210004_query_listed_company_financial_data.data`",
+            skill_text,
+        )
+        self.assertIn(
+            "| `FIN_KEY` | `p0130025_query_company_key_indicators.data`",
+            skill_text,
+        )
+
+    def test_core_operations_select_latest_complete_annual_consolidated_record(
+        self,
+    ) -> None:
+        skill_text = SKILL_PATH.read_text(encoding="utf-8")
+        rules = skill_text.split("#### 核心经营数据生成规则", 1)[1]
+        rules = rules.split("### 4. 构建确定性企业简述", 1)[0]
+
+        self.assertIn("`reportDate` 严格匹配 `YYYY-12-31`", rules)
+        self.assertIn('`reportTimeType` 明确为“年度报告”', rules)
+        self.assertIn("不得把一季度、半年度、三季度或单季度记录当作年度数据", rules)
+        self.assertIn("核心字段的非空数量", rules)
+        self.assertIn("有效 `latestNoticeDate` 最新者", rules)
+        self.assertIn('`combineTypeCode="001"` 或 `combineType="合并"`', rules)
+        self.assertIn('不得使用 `combineType="母公司"`', rules)
+        self.assertIn('`combineTypeCode="002"`', rules)
+        self.assertIn("不换算为万元、亿元", rules)
+        self.assertIn("不得乘以 100", rules)
+
+    def test_core_operations_bound_p0130025_to_employee_supplement(self) -> None:
+        skill_text = SKILL_PATH.read_text(encoding="utf-8")
+        rules = skill_text.split("#### 核心经营数据生成规则", 1)[1]
+        rules = rules.split("### 4. 构建确定性企业简述", 1)[0]
+
+        self.assertIn(
+            "`reportYear` 与选定年度报告年份完全一致",
+            rules,
+        )
+        self.assertIn('`empNumDis` 明确为 `"1"`', rules)
+        self.assertIn("`socialSecurityNum` 不等同集团员工数", rules)
+        self.assertIn(
+            "`busIncome/mainBusIncome/netProfit/totalProfit/totalAss/totalLia/totalOwnEquity/totalTax` 不进入本章节",
+            rules,
+        )
+        self.assertIn("该产品只给年份、没有报告期间且金额单位未明确", rules)
+
+    def test_core_operations_non_listed_or_missing_data_use_business_note_only(
+        self,
+    ) -> None:
+        skill_text = SKILL_PATH.read_text(encoding="utf-8")
+        rules = skill_text.split("#### 核心经营数据生成规则", 1)[1]
+        rules = rules.split("### 4. 构建确定性企业简述", 1)[0]
+
+        expected_note = (
+            "现有资料暂不包含可核验的营业收入、利润、资产负债及现金流数据，"
+            "本章节不作量化判断。建议拜访时结合企业近三年财务报表、纳税申报资料"
+            "及主要客户、订单结构进一步了解。"
+        )
+        self.assertIn(expected_note, rules)
+        self.assertIn("不展示空表", rules)
+        self.assertIn("不生成 `operations_interpretation`", rules)
+        self.assertIn("不得仅因财务数据为空推断其未上市", rules)
+        self.assertNotIn("阳光电源股份有限公司", skill_text)
+        self.assertNotIn("招商银行股份有限公司", skill_text)
 
     def test_report_template_uses_business_language(self) -> None:
         skill_text = SKILL_PATH.read_text(encoding="utf-8")
@@ -278,7 +369,7 @@ class SkillToolBindingTests(unittest.IsolatedAsyncioTestCase):
                 self.assertNotIn(term, report_template)
 
         self.assertIn("数据日期：{{META.generated_at}}", report_template)
-        self.assertIn("资料范围：{{D.coverage_summary}}", report_template)
+        self.assertNotIn("资料范围：{{D.coverage_summary}}", report_template)
         self.assertIn("公开资料未披露", skill_text)
         self.assertIn("商业事件中的“取得订单”改写为“获得订单”", skill_text)
 
@@ -411,6 +502,27 @@ class SkillToolBindingTests(unittest.IsolatedAsyncioTestCase):
 
         self.assertIn("所有 `##` 一级标题段前 12 pt、段后 6 pt", skill_text)
         self.assertIn("标题位于页首时不额外增加段前空白", skill_text)
+        self.assertIn("正文：宋体或可用的等价中文宋体，10.5 pt，固定行高 15 pt", skill_text)
+        self.assertIn("表格正文 9 pt，固定行高 12 pt", skill_text)
+        self.assertIn("不得使用渲染器默认行高或单倍行距", skill_text)
+        self.assertIn("统一使用 15 pt 行高", skill_text)
+        self.assertIn("表头和表格正文统一使用 12 pt 行高", skill_text)
+        self.assertIn("`fontSize=10.5, leading=15`", skill_text)
+        self.assertIn("`fontSize=9, leading=12`", skill_text)
+        self.assertIn(
+            "报告使用说明正文：四条说明单独使用宋体或等价中文宋体 9 pt、固定行高 12 pt",
+            skill_text,
+        )
+        self.assertIn(
+            "报告使用说明四条正文必须使用独立样式并显式设置 `fontSize=9, leading=12`",
+            skill_text,
+        )
+        self.assertIn(
+            "“报告使用说明”标题仍使用一级标题样式，不随正文缩小",
+            skill_text,
+        )
+        self.assertIn("不得出现字形上下紧贴", skill_text)
+        self.assertIn("不得通过减小字号、字符缩放或压缩段后间距抵消行高", skill_text)
         self.assertIn("普通正文段落段后 4 pt", skill_text)
         self.assertIn("PDF 使用段后样式控制间距，不插入空白段落", skill_text)
         self.assertIn("Markdown 回退在自然段之间保留一个空行", skill_text)
@@ -523,7 +635,7 @@ class SkillToolBindingTests(unittest.IsolatedAsyncioTestCase):
         self.assertIn("优先按有效 `pubDate`，再按 `boardStartDate`", rules)
         self.assertIn("`D.tangible_assets` 或任一无形资产事实非空", rules)
         self.assertIn(
-            "`D.company_overview`、`D.tangible_assets` 和事实表格不属于模型派生分析",
+            "`D.company_overview`、`D.tangible_assets`、`D.core_operation_rows` 和事实表格不属于模型派生分析",
             skill_text,
         )
 
@@ -566,7 +678,7 @@ class SkillToolBindingTests(unittest.IsolatedAsyncioTestCase):
             skill_text,
         )
         self.assertIn(
-            "`D.coverage_summary` 只用工商登记、股权与关联关系、土地资产、行业统计与排名、知识产权",
+            "`D.coverage_summary` 只用工商登记、股权与关联关系、上市公司财务、土地资产、行业统计与排名、知识产权",
             skill_text,
         )
 
@@ -619,6 +731,58 @@ class SkillToolBindingTests(unittest.IsolatedAsyncioTestCase):
         self.assertIn('"industry_benchmark_rows": [', skill_text)
         self.assertIn('"industry_risk_rows": [', skill_text)
 
+    def test_industry_scope_uses_business_name_and_hides_internal_codes(self) -> None:
+        skill_text = SKILL_PATH.read_text(encoding="utf-8")
+        rules = skill_text.split("#### 产业画像生成规则", 1)[1]
+        rules = rules.split("### 4. 构建确定性企业简述", 1)[0]
+
+        self.assertIn('"industry_scope_display": null', skill_text)
+        self.assertIn("确定性生成 `D.industry_scope_display`", rules)
+        self.assertIn("`IND.indLocOpr.data[].region`", rules)
+        self.assertIn("`IND.indLocOpr.data[].indsy`", rules)
+        self.assertIn("不含对应 `nicId` 代码片段", rules)
+        self.assertIn("按半角连字符 `-` 切分后至少有三个非空层级", rules)
+        self.assertIn("安徽省输配电及控制设备制造行业", rules)
+        self.assertIn("两个表格的 `period_scope` 必须使用", rules)
+        self.assertIn(
+            "禁止进入最终报告的可见表格、`period_scope`、信息解读或其他正文",
+            rules,
+        )
+        self.assertIn("不得显示“三级行业C382”", rules)
+        self.assertIn(
+            '"industry_scope_display": ["实际用于确定中文地区名和中文行业名',
+            skill_text,
+        )
+
+    def test_enterprise_risk_evidence_is_grouped_before_ai_analysis(self) -> None:
+        skill_text = SKILL_PATH.read_text(encoding="utf-8")
+        rules = skill_text.split("#### 企业风险与合规证据生成规则", 1)[1]
+        rules = rules.split("### 4. 构建确定性企业简述", 1)[0]
+        report_template = extract_report_template(skill_text)
+
+        groups = [
+            "主体与行政合规",
+            "司法与执行",
+            "股权及资产权利负担",
+            "税务与许可合规",
+            "财务经营关注",
+            "近期公开事件",
+        ]
+        positions = [rules.index(group) for group in groups]
+        self.assertEqual(positions, sorted(positions))
+        self.assertIn('"risk_evidence_groups": {', skill_text)
+        self.assertIn('"subject_compliance": {"status": "hit|context|empty|unavailable"', skill_text)
+        self.assertIn('"public_event_clues": {"status": "hit|context|empty|unavailable"', skill_text)
+        self.assertIn("不得相加、互相覆盖或强行解释差异", rules)
+        self.assertIn("股东质押记录写成“股东股权质押”", rules)
+        self.assertIn("无有效年度报告或企业为非上市公司时只写入", rules)
+        self.assertIn("只把 `status=hit` 的组转为 `D.risks[]`", rules)
+        self.assertIn("不得读取其他原始响应", rules)
+        self.assertIn("| 关注维度 | 关键事实 | 范围与待核实事项 |", report_template)
+        self.assertIn("合规提示：{{D.risk_compliance_context}}", report_template)
+        self.assertIn("资料范围：{{D.risk_information_boundary}}", report_template)
+        self.assertNotIn("| 风险维度 | 关键事实 | 范围与待核实事项 |", report_template)
+
     def test_supplier_relationships_are_redacted_and_not_misclassified(self) -> None:
         skill_text = SKILL_PATH.read_text(encoding="utf-8")
         rules = skill_text.split("#### 产业画像生成规则", 1)[1]
@@ -663,10 +827,10 @@ class SkillToolBindingTests(unittest.IsolatedAsyncioTestCase):
             skill_text,
         )
 
-    def test_skill_targets_current_twenty_six_tool_server(self) -> None:
+    def test_skill_targets_current_twenty_seven_tool_server(self) -> None:
         skill_text = SKILL_PATH.read_text(encoding="utf-8")
-        self.assertIn("当前 26 工具版本", skill_text)
-        self.assertIn("**SKILL 版本**：v2.1", skill_text)
+        self.assertIn("当前 27 工具版本", skill_text)
+        self.assertIn("**SKILL 版本**：v2.7", skill_text)
 
 
 if __name__ == "__main__":

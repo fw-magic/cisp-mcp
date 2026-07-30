@@ -30,6 +30,7 @@ from .interfaces import (
     P0060007,
     P0060008,
     P0110003,
+    P0130025,
     P0130036,
     P0130038,
     P0210004,
@@ -75,6 +76,11 @@ P0010059Type = Literal[
     "caseRandomCheck",
     "companyIpr",
     "companyCancelEasy",
+]
+
+P0130025IndicatorType = Literal[
+    "1",
+    "2",
 ]
 
 P0130036LandType = Literal[
@@ -732,6 +738,33 @@ async def p0110003_query_honor_qualification_info(
     return await client.query_product(
         prod_code=P0110003.product_code,
         params=with_extra_params({"entInfo": ent_info}, extra_params),
+    )
+
+
+@mcp.tool()
+async def p0130025_query_company_key_indicators(
+    ent_info: str,
+    indicator_type: P0130025IndicatorType = "1",
+    extra_params: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """企业关键指标信息查询。
+
+    ent_info 支持企业名称、工商注册号或统一社会信用代码。
+    indicator_type 可选：1=指标等级、2=指标金额，默认 1。
+    返回企业年报中的报告年份、资产总额、负债总额、所有者权益、营业收入、
+    主营业务收入、利润、纳税、从业人数和社保人数等关键指标。
+    响应列表位于 coreLndicatorInfo；该字段名沿用底层接口原始拼写。
+    """
+    client = get_client()
+    return await client.query_product(
+        prod_code=P0130025.product_code,
+        params=with_extra_params(
+            {
+                "entInfo": ent_info,
+                "type": indicator_type,
+            },
+            extra_params,
+        ),
     )
 
 

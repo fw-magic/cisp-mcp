@@ -142,6 +142,14 @@ INTERFACES = {
         data_field="P0110003Data",
         shortcut_field="itemNameList",
     ),
+    "P0130025": CispInterface(
+        product_code="P0130025",
+        name="企业关键指标信息查询",
+        description="根据企业名称、工商注册号或统一社会信用代码查询企业年报资产关键指标的等级或金额。",
+        status_field="P0130025Status",
+        data_field="P0130025Data",
+        shortcut_field="coreLndicatorInfo",
+    ),
     "P0130036": CispInterface(
         product_code="P0130036",
         name="企业土地信息查询",
@@ -223,6 +231,7 @@ P0050008 = INTERFACES["P0050008"]
 P0060007 = INTERFACES["P0060007"]
 P0060008 = INTERFACES["P0060008"]
 P0110003 = INTERFACES["P0110003"]
+P0130025 = INTERFACES["P0130025"]
 P0130036 = INTERFACES["P0130036"]
 P0130038 = INTERFACES["P0130038"]
 P0210004 = INTERFACES["P0210004"]
