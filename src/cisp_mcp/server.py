@@ -273,7 +273,7 @@ async def p0010010_query_business_profile(
 ) -> dict[str, Any]:
     """企业工商照面信息查询。
 
-    根据企业名称、统一社会信用代码或工商注册号查询工商注册照面信息。
+    根据企业名称、统一社会信用代码或工商注册号查询工商注册照面信息及历史名称信息。
     返回的 basicList[].entId 是 CISP 企业内部标识：当其他工具要求 eid 或 entId、
     而用户只提供企业名称时，应优先调用本工具，并从 orgName 准确匹配的记录中取 entId。
     不得根据统一社会信用代码或其他字段自行推算 eid/entId。
@@ -293,7 +293,11 @@ async def p0010058_query_business_basic_deep(
     org_code: str | None = None,
     extra_params: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    """企业工商基本信息查询（深度）。企业名称、统一社会信用代码、注册号、组织机构代码四选一。"""
+    """企业工商基本信息查询（深度）。
+
+    根据企业名称、工商注册号、统一社会信用代码或组织机构代码查询企业深度工商信息；
+    企业名称、统一社会信用代码、注册号、组织机构代码四选一。
+    """
     params = {
         "entName": ent_name,
         "creditCode": credit_code,
@@ -319,6 +323,7 @@ async def p0010059_query_business_basic_brief(
 ) -> dict[str, Any]:
     """企业工商基本信息查询（简项）。
 
+    根据企业名称、工商注册号、统一社会信用代码或组织机构代码查询指定类型的企业工商信息。
     ent_name、credit_code、reg_no、org_code 严格四选一。
     types 用于选择工商照面、主要人员、股东、变更、年报和风险等数据类型；
     不传 types 时由底层产品决定返回范围。
@@ -394,7 +399,7 @@ async def p0010074_query_software_copyright_info(
     page_size: str | None = None,
     extra_params: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    """企业软件著作权信息查询。根据企业名称、统一社会信用代码或注册号查询软件著作权信息。"""
+    """企业软件著作权信息查询。根据企业名称、统一社会信用代码或注册号查询企业软件著作权信息。"""
     client = get_client()
     return await client.query_product(
         prod_code=P0010074.product_code,
@@ -417,7 +422,7 @@ async def p0010075_query_work_copyright_info(
     page_size: str | None = None,
     extra_params: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    """企业作品著作权信息查询。根据企业名称、工商注册号或统一社会信用代码查询作品著作权信息。"""
+    """企业作品著作权信息查询。根据企业名称、工商注册号或统一社会信用代码查询企业作品著作权信息。"""
     client = get_client()
     return await client.query_product(
         prod_code=P0010075.product_code,
@@ -440,7 +445,7 @@ async def p0010076_query_icp_filing_info(
     page_size: str | None = None,
     extra_params: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    """企业 ICP 备案信息查询。根据企业名称、工商注册号或统一社会信用代码查询 ICP 备案信息。"""
+    """企业 ICP 备案信息查询。根据企业名称、工商注册号或统一社会信用代码查询企业 ICP 备案信息。"""
     client = get_client()
     return await client.query_product(
         prod_code=P0010076.product_code,
@@ -494,7 +499,8 @@ async def p0010084_query_license_info(
 ) -> dict[str, Any]:
     """企业许可信息查询。
 
-    查询工商、质检、食药监、金融监管、环保、医疗等许可信息。
+    根据企业名称、统一社会信用代码或注册号查询工商、质检、食药监、金融监管、
+    环保、医疗等许可信息。
     license_type 可选值包括 gs、zjzj、syj-xk、syj-old、syj-drug、yjh、
     bjh、gdzj-gy、gdzj-dsj、pwxk、pwxk-dj、ylxk。
     province 仅在 license_type 为 ylxk（医疗许可）时使用。
@@ -523,6 +529,7 @@ async def p0020021_query_single_point_related_info(
 ) -> dict[str, Any]:
     """企业单点关联信息查询。
 
+    根据企业名称、注册号、组织机构代码或统一社会信用代码查询企业投资和任职关联信息。
     根据用户意图选择 relation_direction：
     "1" 表示同时查询投资和任职关系；
     "2" 表示只查询投资关系；
@@ -555,7 +562,11 @@ async def p0050007_query_public_opinion_list(
     page_size: str | None = None,
     extra_params: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    """企业舆情信息列表查询。ent_name 使用企业名称数组，如 ["证通股份有限公司"]，支持多个企业。"""
+    """企业舆情信息列表查询。
+
+    根据企业名称、三级标签、情感方向等条件查询企业舆情列表信息。
+    ent_name 使用企业名称数组，如 ["证通股份有限公司"]，支持多个企业。
+    """
     client = get_client()
     return await client.query_product(
         prod_code=P0050007.product_code,
@@ -581,7 +592,11 @@ async def p0050008_query_public_opinion_detail(
     entry_id: str | None = None,
     extra_params: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    """企业舆情信息详情查询。优先使用 entry_id；只传 ent_name 时会先查列表，再取第一条舆情详情。"""
+    """企业舆情信息详情查询。
+
+    根据企业名称或舆情 ID 查询企业舆情详情信息。
+    优先使用 entry_id；只传 ent_name 时会先查列表，再取第一条舆情详情。
+    """
     client = get_client()
     if not entry_id and ent_name:
         list_result = await client.query_product(
@@ -692,7 +707,7 @@ async def p0060007_verify_business_two_elements(
     reg_no: str,
     extra_params: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    """企业工商二要素验证。根据企业名称和统一社会信用代码/企业注册号验证是否匹配。"""
+    """企业工商二要素验证。根据企业名称和工商注册号/统一社会信用代码验证信息是否匹配。"""
     client = get_client()
     return await client.query_product(
         prod_code=P0060007.product_code,
@@ -809,7 +824,8 @@ async def p0130038_query_industry_analysis(
 ) -> dict[str, Any]:
     """企业画像行业分析查询。
 
-    ent_info 支持企业名称、统一社会信用代码或企业注册号。
+    根据企业、行业和地区条件查询企业排名、行业财务指标、综合经营指标和知识产权排名等
+    行业分析信息。ent_info 支持企业名称、统一社会信用代码或企业注册号。
     analysis_type 可选：finRank=企业财务指标最新排序；
     finRankStock=上市公司财务指标最新排序；entRegionRank=企业区域行业排名；
     locfin=行业地区财务指标；indLocOpr=年度行业地区指标；
@@ -845,7 +861,8 @@ async def p0210004_query_listed_company_financial_data(
 ) -> dict[str, Any]:
     """上市公司财务数据查询。
 
-    ent_info 支持企业名称、统一社会信用代码或企业注册号。
+    根据企业名称、统一社会信用代码或注册号查询上市企业的利润、现金流量、资产负债和
+    主要财务指标。ent_info 支持企业名称、统一社会信用代码或企业注册号。
     financial_type 可选：rgincome=通用类利润、rgcashflow=通用类现金流量、
     fncmfnin=金融公司主要财务指标、rgbalance=通用类资产负债、
     mainfinadata=主要会计数据和财务指标、balance=一般企业资产负债、
@@ -917,7 +934,8 @@ async def p0980006_query_advanced_company_filter(
 ) -> dict[str, Any]:
     """企业高级筛选。
 
-    通过地区、行业、规模、资本、上市、融资、招投标、知识产权等条件筛选企业。
+    通过地区、行业、规模、资本、上市、融资、招投标、知识产权等多维度条件筛选
+    符合条件的企业列表。
     eid 为可选的 CISP 企业内部标识，传入后原样映射到底层 eid 字段。
     筛选码值按产品约定原样传递；成立日期格式为 yyyy-MM-dd。
     """
@@ -981,9 +999,10 @@ async def p0980008_query_tax_rating(
 ) -> dict[str, Any]:
     """纳税评级查询。
 
-    eid 为 CISP 企业内部标识。若用户只提供企业名称，应先调用
-    p0010010_query_business_profile，将企业名称传入 ent_info，再从 orgName 准确匹配的
-    basicList[].entId 获取值并作为本工具的 eid。不得自行推算 eid。
+    根据企业内部 eid 查询企业纳税评级。eid 为 CISP 企业内部标识。
+    若用户只提供企业名称，应先调用 p0010010_query_business_profile，将企业名称传入
+    ent_info，再从 orgName 准确匹配的 basicList[].entId 获取值并作为本工具的 eid。
+    不得自行推算 eid。
     """
     client = get_client()
     return await client.query_product(
@@ -999,8 +1018,9 @@ async def p0980023_query_two_year_risk_summary(
 ) -> dict[str, Any]:
     """近2年风险分析统计。
 
-    eid 为 CISP 企业内部标识，返回 collect1 至 collect15 风险统计。若用户只提供企业名称，
-    应先调用 p0010010_query_business_profile，将企业名称传入 ent_info，再从 orgName
+    根据企业内部 eid 查询企业近两年风险分析统计，返回 collect1 至 collect15 风险统计。
+    eid 为 CISP 企业内部标识。若用户只提供企业名称，应先调用
+    p0010010_query_business_profile，将企业名称传入 ent_info，再从 orgName
     准确匹配的 basicList[].entId 获取值并作为本工具的 eid。不得自行推算 eid。
     """
     client = get_client()
@@ -1017,6 +1037,7 @@ async def p0980033_query_listing_financing_bidding_ipr(
 ) -> dict[str, Any]:
     """上市投融资招投标知识产权情况查询。
 
+    根据企业名称、工商注册号或统一社会信用代码查询上市、投融资、招投标和知识产权情况。
     ent_info 支持企业名称、统一社会信用代码或工商注册号。
     """
     client = get_client()
