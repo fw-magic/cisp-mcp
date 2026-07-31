@@ -581,7 +581,7 @@ def generate_html(ev):
 {basic_rows}
 </tbody>
 </table>
-<div class="data-source">水滴 MCP（工商深度）｜查询时间：{QUERY_TIME}</div>
+<div class="data-source">水滴征信 MCP（工商深度）｜查询时间：{QUERY_TIME}</div>
 
 <h3>（二）关键人员信息</h3>
 <table>
@@ -590,7 +590,7 @@ def generate_html(ev):
 {people_rows}
 </tbody>
 </table>
-<div class="data-source">水滴 MCP（工商深度）｜查询时间：{QUERY_TIME}</div>
+<div class="data-source">水滴征信 MCP（工商深度）｜查询时间：{QUERY_TIME}</div>
 
 <h3>（三）股权结构与经营网络</h3>
 <table>
@@ -601,7 +601,7 @@ def generate_html(ev):
 </table>
 <p style="font-size:9pt;color:#555;">股东共{ev['shareholder_count']}名，上表按持股比例降序展示前{len(ev['shareholders'])}名。</p>
 <p style="font-size:9pt;color:#555;">{filiation_text}。网站：{website_text}。</p>
-<div class="data-source">水滴 MCP（工商深度）｜查询时间：{QUERY_TIME}</div>
+<div class="data-source">水滴征信 MCP（工商深度）｜查询时间：{QUERY_TIME}</div>
 
 <h3>（四）无形资产与资质</h3>
 <table>
@@ -611,7 +611,7 @@ def generate_html(ev):
 </tbody>
 </table>
 <p style="font-size:9pt;color:#555;">各维度总量来自分页元数据，本次仅展示首页返回记录，不代表全部。</p>
-<div class="data-source">水滴 MCP（商标、专利、软件著作权、作品著作权、ICP备案、行政许可、荣誉资质）｜查询时间：{QUERY_TIME}</div>
+<div class="data-source">水滴征信 MCP（商标、专利、软件著作权、作品著作权、ICP备案、行政许可、荣誉资质）｜查询时间：{QUERY_TIME}</div>
 
 <h3>（五）近期公开动态</h3>
 <p style="font-size:9pt;color:#555;">{news_meta}。</p>
@@ -621,7 +621,7 @@ def generate_html(ev):
 {news_rows}
 </tbody>
 </table>
-<div class="data-source">水滴 MCP（近期舆情）｜查询时间：{QUERY_TIME}</div>
+<div class="data-source">水滴征信 MCP（近期舆情）｜查询时间：{QUERY_TIME}</div>
 
 <h2>四、拜访核验重点</h2>
 <table>
@@ -630,7 +630,7 @@ def generate_html(ev):
 {vq_rows}
 </tbody>
 </table>
-<div class="data-source">水滴 MCP（综合维度）｜查询时间：{QUERY_TIME}</div>
+<div class="data-source">水滴征信 MCP（综合维度）｜查询时间：{QUERY_TIME}</div>
 
 <h2>五、风险预警与合规提示</h2>
 <table>
@@ -639,12 +639,12 @@ def generate_html(ev):
 {risk_rows}
 </tbody>
 </table>
-<div class="data-source">水滴 MCP（工商深度-风险维度）｜查询时间：{QUERY_TIME}</div>
+<div class="data-source">水滴征信 MCP（工商深度-风险维度）｜查询时间：{QUERY_TIME}</div>
 
 <div class="usage-notes">
 <h2 style="font-size:12pt;margin-top:0;">报告使用说明</h2>
 <p>- 本报告仅用于客户经理访前准备和沟通参考，不作为授信审批或其他专业决策依据。</p>
-<p>- 本报告基于查询时点水滴 MCP 返回的公开数据；空结果、字段缺失和查询失败均不等同于不存在相关事实。</p>
+<p>- 本报告基于查询时点水滴征信 MCP 返回的公开数据；空结果、字段缺失和查询失败均不等同于不存在相关事实。</p>
 <p>- 关键经营、财务和合作信息应在拜访中由客户经理进一步核实。</p>
 <p>- 本报告涉及企业信息，接收方应按所在机构制度妥善保管。</p>
 <p style="color:#808080;font-size:8pt;">成功维度：{esc(successful_str)} ｜ 空结果维度：{esc(empty_str)} ｜ 未完成维度：{esc(failed_str)} ｜ 查询时间：{QUERY_TIME}</p>

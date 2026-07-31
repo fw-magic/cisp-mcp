@@ -10,7 +10,7 @@ SKILL_PATH = (
     Path(__file__).resolve().parents[1]
     / ".agents"
     / "skills"
-    / "shuidi-company-previsit-one-pager"
+    / "企业画像"
     / "SKILL.md"
 )
 
@@ -92,6 +92,21 @@ def extract_report_template(skill_text: str) -> str:
 
 
 class SkillToolBindingTests(unittest.IsolatedAsyncioTestCase):
+    def test_skill_identity_and_product_copy(self) -> None:
+        self.assertTrue(SKILL_PATH.is_file())
+        skill_text = SKILL_PATH.read_text(encoding="utf-8")
+        report_template = extract_report_template(skill_text)
+
+        self.assertIn("name: enterprise-profile", skill_text)
+        self.assertIn(
+            "`/enterprise-profile 企业名称或信用代码 [--format pdf|md]`",
+            skill_text,
+        )
+        self.assertIn("# 企业画像", report_template)
+        self.assertIn("output/pdf/{company_name}-企业画像.pdf", skill_text)
+        self.assertNotIn("一页纸", skill_text)
+        self.assertNotIn("shuidi-company-previsit-one-pager", skill_text)
+
     async def test_documented_parameters_match_mcp_tool_schemas(self) -> None:
         rows = parse_tool_binding_rows(SKILL_PATH.read_text(encoding="utf-8"))
         tools = {tool.name: tool for tool in await server.mcp.list_tools()}
@@ -814,7 +829,10 @@ class SkillToolBindingTests(unittest.IsolatedAsyncioTestCase):
         )
         self.assertIn("| 风险信号 | 公开统计 | 拜访核验方向 |", report_template)
         self.assertIn("{{#if D.has_industry_risk}}", report_template)
-        self.assertIn("水滴 MCP（{{D.source_dimensions.industry}}）", report_template)
+        self.assertIn(
+            "水滴征信 MCP（{{D.source_dimensions.industry}}）",
+            report_template,
+        )
 
         self.assertIn("不得把数量变化解释为市场规模", skill_text)
         self.assertIn("禁止改写为“行业领先”“头部企业”“龙头企业”", skill_text)

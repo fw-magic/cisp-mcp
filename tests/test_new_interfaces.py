@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import inspect
+import json
 import unittest
 from typing import Any, get_args, get_type_hints
 from unittest.mock import patch
@@ -773,6 +775,154 @@ class NewInterfaceToolTests(unittest.IsolatedAsyncioTestCase):
         )
         self.assertEqual(len(array_schema["items"]["enum"]), 33)
 
+    async def test_p0010059_metadata_has_only_input_schema(self) -> None:
+        tools = await server.mcp.list_tools()
+        tool = next(
+            item
+            for item in tools
+            if item.name == "p0010059_query_business_basic_brief"
+        )
+
+        input_properties = tool.inputSchema["properties"]
+        self.assertEqual(
+            set(input_properties),
+            {
+                "ent_name",
+                "credit_code",
+                "reg_no",
+                "org_code",
+                "types",
+                "extra_params",
+            },
+        )
+        for parameter_name, parameter_schema in input_properties.items():
+            with self.subTest(parameter_name=parameter_name):
+                self.assertTrue(parameter_schema.get("description"))
+
+        self.assertIn("严格四选一", input_properties["ent_name"]["description"])
+        self.assertIn(
+            "companyCancelEasy=简易注销公告",
+            input_properties["types"]["description"],
+        )
+        self.assertIn("camelCase", input_properties["extra_params"]["description"])
+
+        self.assertIsNone(tool.outputSchema)
+
+        description = tool.description or ""
+        self.assertIn("summary", description)
+        self.assertIn("中文", description)
+        self.assertIn("structured_data", description)
+        self.assertIn("不是工具原始 JSON 中新增的顶层字段", description)
+        self.assertIn("raw_response", description)
+        self.assertIn("data.caseRandomCheckList[].detail[]", description)
+        self.assertIn(
+            "data.companyIprList[].companyIprChange[]",
+            description,
+        )
+        self.assertIn(
+            "data.companyCancelEasyList[].companyCancelEasyObjections[]",
+            description,
+        )
+        self.assertIn("标注为万元", description)
+        self.assertIn("不得自行乘以 100", description)
+        self.assertIn("YYYY-MM-DD", description)
+
+        expected_data_paths = {
+            "data.basicList[]",
+            "data.personList[]",
+            "data.shareholderList[]",
+            "data.originalShareholderList[]",
+            "data.alterList[]",
+            "data.filiationList[]",
+            "data.exceptionList[]",
+            "data.liquidationList[]",
+            "data.mortAltList[]",
+            "data.mortDetailList[]",
+            "data.mortCanList[]",
+            "data.mortPriClaSec[]",
+            "data.mortguaInfoList[]",
+            "data.mortOrgList[]",
+            "data.mortRegList[]",
+            "data.sharFrozList[]",
+            "data.sharePledgList[]",
+            "data.sharePledgAltList[]",
+            "data.sharePledgCanList[]",
+            "data.changeRecordsList[]",
+            "data.changeStockRightsList[]",
+            "data.basicInformationList[]",
+            "data.provideGuaranteeList[]",
+            "data.foreignInvestmentList[]",
+            "data.yearReportPaidUpCapitalList[]",
+            "data.socialInsuranceList[]",
+            "data.yearReportSubCapitals[]",
+            "data.websiteOrOnlineList[]",
+            "data.illegalList[]",
+            "data.caseCheckList[]",
+            "data.caseRandomCheckList[]",
+            "data.companyIprList[]",
+            "data.companyCancelEasyList[]",
+        }
+        for data_path in expected_data_paths:
+            with self.subTest(data_path=data_path):
+                self.assertIn(data_path, description)
+
+    async def test_p0010059_unstructured_output_preserves_payload_shape(self) -> None:
+        payload = {
+            "product_code": "P0010059",
+            "interface_name": "企业工商基本信息查询（简项）",
+            "success": True,
+            "has_result": True,
+            "result_code": "00000",
+            "result_code_desc": "查询成功",
+            "result_desc": "成功",
+            "product_status": "4",
+            "product_status_desc": "查询成功有结果",
+            "order_no": None,
+            "packet_count": 1,
+            "is_compressed": 0,
+            "data": {
+                "caseRandomCheckList": [
+                    {
+                        "no": 1,
+                        "detail": [
+                            {
+                                "checkItem": "企业投资项目监督检查",
+                                "checkResult": None,
+                            }
+                        ],
+                        "unknownNested": {"source": "upstream"},
+                    }
+                ],
+                "unknownBlock": [{"value": 1}],
+            },
+            "raw_response": {"custom": None},
+        }
+
+        class StaticResponseClient:
+            async def query_product(
+                self,
+                prod_code: str,
+                params: dict[str, Any],
+            ) -> dict[str, Any]:
+                return payload
+
+        with patch.object(server, "get_client", return_value=StaticResponseClient()):
+            content = await server.mcp.call_tool(
+                "p0010059_query_business_basic_brief",
+                {"ent_name": "测试企业", "types": ["caseRandomCheck"]},
+            )
+
+        self.assertEqual(len(content), 1)
+        unstructured_output = json.loads(content[0].text)
+        self.assertEqual(unstructured_output, payload)
+        self.assertIsNone(unstructured_output["order_no"])
+        self.assertIsInstance(
+            unstructured_output["data"]["caseRandomCheckList"][0]["no"],
+            int,
+        )
+        self.assertNotIn("basicList", unstructured_output)
+        self.assertNotIn("mortOrgList", unstructured_output["data"])
+
     async def test_p0980006_maps_filters_defaults_and_extra_overrides(self) -> None:
         result = await server.p0980006_query_advanced_company_filter(
             eid="1911000001000013428",
@@ -873,6 +1023,87 @@ class NewInterfaceToolTests(unittest.IsolatedAsyncioTestCase):
                 ),
             ],
         )
+
+    async def test_all_tool_descriptions_come_from_function_docstrings(self) -> None:
+        tool_functions = {
+            "p0010010_query_business_profile": server.p0010010_query_business_profile,
+            "p0010058_query_business_basic_deep": (
+                server.p0010058_query_business_basic_deep
+            ),
+            "p0010059_query_business_basic_brief": (
+                server.p0010059_query_business_basic_brief
+            ),
+            "p0010068_fuzzy_search_company_name": (
+                server.p0010068_fuzzy_search_company_name
+            ),
+            "p0010073_query_trademark_info": server.p0010073_query_trademark_info,
+            "p0010074_query_software_copyright_info": (
+                server.p0010074_query_software_copyright_info
+            ),
+            "p0010075_query_work_copyright_info": (
+                server.p0010075_query_work_copyright_info
+            ),
+            "p0010076_query_icp_filing_info": server.p0010076_query_icp_filing_info,
+            "p0010078_query_patent_info": server.p0010078_query_patent_info,
+            "p0010084_query_license_info": server.p0010084_query_license_info,
+            "p0020021_query_single_point_related_info": (
+                server.p0020021_query_single_point_related_info
+            ),
+            "p0050007_query_public_opinion_list": (
+                server.p0050007_query_public_opinion_list
+            ),
+            "p0050008_query_public_opinion_detail": (
+                server.p0050008_query_public_opinion_detail
+            ),
+            "p0050007_p0050008_query_public_opinion_info": (
+                server.p0050007_p0050008_query_public_opinion_info
+            ),
+            "p0060007_verify_business_two_elements": (
+                server.p0060007_verify_business_two_elements
+            ),
+            "p0060008_verify_business_three_elements": (
+                server.p0060008_verify_business_three_elements
+            ),
+            "p0110003_query_honor_qualification_info": (
+                server.p0110003_query_honor_qualification_info
+            ),
+            "p0130025_query_company_key_indicators": (
+                server.p0130025_query_company_key_indicators
+            ),
+            "p0130036_query_land_info": server.p0130036_query_land_info,
+            "p0130038_query_industry_analysis": (
+                server.p0130038_query_industry_analysis
+            ),
+            "p0210004_query_listed_company_financial_data": (
+                server.p0210004_query_listed_company_financial_data
+            ),
+            "p0980006_query_advanced_company_filter": (
+                server.p0980006_query_advanced_company_filter
+            ),
+            "p0980008_query_tax_rating": server.p0980008_query_tax_rating,
+            "p0980023_query_two_year_risk_summary": (
+                server.p0980023_query_two_year_risk_summary
+            ),
+            "p0980033_query_listing_financing_bidding_ipr": (
+                server.p0980033_query_listing_financing_bidding_ipr
+            ),
+            "p0990022_query_supplier_relationships": (
+                server.p0990022_query_supplier_relationships
+            ),
+            "query_cisp_product": server.query_cisp_product,
+        }
+        tools = {
+            tool.name: tool
+            for tool in await server.mcp.list_tools()
+        }
+
+        self.assertEqual(set(tools), set(tool_functions))
+        for tool_name, tool_function in tool_functions.items():
+            with self.subTest(tool_name=tool_name):
+                self.assertEqual(
+                    (tools[tool_name].description or "").rstrip(),
+                    inspect.getdoc(tool_function),
+                )
 
     async def test_mcp_lists_all_twenty_seven_tools(self) -> None:
         tools = await server.mcp.list_tools()
