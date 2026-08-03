@@ -27,6 +27,7 @@ EXPECTED_TOOLS = {
     "p0020014_query_suspected_relationships",
     "p0020019_query_suspected_controller",
     "p0020021_query_single_point_related_info",
+    "p0020023_query_equity_penetration",
     "p0020031_query_multi_point_relationships",
     "p0020044_query_intercompany_relationship",
     "p0020129_query_controller_and_ubo",

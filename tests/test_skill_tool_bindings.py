@@ -853,16 +853,17 @@ class SkillToolBindingTests(unittest.IsolatedAsyncioTestCase):
             skill_text,
         )
 
-    def test_skill_targets_current_thirty_three_tool_server(self) -> None:
+    def test_skill_targets_current_thirty_four_tool_server(self) -> None:
         skill_text = SKILL_PATH.read_text(encoding="utf-8")
-        self.assertIn("当前 33 工具版本", skill_text)
+        self.assertIn("当前 34 工具版本", skill_text)
         self.assertIn("**SKILL 版本**：v2.7", skill_text)
 
 
 class EquityStructureSkillTests(unittest.TestCase):
-    def test_skill_binds_all_six_new_equity_tools(self) -> None:
+    def test_skill_binds_all_seven_core_equity_tools(self) -> None:
         skill_text = EQUITY_SKILL_PATH.read_text(encoding="utf-8")
         for tool_name in (
+            "p0020023_query_equity_penetration",
             "p0020129_query_controller_and_ubo",
             "p0090011_query_ubo_full_paths",
             "p0020044_query_intercompany_relationship",
@@ -883,10 +884,47 @@ class EquityStructureSkillTests(unittest.TestCase):
             "`suspectList[].sus.<type>`",
             "`suspectList[].<type>[]`",
             'depth="2", relation_type="2"',
+            'level="1", ratio="5"',
             'final_flag="1"',
         ):
             with self.subTest(expected_rule=expected_rule):
                 self.assertIn(expected_rule, skill_text)
+
+    def test_skill_uses_chinese_due_diligence_wording(self) -> None:
+        skill_text = EQUITY_SKILL_PATH.read_text(encoding="utf-8")
+        self.assertIn("投资尽职调查", skill_text)
+        self.assertIn("待补证事项与尽调建议", skill_text)
+        self.assertNotRegex(skill_text, r"(?<![A-Za-z])DD(?![A-Za-z])")
+        self.assertIn("最多 5 层", skill_text)
+        self.assertNotIn("默认最大 6 层", skill_text)
+
+    def test_report_header_omits_penetration_scope(self) -> None:
+        skill_text = EQUITY_SKILL_PATH.read_text(encoding="utf-8")
+        self.assertIn("### 报告头部", skill_text)
+        self.assertIn("不得出现“穿透范围：”字段", skill_text)
+        self.assertIn("报告标题下方只展示以下四项", skill_text)
+        self.assertIn("**主体与数据基准**", skill_text)
+        self.assertNotIn("**范围与基准**", skill_text)
+
+    def test_control_path_tables_omit_status_column(self) -> None:
+        skill_text = EQUITY_SKILL_PATH.read_text(encoding="utf-8")
+        path_table = skill_text.split("### 关键控制路径表", 1)[1]
+        path_table = path_table.split("### 控制权核验表", 1)[0]
+        self.assertIn("都不得设置“状态”列", path_table)
+        self.assertIn("证据性质合并到“证据”列", path_table)
+        self.assertNotIn("| 状态 |", path_table)
+        self.assertNotIn("| 事实/计算 |", path_table)
+
+    def test_report_omits_evidence_index_chapter(self) -> None:
+        skill_text = EQUITY_SKILL_PATH.read_text(encoding="utf-8")
+        narrative = skill_text.split("### 叙述逻辑", 1)[1]
+        narrative = narrative.split("### 报告头部", 1)[0]
+        self.assertIn("最终报告到第八章结束", narrative)
+        self.assertIn("不得生成“证据索引”章节", narrative)
+        self.assertNotIn("9. **证据索引**", narrative)
+        self.assertNotIn("### 证据索引", skill_text)
+        self.assertIn("### 内部证据工作底稿（不进入报告）", skill_text)
+        self.assertIn("不得进入最终报告、附录或聊天交付", skill_text)
 
     def test_skill_records_real_validation_and_upstream_failure(self) -> None:
         skill_text = EQUITY_SKILL_PATH.read_text(encoding="utf-8")

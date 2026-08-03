@@ -148,7 +148,7 @@ Discovered MCP tools:
 - p0010058_query_business_basic_deep
 ...
 - query_cisp_product
-Total: 33
+Total: 34
 Smoke test passed.
 ```
 
@@ -207,6 +207,7 @@ Authorization: Bearer <测试用CISP_API_KEY>
 | `P0020014` | 企业疑似关系信息查询 | `p0020014_query_suspected_relationships` |
 | `P0020019` | 企业疑似实际控制人信息查询 | `p0020019_query_suspected_controller` |
 | `P0020021` | 企业单点关联信息查询 | `p0020021_query_single_point_related_info` |
+| `P0020023` | 企业股权穿透信息查询 | `p0020023_query_equity_penetration` |
 | `P0020031` | 企业多点关联信息查询 | `p0020031_query_multi_point_relationships` |
 | `P0020044` | 企业间关联关系查询 | `p0020044_query_intercompany_relationship` |
 | `P0020129` | 企业实控人和最终受益人查询 | `p0020129_query_controller_and_ubo` |

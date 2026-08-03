@@ -91,6 +91,7 @@ class NewInterfaceMetadataTests(unittest.TestCase):
         expected = {
             "P0020014": ("P0020014Status", "P0020014Data", "suspectList"),
             "P0020019": ("P0020019Status", "P0020019Data", "controlNodeList"),
+            "P0020023": ("P0020023Status", "P0020023Data", "upList"),
             "P0020031": ("P0020031Status", "P0020031Data", "nodes"),
             "P0020044": ("P0020044Status", "P0020044Data", "relationship"),
             "P0020129": ("P0020129Status", "P0020129Data", "dataList"),
@@ -109,6 +110,7 @@ class NewInterfaceMetadataTests(unittest.TestCase):
         for product_code in (
             "P0020014",
             "P0020019",
+            "P0020023",
             "P0020031",
             "P0020044",
             "P0020129",
@@ -138,6 +140,63 @@ class NewInterfaceMetadataTests(unittest.TestCase):
                     normalized[interface.shortcut_field],
                     shortcut_value,
                 )
+
+    def test_p0020023_preserves_both_recursive_trees(self) -> None:
+        interface = interfaces.INTERFACES["P0020023"]
+        up_list = [
+            {
+                "grade": "1",
+                "name": "自然人股东",
+                "type": "0",
+                "fundedRatio": "60.00",
+                "hasNextNode": "0",
+                "count": "0",
+                "nodeList": [],
+            }
+        ]
+        down_list = [
+            {
+                "grade": "1",
+                "name": "一级子公司",
+                "type": "1",
+                "fundedRatio": "100.00",
+                "hasNextNode": "1",
+                "count": "1",
+                "nodeList": [
+                    {
+                        "grade": "2",
+                        "name": "二级子公司",
+                        "type": "1",
+                        "fundedRatio": "80.00",
+                        "hasNextNode": "0",
+                        "count": "0",
+                        "nodeList": [],
+                    }
+                ],
+            }
+        ]
+        raw_response = {
+            "resultCode": "00000",
+            "resultData": {
+                "P0020023Status": "4",
+                "P0020023Data": {
+                    "upList": up_list,
+                    "downList": down_list,
+                },
+            },
+        }
+
+        normalized = client_module.normalize_interface_response(
+            raw_response,
+            interface,
+        )
+
+        self.assertEqual(normalized["upList"], up_list)
+        self.assertEqual(normalized["data"]["downList"], down_list)
+        self.assertEqual(
+            normalized["data"]["downList"][0]["nodeList"][0]["grade"],
+            "2",
+        )
 
     def test_p0110003_metadata(self) -> None:
         self.assertIn("P0110003", interfaces.INTERFACES)
@@ -413,6 +472,42 @@ class NewInterfaceToolTests(unittest.IsolatedAsyncioTestCase):
             ],
         )
 
+    async def test_p0020023_maps_penetration_defaults_and_filters(self) -> None:
+        default_result = await server.p0020023_query_equity_penetration(
+            ent_info="阳光电源股份有限公司",
+        )
+        filtered_result = await server.p0020023_query_equity_penetration(
+            ent_info="913401001492097421",
+            level="5",
+            ratio="30.5",
+            extra_params={"customParam": "custom-value"},
+        )
+
+        self.assertEqual(
+            self.client.calls,
+            [
+                (
+                    "P0020023",
+                    {
+                        "entInfo": "阳光电源股份有限公司",
+                        "level": "3",
+                        "ratio": "5",
+                    },
+                ),
+                (
+                    "P0020023",
+                    {
+                        "entInfo": "913401001492097421",
+                        "level": "5",
+                        "ratio": "30.5",
+                        "customParam": "custom-value",
+                    },
+                ),
+            ],
+        )
+        self.assertEqual(default_result["prod_code"], "P0020023")
+        self.assertEqual(filtered_result["prod_code"], "P0020023")
+
     async def test_relationship_tools_normalize_lists_and_defaults(self) -> None:
         await server.p0020044_query_intercompany_relationship(
             ent_info=[" 企业甲 ", "企业乙"],
@@ -507,6 +602,7 @@ class NewInterfaceToolTests(unittest.IsolatedAsyncioTestCase):
         tool_names = (
             "p0020014_query_suspected_relationships",
             "p0020019_query_suspected_controller",
+            "p0020023_query_equity_penetration",
             "p0020031_query_multi_point_relationships",
             "p0020044_query_intercompany_relationship",
             "p0020129_query_controller_and_ubo",
@@ -528,6 +624,7 @@ class NewInterfaceToolTests(unittest.IsolatedAsyncioTestCase):
         for tool_name, identifier_name in (
             ("p0020014_query_suspected_relationships", "ent_info"),
             ("p0020019_query_suspected_controller", "ent_info"),
+            ("p0020023_query_equity_penetration", "ent_info"),
             ("p0020129_query_controller_and_ubo", "ent_info"),
             ("p0090011_query_ubo_full_paths", "ent_name"),
         ):
@@ -561,6 +658,18 @@ class NewInterfaceToolTests(unittest.IsolatedAsyncioTestCase):
         self.assertIn("任职企业全称-姓名", multi_schema["person_names"]["description"])
         self.assertIn("建议先用 2", multi_schema["depth"]["description"])
 
+        penetration_schema = tools[
+            "p0020023_query_equity_penetration"
+        ].inputSchema["properties"]
+        self.assertEqual(
+            penetration_schema["level"]["enum"],
+            list(get_args(server.P0020023Level)),
+        )
+        self.assertEqual(penetration_schema["level"]["default"], "3")
+        self.assertEqual(penetration_schema["ratio"]["default"], "5")
+        self.assertIn("0 至 100", penetration_schema["ratio"]["description"])
+        self.assertIn("pattern", penetration_schema["ratio"])
+
     async def test_equity_tools_reject_core_extra_param_overrides(self) -> None:
         calls = (
             server.p0020014_query_suspected_relationships(
@@ -570,6 +679,10 @@ class NewInterfaceToolTests(unittest.IsolatedAsyncioTestCase):
             server.p0020019_query_suspected_controller(
                 "测试企业",
                 extra_params={"finalFlag": "1"},
+            ),
+            server.p0020023_query_equity_penetration(
+                "测试企业",
+                extra_params={"level": "1"},
             ),
             server.p0020031_query_multi_point_relationships(
                 ent_info="测试企业",
@@ -608,6 +721,14 @@ class NewInterfaceToolTests(unittest.IsolatedAsyncioTestCase):
             (
                 "p0020044_query_intercompany_relationship",
                 {"ent_info": ["企业甲"], "depth": "0"},
+            ),
+            (
+                "p0020023_query_equity_penetration",
+                {"ent_info": "测试企业", "level": "6"},
+            ),
+            (
+                "p0020023_query_equity_penetration",
+                {"ent_info": "测试企业", "ratio": "100.01"},
             ),
         )
 
@@ -1351,6 +1472,9 @@ class NewInterfaceToolTests(unittest.IsolatedAsyncioTestCase):
             "p0020021_query_single_point_related_info": (
                 server.p0020021_query_single_point_related_info
             ),
+            "p0020023_query_equity_penetration": (
+                server.p0020023_query_equity_penetration
+            ),
             "p0020031_query_multi_point_relationships": (
                 server.p0020031_query_multi_point_relationships
             ),
@@ -1417,16 +1541,17 @@ class NewInterfaceToolTests(unittest.IsolatedAsyncioTestCase):
                     inspect.getdoc(tool_function),
                 )
 
-    async def test_mcp_lists_all_thirty_three_tools(self) -> None:
+    async def test_mcp_lists_all_thirty_four_tools(self) -> None:
         tools = await server.mcp.list_tools()
         names = {tool.name for tool in tools}
 
-        self.assertEqual(len(names), 33)
+        self.assertEqual(len(names), 34)
         self.assertTrue(
             {
                 "p0010059_query_business_basic_brief",
                 "p0020014_query_suspected_relationships",
                 "p0020019_query_suspected_controller",
+                "p0020023_query_equity_penetration",
                 "p0020031_query_multi_point_relationships",
                 "p0020044_query_intercompany_relationship",
                 "p0020129_query_controller_and_ubo",

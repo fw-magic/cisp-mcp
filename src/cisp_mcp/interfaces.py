@@ -118,6 +118,14 @@ INTERFACES = {
         data_field="P0020021Data",
         shortcut_field="entInvList",
     ),
+    "P0020023": CispInterface(
+        product_code="P0020023",
+        name="企业股权穿透信息查询",
+        description="根据企业名称或统一社会信用代码查询向上股东和向下对外投资的递归股权穿透结构。",
+        status_field="P0020023Status",
+        data_field="P0020023Data",
+        shortcut_field="upList",
+    ),
     "P0020031": CispInterface(
         product_code="P0020031",
         name="企业多点关联信息查询",
@@ -276,6 +284,7 @@ P0010084 = INTERFACES["P0010084"]
 P0020014 = INTERFACES["P0020014"]
 P0020019 = INTERFACES["P0020019"]
 P0020021 = INTERFACES["P0020021"]
+P0020023 = INTERFACES["P0020023"]
 P0020031 = INTERFACES["P0020031"]
 P0020044 = INTERFACES["P0020044"]
 P0020129 = INTERFACES["P0020129"]

@@ -28,6 +28,7 @@ from .interfaces import (
     P0020014,
     P0020019,
     P0020021,
+    P0020023,
     P0020031,
     P0020044,
     P0020129,
@@ -158,6 +159,14 @@ P0020019FinalFlag = Literal[
     "1",
 ]
 
+P0020023Level = Literal[
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+]
+
 NonBlankString = Annotated[
     str,
     StringConstraints(strip_whitespace=True, min_length=1),
@@ -167,6 +176,14 @@ EnterpriseIdentifier = Annotated[
     NonBlankString,
     Field(
         description="企业全称、统一社会信用代码或工商注册号；不得传空字符串。",
+        examples=["阳光电源股份有限公司", "913401001492097421"],
+    ),
+]
+
+NameOrCreditCodeIdentifier = Annotated[
+    NonBlankString,
+    Field(
+        description="企业全称或统一社会信用代码；不得传空字符串。",
         examples=["阳光电源股份有限公司", "913401001492097421"],
     ),
 ]
@@ -276,6 +293,29 @@ ControllerFinalFlagParameter = Annotated[
             "国资终点；默认 0。"
         ),
         examples=["1"],
+    ),
+]
+
+EquityPenetrationLevelParameter = Annotated[
+    P0020023Level,
+    Field(
+        description="向上股东和向下投资的穿透层级：1 至 5，默认 3。",
+        examples=["3", "5"],
+    ),
+]
+
+EquityRatioThresholdParameter = Annotated[
+    str,
+    StringConstraints(
+        strip_whitespace=True,
+        pattern=r"^(?:100(?:\.0+)?|(?:[0-9]|[1-9][0-9])(?:\.\d+)?)$",
+    ),
+    Field(
+        description=(
+            "持股比例过滤阈值，使用 0 至 100 的数字字符串且不带百分号；按产品文档，"
+            "只返回持股比例大于等于该值的企业股东节点，默认 5。"
+        ),
+        examples=["5", "0", "30.5"],
     ),
 ]
 
@@ -807,6 +847,43 @@ async def p0020021_query_single_point_related_info(
                 "relationDirection": relation_direction,
             },
             extra_params,
+        ),
+    )
+
+
+@mcp.tool()
+async def p0020023_query_equity_penetration(
+    ent_info: NameOrCreditCodeIdentifier,
+    level: EquityPenetrationLevelParameter = "3",
+    ratio: EquityRatioThresholdParameter = "5",
+    extra_params: AdvancedExtraParams = None,
+) -> dict[str, Any]:
+    """企业股权穿透信息查询。
+
+    根据企业全称或统一社会信用代码，同时查询向上股东和向下对外投资的递归结构。
+    level 为穿透层级，允许 1 至 5，默认 3；ratio 为 0 至 100 的持股比例阈值，
+    使用不带百分号的数字字符串，默认 5。按产品文档，底层产品只返回达到阈值的
+    企业股东节点。
+
+    data.upList[] 是向上股东树：节点 fundedRatio 表示该节点对其下一级企业的持股；
+    data.downList[] 是向下投资树：节点 fundedRatio 表示其上一级企业对该节点的持股。
+    两棵树都通过 nodeList[] 递归，grade 从与目标企业直接相邻的第 1 层开始。
+    hasNextNode 为 1/0，count 为子节点数量，type 为 0=自然人、1=非自然人。
+    文档把部分字段标为 number，但接口样例实际返回字符串；解析时应兼容两种类型。
+    目标企业本身不在 upList/downList 中，生成图时需以本次 ent_info 对应的已核验主体
+    作为根节点。比例阈值会隐藏低于阈值的节点，不能把未返回节点解释为不存在。
+    """
+    client = get_client()
+    return await client.query_product(
+        prod_code=P0020023.product_code,
+        params=with_guarded_extra_params(
+            {
+                "entInfo": ent_info,
+                "level": level,
+                "ratio": ratio,
+            },
+            extra_params,
+            ("entInfo", "level", "ratio"),
         ),
     )
 
