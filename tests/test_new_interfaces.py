@@ -6,6 +6,8 @@ import unittest
 from typing import Any, get_args, get_type_hints
 from unittest.mock import patch
 
+from mcp.server.fastmcp.exceptions import ToolError
+
 from cisp_mcp import client as client_module
 from cisp_mcp import interfaces, server
 
@@ -84,6 +86,58 @@ class NewInterfaceMetadataTests(unittest.TestCase):
         self.assertEqual(interface.status_field, "P0020021Status")
         self.assertEqual(interface.data_field, "P0020021Data")
         self.assertEqual(interface.shortcut_field, "entInvList")
+
+    def test_equity_analysis_product_metadata(self) -> None:
+        expected = {
+            "P0020014": ("P0020014Status", "P0020014Data", "suspectList"),
+            "P0020019": ("P0020019Status", "P0020019Data", "controlNodeList"),
+            "P0020031": ("P0020031Status", "P0020031Data", "nodes"),
+            "P0020044": ("P0020044Status", "P0020044Data", "relationship"),
+            "P0020129": ("P0020129Status", "P0020129Data", "dataList"),
+            "P0090011": ("P0090011Status", "P0090011Data", "MatchInfoList"),
+        }
+
+        for product_code, fields in expected.items():
+            with self.subTest(product_code=product_code):
+                interface = interfaces.INTERFACES[product_code]
+                self.assertEqual(
+                    (interface.status_field, interface.data_field, interface.shortcut_field),
+                    fields,
+                )
+
+    def test_equity_analysis_product_responses_are_normalized(self) -> None:
+        for product_code in (
+            "P0020014",
+            "P0020019",
+            "P0020031",
+            "P0020044",
+            "P0020129",
+            "P0090011",
+        ):
+            with self.subTest(product_code=product_code):
+                interface = interfaces.INTERFACES[product_code]
+                shortcut_value = [{"source": product_code}]
+                raw_response = {
+                    "resultCode": "00000",
+                    "resultData": {
+                        interface.status_field: "4",
+                        interface.data_field: {
+                            interface.shortcut_field: shortcut_value,
+                        },
+                    },
+                }
+
+                normalized = client_module.normalize_interface_response(
+                    raw_response,
+                    interface,
+                )
+
+                self.assertTrue(normalized["success"])
+                self.assertTrue(normalized["has_result"])
+                self.assertEqual(
+                    normalized[interface.shortcut_field],
+                    shortcut_value,
+                )
 
     def test_p0110003_metadata(self) -> None:
         self.assertIn("P0110003", interfaces.INTERFACES)
@@ -321,6 +375,248 @@ class NewInterfaceToolTests(unittest.IsolatedAsyncioTestCase):
 
     def tearDown(self) -> None:
         self.client_patch.stop()
+
+    async def test_equity_conclusion_tools_map_exact_upstream_fields(self) -> None:
+        await server.p0020129_query_controller_and_ubo(
+            ent_info="证通股份有限公司",
+        )
+        await server.p0090011_query_ubo_full_paths(
+            ent_name="911000001000013428",
+        )
+        await server.p0020014_query_suspected_relationships(
+            ent_info="证通股份有限公司",
+            relation_type="emailSus",
+        )
+        await server.p0020019_query_suspected_controller(
+            ent_info="证通股份有限公司",
+            path_type="1",
+            final_flag="1",
+        )
+
+        self.assertEqual(
+            self.client.calls,
+            [
+                ("P0020129", {"entInfo": "证通股份有限公司"}),
+                ("P0090011", {"entName": "911000001000013428"}),
+                (
+                    "P0020014",
+                    {"entInfo": "证通股份有限公司", "type": "emailSus"},
+                ),
+                (
+                    "P0020019",
+                    {
+                        "entInfo": "证通股份有限公司",
+                        "type": "1",
+                        "finalFlag": "1",
+                    },
+                ),
+            ],
+        )
+
+    async def test_relationship_tools_normalize_lists_and_defaults(self) -> None:
+        await server.p0020044_query_intercompany_relationship(
+            ent_info=[" 企业甲 ", "企业乙"],
+        )
+        await server.p0020031_query_multi_point_relationships(
+            ent_info="企业甲， 企业乙",
+            person_names=["企业甲-张三", " 企业乙-李四 "],
+            depth="3",
+            relation_type="2",
+        )
+
+        self.assertEqual(
+            self.client.calls,
+            [
+                (
+                    "P0020044",
+                    {"entInfo": "企业甲,企业乙", "depth": "5", "weight": "0"},
+                ),
+                (
+                    "P0020031",
+                    {
+                        "entInfo": "企业甲,企业乙",
+                        "persName": "企业甲-张三,企业乙-李四",
+                        "depth": "3",
+                        "weight": "2",
+                    },
+                ),
+            ],
+        )
+
+    async def test_relationship_tools_validate_subject_limits(self) -> None:
+        with self.assertRaisesRegex(ValueError, "at most 10"):
+            await server.p0020044_query_intercompany_relationship(
+                ent_info=[f"企业{index}" for index in range(11)],
+            )
+
+        with self.assertRaisesRegex(ValueError, "At least one"):
+            await server.p0020031_query_multi_point_relationships()
+
+        with self.assertRaisesRegex(ValueError, "at most 10"):
+            await server.p0020031_query_multi_point_relationships(
+                ent_info=[f"企业{index}" for index in range(6)],
+                person_names=[f"企业{index}-人员" for index in range(5)],
+            )
+
+        with self.assertRaisesRegex(ValueError, "must not override"):
+            await server.p0020044_query_intercompany_relationship(
+                ent_info="企业甲",
+                extra_params={
+                    "entInfo": [f"覆盖企业{index}" for index in range(11)],
+                },
+            )
+
+        self.assertEqual(self.client.calls, [])
+
+    async def test_equity_tool_schemas_expose_documented_enums(self) -> None:
+        tools = {tool.name: tool for tool in await server.mcp.list_tools()}
+
+        suspected_schema = tools[
+            "p0020014_query_suspected_relationships"
+        ].inputSchema["properties"]["relation_type"]["anyOf"]
+        self.assertEqual(
+            next(item["enum"] for item in suspected_schema if "enum" in item),
+            list(get_args(server.P0020014RelationType)),
+        )
+
+        for tool_name in (
+            "p0020031_query_multi_point_relationships",
+            "p0020044_query_intercompany_relationship",
+        ):
+            with self.subTest(tool_name=tool_name):
+                schema = tools[tool_name].inputSchema["properties"]
+                self.assertEqual(
+                    schema["relation_type"]["enum"],
+                    list(get_args(server.RelationshipWeight)),
+                )
+                self.assertEqual(schema["relation_type"]["default"], "0")
+                self.assertEqual(schema["depth"]["default"], "5")
+
+        controller_schema = tools[
+            "p0020019_query_suspected_controller"
+        ].inputSchema["properties"]
+        self.assertEqual(controller_schema["path_type"]["enum"], ["0", "1"])
+        self.assertEqual(controller_schema["final_flag"]["enum"], ["0", "1"])
+        self.assertIn(
+            "data.MatchInfoList[]",
+            tools["p0090011_query_ubo_full_paths"].description or "",
+        )
+
+    async def test_equity_tool_input_schemas_are_self_describing(self) -> None:
+        tools = {tool.name: tool for tool in await server.mcp.list_tools()}
+        tool_names = (
+            "p0020014_query_suspected_relationships",
+            "p0020019_query_suspected_controller",
+            "p0020031_query_multi_point_relationships",
+            "p0020044_query_intercompany_relationship",
+            "p0020129_query_controller_and_ubo",
+            "p0090011_query_ubo_full_paths",
+        )
+
+        for tool_name in tool_names:
+            with self.subTest(tool_name=tool_name):
+                properties = tools[tool_name].inputSchema["properties"]
+                for parameter_name, parameter_schema in properties.items():
+                    with self.subTest(parameter_name=parameter_name):
+                        self.assertTrue(parameter_schema.get("description"))
+                        self.assertTrue(parameter_schema.get("examples"))
+                self.assertIn(
+                    "不得重复或覆盖",
+                    properties["extra_params"]["description"],
+                )
+
+        for tool_name, identifier_name in (
+            ("p0020014_query_suspected_relationships", "ent_info"),
+            ("p0020019_query_suspected_controller", "ent_info"),
+            ("p0020129_query_controller_and_ubo", "ent_info"),
+            ("p0090011_query_ubo_full_paths", "ent_name"),
+        ):
+            with self.subTest(tool_name=tool_name):
+                tool_schema = tools[tool_name].inputSchema
+                self.assertIn(identifier_name, tool_schema["required"])
+                self.assertEqual(
+                    tool_schema["properties"][identifier_name]["minLength"],
+                    1,
+                )
+
+        intercompany_schema = tools[
+            "p0020044_query_intercompany_relationship"
+        ].inputSchema["properties"]
+        company_array = next(
+            item
+            for item in intercompany_schema["ent_info"]["anyOf"]
+            if item.get("type") == "array"
+        )
+        self.assertEqual(company_array["minItems"], 1)
+        self.assertEqual(company_array["maxItems"], 10)
+        self.assertEqual(company_array["items"]["minLength"], 1)
+        self.assertEqual(intercompany_schema["depth"]["pattern"], r"^[1-9]\d*$")
+        self.assertIn("0=投资和任职", intercompany_schema["relation_type"]["description"])
+
+        multi_schema = tools[
+            "p0020031_query_multi_point_relationships"
+        ].inputSchema["properties"]
+        self.assertIn("至少提供一项", multi_schema["ent_info"]["description"])
+        self.assertIn("合计最多 10", multi_schema["person_names"]["description"])
+        self.assertIn("任职企业全称-姓名", multi_schema["person_names"]["description"])
+        self.assertIn("建议先用 2", multi_schema["depth"]["description"])
+
+    async def test_equity_tools_reject_core_extra_param_overrides(self) -> None:
+        calls = (
+            server.p0020014_query_suspected_relationships(
+                "测试企业",
+                extra_params={"type": "telSus"},
+            ),
+            server.p0020019_query_suspected_controller(
+                "测试企业",
+                extra_params={"finalFlag": "1"},
+            ),
+            server.p0020031_query_multi_point_relationships(
+                ent_info="测试企业",
+                extra_params={"depth": "2"},
+            ),
+            server.p0020044_query_intercompany_relationship(
+                ent_info="测试企业",
+                extra_params={"weight": "2"},
+            ),
+            server.p0020129_query_controller_and_ubo(
+                "测试企业",
+                extra_params={"entInfo": "覆盖企业"},
+            ),
+            server.p0090011_query_ubo_full_paths(
+                "测试企业",
+                extra_params={"entName": "覆盖企业"},
+            ),
+        )
+
+        for call in calls:
+            with self.assertRaisesRegex(ValueError, "must not override"):
+                await call
+
+        self.assertEqual(self.client.calls, [])
+
+    async def test_equity_tool_schemas_reject_invalid_mcp_inputs(self) -> None:
+        invalid_calls = (
+            (
+                "p0020129_query_controller_and_ubo",
+                {"ent_info": ""},
+            ),
+            (
+                "p0020044_query_intercompany_relationship",
+                {"ent_info": [f"企业{index}" for index in range(11)]},
+            ),
+            (
+                "p0020044_query_intercompany_relationship",
+                {"ent_info": ["企业甲"], "depth": "0"},
+            ),
+        )
+
+        for tool_name, arguments in invalid_calls:
+            with self.subTest(tool_name=tool_name, arguments=arguments):
+                with self.assertRaises(ToolError):
+                    await server.mcp.call_tool(tool_name, arguments)
+
+        self.assertEqual(self.client.calls, [])
 
     async def test_p0020021_maps_relation_direction(self) -> None:
         self.assertTrue(
@@ -1046,8 +1342,23 @@ class NewInterfaceToolTests(unittest.IsolatedAsyncioTestCase):
             "p0010076_query_icp_filing_info": server.p0010076_query_icp_filing_info,
             "p0010078_query_patent_info": server.p0010078_query_patent_info,
             "p0010084_query_license_info": server.p0010084_query_license_info,
+            "p0020014_query_suspected_relationships": (
+                server.p0020014_query_suspected_relationships
+            ),
+            "p0020019_query_suspected_controller": (
+                server.p0020019_query_suspected_controller
+            ),
             "p0020021_query_single_point_related_info": (
                 server.p0020021_query_single_point_related_info
+            ),
+            "p0020031_query_multi_point_relationships": (
+                server.p0020031_query_multi_point_relationships
+            ),
+            "p0020044_query_intercompany_relationship": (
+                server.p0020044_query_intercompany_relationship
+            ),
+            "p0020129_query_controller_and_ubo": (
+                server.p0020129_query_controller_and_ubo
             ),
             "p0050007_query_public_opinion_list": (
                 server.p0050007_query_public_opinion_list
@@ -1064,6 +1375,7 @@ class NewInterfaceToolTests(unittest.IsolatedAsyncioTestCase):
             "p0060008_verify_business_three_elements": (
                 server.p0060008_verify_business_three_elements
             ),
+            "p0090011_query_ubo_full_paths": server.p0090011_query_ubo_full_paths,
             "p0110003_query_honor_qualification_info": (
                 server.p0110003_query_honor_qualification_info
             ),
@@ -1105,14 +1417,20 @@ class NewInterfaceToolTests(unittest.IsolatedAsyncioTestCase):
                     inspect.getdoc(tool_function),
                 )
 
-    async def test_mcp_lists_all_twenty_seven_tools(self) -> None:
+    async def test_mcp_lists_all_thirty_three_tools(self) -> None:
         tools = await server.mcp.list_tools()
         names = {tool.name for tool in tools}
 
-        self.assertEqual(len(names), 27)
+        self.assertEqual(len(names), 33)
         self.assertTrue(
             {
                 "p0010059_query_business_basic_brief",
+                "p0020014_query_suspected_relationships",
+                "p0020019_query_suspected_controller",
+                "p0020031_query_multi_point_relationships",
+                "p0020044_query_intercompany_relationship",
+                "p0020129_query_controller_and_ubo",
+                "p0090011_query_ubo_full_paths",
                 "p0130025_query_company_key_indicators",
                 "p0130036_query_land_info",
                 "p0130038_query_industry_analysis",

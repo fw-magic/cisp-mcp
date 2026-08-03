@@ -94,6 +94,22 @@ INTERFACES = {
         data_field="P0010084Data",
         shortcut_field="detailList",
     ),
+    "P0020014": CispInterface(
+        product_code="P0020014",
+        name="企业疑似关系信息查询",
+        description="根据企业名称、统一社会信用代码或注册号查询同电话、同地址、同网站、同邮箱等疑似关联企业。",
+        status_field="P0020014Status",
+        data_field="P0020014Data",
+        shortcut_field="suspectList",
+    ),
+    "P0020019": CispInterface(
+        product_code="P0020019",
+        name="企业疑似实际控制人信息查询",
+        description="根据企业名称、统一社会信用代码或注册号查询疑似实际控制人及其控制路径。",
+        status_field="P0020019Status",
+        data_field="P0020019Data",
+        shortcut_field="controlNodeList",
+    ),
     "P0020021": CispInterface(
         product_code="P0020021",
         name="企业单点关联信息查询",
@@ -101,6 +117,30 @@ INTERFACES = {
         status_field="P0020021Status",
         data_field="P0020021Data",
         shortcut_field="entInvList",
+    ),
+    "P0020031": CispInterface(
+        product_code="P0020031",
+        name="企业多点关联信息查询",
+        description="查询多个企业或自然人之间的投资、任职、担保、诉讼及客户供应商关联网络。",
+        status_field="P0020031Status",
+        data_field="P0020031Data",
+        shortcut_field="nodes",
+    ),
+    "P0020044": CispInterface(
+        product_code="P0020044",
+        name="企业间关联关系查询",
+        description="查询最多十家企业之间的投资和任职关联关系。",
+        status_field="P0020044Status",
+        data_field="P0020044Data",
+        shortcut_field="relationship",
+    ),
+    "P0020129": CispInterface(
+        product_code="P0020129",
+        name="企业实控人和最终受益人查询",
+        description="根据企业名称、统一社会信用代码或注册号查询实际控制人和最终受益人。",
+        status_field="P0020129Status",
+        data_field="P0020129Data",
+        shortcut_field="dataList",
     ),
     "P0050007": CispInterface(
         product_code="P0050007",
@@ -133,6 +173,14 @@ INTERFACES = {
         status_field="P0060008Status",
         data_field="P0060008Data",
         shortcut_field="matchList",
+    ),
+    "P0090011": CispInterface(
+        product_code="P0090011",
+        name="企业最终受益人信息查询-全路径版",
+        description="根据企业名称、统一社会信用代码或注册号查询最终受益人、完整受益路径及低于阈值的穿透路径。",
+        status_field="P0090011Status",
+        data_field="P0090011Data",
+        shortcut_field="MatchInfoList",
     ),
     "P0110003": CispInterface(
         product_code="P0110003",
@@ -225,11 +273,17 @@ P0010075 = INTERFACES["P0010075"]
 P0010076 = INTERFACES["P0010076"]
 P0010078 = INTERFACES["P0010078"]
 P0010084 = INTERFACES["P0010084"]
+P0020014 = INTERFACES["P0020014"]
+P0020019 = INTERFACES["P0020019"]
 P0020021 = INTERFACES["P0020021"]
+P0020031 = INTERFACES["P0020031"]
+P0020044 = INTERFACES["P0020044"]
+P0020129 = INTERFACES["P0020129"]
 P0050007 = INTERFACES["P0050007"]
 P0050008 = INTERFACES["P0050008"]
 P0060007 = INTERFACES["P0060007"]
 P0060008 = INTERFACES["P0060008"]
+P0090011 = INTERFACES["P0090011"]
 P0110003 = INTERFACES["P0110003"]
 P0130025 = INTERFACES["P0130025"]
 P0130036 = INTERFACES["P0130036"]

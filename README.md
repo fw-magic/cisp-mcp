@@ -148,7 +148,7 @@ Discovered MCP tools:
 - p0010058_query_business_basic_deep
 ...
 - query_cisp_product
-Total: 27
+Total: 33
 Smoke test passed.
 ```
 
@@ -204,12 +204,18 @@ Authorization: Bearer <测试用CISP_API_KEY>
 | `P0010076` | 企业 ICP 备案信息查询 | `p0010076_query_icp_filing_info` |
 | `P0010078` | 企业专利信息查询 | `p0010078_query_patent_info` |
 | `P0010084` | 企业许可信息查询 | `p0010084_query_license_info` |
+| `P0020014` | 企业疑似关系信息查询 | `p0020014_query_suspected_relationships` |
+| `P0020019` | 企业疑似实际控制人信息查询 | `p0020019_query_suspected_controller` |
 | `P0020021` | 企业单点关联信息查询 | `p0020021_query_single_point_related_info` |
+| `P0020031` | 企业多点关联信息查询 | `p0020031_query_multi_point_relationships` |
+| `P0020044` | 企业间关联关系查询 | `p0020044_query_intercompany_relationship` |
+| `P0020129` | 企业实控人和最终受益人查询 | `p0020129_query_controller_and_ubo` |
 | `P0050007` | 企业舆情信息列表查询 | `p0050007_query_public_opinion_list` |
 | `P0050008` | 企业舆情信息详情查询 | `p0050008_query_public_opinion_detail` |
 | `P0050007+P0050008` | 企业舆情信息查询（列表+详情） | `p0050007_p0050008_query_public_opinion_info` |
 | `P0060007` | 企业工商二要素验证 | `p0060007_verify_business_two_elements` |
 | `P0060008` | 企业工商三要素验证 | `p0060008_verify_business_three_elements` |
+| `P0090011` | 企业最终受益人信息查询-全路径版 | `p0090011_query_ubo_full_paths` |
 | `P0110003` | 企业荣誉资质信息查询 | `p0110003_query_honor_qualification_info` |
 | `P0130025` | 企业关键指标信息查询 | `p0130025_query_company_key_indicators` |
 | `P0130036` | 企业土地信息查询 | `p0130036_query_land_info` |
@@ -245,7 +251,13 @@ Authorization: Bearer <测试用CISP_API_KEY>
 - `icpList`
 - `patentsList`
 - `detailList`（`P0010084`、`P0130036`）
+- `suspectList`
+- `controlNodeList`
 - `entInvList`
+- `nodes`
+- `relationship`
+- `dataList`
+- `MatchInfoList`
 - `infoList`
 - `infoDetail`
 - `matchList`

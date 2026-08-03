@@ -4,12 +4,13 @@ import argparse
 import hashlib
 import json
 import os
-from typing import Any, Literal
+from typing import Annotated, Any, Literal
 
 from mcp.server.auth.middleware.auth_context import get_access_token
 from mcp.server.auth.provider import AccessToken
 from mcp.server.auth.settings import AuthSettings
 from mcp.server.fastmcp import FastMCP
+from pydantic import Field, StringConstraints
 
 from .client import CispApiClient
 from .config import load_settings
@@ -24,11 +25,17 @@ from .interfaces import (
     P0010076,
     P0010078,
     P0010084,
+    P0020014,
+    P0020019,
     P0020021,
+    P0020031,
+    P0020044,
+    P0020129,
     P0050007,
     P0050008,
     P0060007,
     P0060008,
+    P0090011,
     P0110003,
     P0130025,
     P0130036,
@@ -126,6 +133,163 @@ P0210004FinancialType = Literal[
     "cashflow",
 ]
 
+P0020014RelationType = Literal[
+    "telSus",
+    "contactSus",
+    "registSus",
+    "websiteSus",
+    "emailSus",
+    "domainSus",
+]
+
+RelationshipWeight = Literal[
+    "0",
+    "1",
+    "2",
+]
+
+P0020019PathType = Literal[
+    "0",
+    "1",
+]
+
+P0020019FinalFlag = Literal[
+    "0",
+    "1",
+]
+
+NonBlankString = Annotated[
+    str,
+    StringConstraints(strip_whitespace=True, min_length=1),
+]
+
+EnterpriseIdentifier = Annotated[
+    NonBlankString,
+    Field(
+        description="企业全称、统一社会信用代码或工商注册号；不得传空字符串。",
+        examples=["阳光电源股份有限公司", "913401001492097421"],
+    ),
+]
+
+UboEnterpriseIdentifier = Annotated[
+    NonBlankString,
+    Field(
+        description=(
+            "企业全称、统一社会信用代码或工商注册号；映射到底层 entName 字段，"
+            "不得传空字符串。"
+        ),
+        examples=["招商银行股份有限公司", "9144030010001686XA"],
+    ),
+]
+
+CompanyCollection = Annotated[
+    Annotated[
+        list[NonBlankString],
+        Field(min_length=1, max_length=10),
+    ]
+    | NonBlankString,
+    Field(
+        description=(
+            "企业全称、统一社会信用代码或工商注册号；可传非空字符串、"
+            "中英文逗号分隔字符串或 1 至 10 项的字符串数组。"
+        ),
+        examples=[
+            ["阳光电源股份有限公司", "阳光新能源开发股份有限公司"],
+            "阳光电源股份有限公司,阳光新能源开发股份有限公司",
+        ],
+    ),
+]
+
+OptionalCompanyCollection = Annotated[
+    CompanyCollection | None,
+    Field(
+        description=(
+            "待查询的企业主体；可传非空字符串、中英文逗号分隔字符串或最多 10 项的"
+            "字符串数组。与 person_names 至少提供一项，两者合计最多 10 个主体。"
+        ),
+        examples=[["招商银行股份有限公司", "招商局集团有限公司"]],
+    ),
+]
+
+OptionalPersonCollection = Annotated[
+    Annotated[
+        list[NonBlankString],
+        Field(min_length=1, max_length=10),
+    ]
+    | NonBlankString
+    | None,
+    Field(
+        description=(
+            "待查询的自然人；每项使用“任职企业全称-姓名”格式。可传非空字符串、"
+            "中英文逗号分隔字符串或最多 10 项的字符串数组。与 ent_info 至少提供一项，"
+            "两者合计最多 10 个主体。"
+        ),
+        examples=[["阳光电源股份有限公司-曹仁贤"]],
+    ),
+]
+
+RelationshipDepth = Annotated[
+    str,
+    StringConstraints(strip_whitespace=True, pattern=r"^[1-9]\d*$"),
+    Field(
+        description=(
+            "关系查询深度，使用正整数字符串；默认 5。为控制结果规模，股权分析建议"
+            "先用 2，不足时再逐级增加。"
+        ),
+        examples=["2", "5"],
+    ),
+]
+
+RelationshipWeightParameter = Annotated[
+    RelationshipWeight,
+    Field(
+        description="关系范围：0=投资和任职，1=仅任职，2=仅投资。",
+        examples=["2"],
+    ),
+]
+
+SuspectedRelationshipTypeParameter = Annotated[
+    P0020014RelationType | None,
+    Field(
+        description=(
+            "疑似关系类型：telSus=同电话，contactSus=同年报地址，"
+            "registSus=同注册地址，websiteSus=同网站，emailSus=同邮箱，"
+            "domainSus=同邮箱域名。不传时由底层产品决定返回范围。"
+        ),
+        examples=["contactSus"],
+    ),
+]
+
+ControllerPathTypeParameter = Annotated[
+    P0020019PathType,
+    Field(
+        description="控制路径返回方式：0=完整路径，1=简化路径；默认 0。",
+        examples=["0"],
+    ),
+]
+
+ControllerFinalFlagParameter = Annotated[
+    P0020019FinalFlag,
+    Field(
+        description=(
+            "控制路径穿透方式：0=返回常规企业级控制候选，1=继续穿透到底层自然人或"
+            "国资终点；默认 0。"
+        ),
+        examples=["1"],
+    ),
+]
+
+AdvancedExtraParams = Annotated[
+    dict[str, Any] | None,
+    Field(
+        description=(
+            "仅用于产品文档未暴露的高级 camelCase 参数；不得重复或覆盖本工具已声明的"
+            "核心请求字段。通常保持为空。"
+        ),
+        examples=[{}],
+    ),
+]
+
 
 def read_mcp_port() -> int:
     return int(os.getenv("PORT") or os.getenv("MCP_PORT") or "8000")
@@ -188,6 +352,25 @@ def with_extra_params(params: dict[str, Any], extra_params: dict[str, Any] | Non
     return params
 
 
+def with_guarded_extra_params(
+    params: dict[str, Any],
+    extra_params: dict[str, Any] | None,
+    protected_fields: tuple[str, ...],
+) -> dict[str, Any]:
+    if not extra_params:
+        return params
+
+    conflicts = sorted(set(extra_params).intersection(protected_fields))
+    if conflicts:
+        readable = ", ".join(conflicts)
+        raise ValueError(
+            f"extra_params must not override declared core parameters: {readable}"
+        )
+
+    params.update(extra_params)
+    return params
+
+
 def require_one_of(params: dict[str, Any], names: tuple[str, ...]) -> None:
     for name in names:
         value = params.get(name)
@@ -219,6 +402,19 @@ def normalize_string_list(value: list[str] | None) -> str | None:
         return None
     cleaned = [item.strip() for item in value if item and item.strip()]
     return ",".join(cleaned) or None
+
+
+def normalize_comma_separated(value: list[str] | str | None) -> str | None:
+    if value is None:
+        return None
+    items = value if isinstance(value, list) else value.replace("，", ",").split(",")
+    cleaned = [item.strip() for item in items if item and item.strip()]
+    return ",".join(cleaned) or None
+
+
+def require_at_most_items(value: str | None, maximum: int, parameter: str) -> None:
+    if value and len(value.split(",")) > maximum:
+        raise ValueError(f"{parameter} accepts at most {maximum} comma-separated items")
 
 
 def normalize_public_opinion_ent_name(value: list[str] | str | None) -> str | None:
@@ -522,6 +718,71 @@ async def p0010084_query_license_info(
 
 
 @mcp.tool()
+async def p0020014_query_suspected_relationships(
+    ent_info: EnterpriseIdentifier,
+    relation_type: SuspectedRelationshipTypeParameter = None,
+    extra_params: AdvancedExtraParams = None,
+) -> dict[str, Any]:
+    """企业疑似关系信息查询。
+
+    根据企业名称、统一社会信用代码或注册号查询疑似关联企业。
+    relation_type 可选：telSus=同电话、contactSus=同年报地址、
+    registSus=同注册地址、websiteSus=同网站、emailSus=同邮箱、
+    domainSus=同邮箱域名；不传时由底层产品决定返回范围。
+    结果位于 data.suspectList[]：sus.<关系类型> 是目标企业被匹配的电话、地址、
+    网站、邮箱或域名值；相应同名数组（如 telSus、registSus）是疑似关联候选，
+    relationContent 是关联依据。候选数组可能为空；domainSus 结果量可能很大。
+    这些结果属于关联线索，不应直接表述为已确认的控制或交易关系。
+    """
+    client = get_client()
+    return await client.query_product(
+        prod_code=P0020014.product_code,
+        params=with_guarded_extra_params(
+            {
+                "entInfo": ent_info,
+                "type": relation_type,
+            },
+            extra_params,
+            ("entInfo", "type"),
+        ),
+    )
+
+
+@mcp.tool()
+async def p0020019_query_suspected_controller(
+    ent_info: EnterpriseIdentifier,
+    path_type: ControllerPathTypeParameter = "0",
+    final_flag: ControllerFinalFlagParameter = "0",
+    extra_params: AdvancedExtraParams = None,
+) -> dict[str, Any]:
+    """企业疑似实际控制人信息查询。
+
+    根据企业名称、统一社会信用代码或注册号查询疑似实际控制人和控制路径。
+    path_type：0=完整路径，1=简化路径；final_flag：0=常规结果，
+    1=将路径继续穿透到底层。默认查询完整路径且不强制穿透到底层。
+    data.controlNodeList[] 给出疑似控制节点及间接控制比例 percent；
+    data.linkList[] 给出 startId、endId、direction 和 directPercent；
+    data.rootNodeList[] 与 data.nodeList[] 用于还原路径。实测 direction=-1 时通常需将
+    endId 作为持股方、startId 作为被投企业，且 linkList 可能重复相同边，使用前应
+    结合节点名称校验方向并去重。结论为“疑似”口径，应与工商股东、最终受益人和
+    其他控制权产品交叉验证。
+    """
+    client = get_client()
+    return await client.query_product(
+        prod_code=P0020019.product_code,
+        params=with_guarded_extra_params(
+            {
+                "entInfo": ent_info,
+                "type": path_type,
+                "finalFlag": final_flag,
+            },
+            extra_params,
+            ("entInfo", "type", "finalFlag"),
+        ),
+    )
+
+
+@mcp.tool()
 async def p0020021_query_single_point_related_info(
     ent_info: str,
     relation_direction: Literal["1", "2", "3"],
@@ -546,6 +807,135 @@ async def p0020021_query_single_point_related_info(
                 "relationDirection": relation_direction,
             },
             extra_params,
+        ),
+    )
+
+
+@mcp.tool()
+async def p0020031_query_multi_point_relationships(
+    ent_info: OptionalCompanyCollection = None,
+    person_names: OptionalPersonCollection = None,
+    depth: RelationshipDepth = "5",
+    relation_type: RelationshipWeightParameter = "0",
+    extra_params: AdvancedExtraParams = None,
+) -> dict[str, Any]:
+    """企业多点关联信息查询。
+
+    查询多个企业或自然人之间的关联网络。ent_info 接受企业名称、统一社会信用代码
+    或注册号；person_names 中每个人按“企业名称-姓名”传入。两类输入至少提供一类，
+    合计最多 10 个主体，列表或中英文逗号分隔字符串均可。
+    depth 默认 5；relation_type：0=投资和任职、1=仅任职、2=仅投资。
+    data.nodes[] 是企业/人员节点，data.table[] 按 roadId 组织路径明细，
+    data.relation[] 是关系边；同一条边可能因出现在多条路径中而重复，图上可去重，
+    但路径分析必须保留 roadId。
+    上游 relationType 还可能出现 Gurantee（担保，底层接口原始拼写）、Lawsuit
+    和 Client_Supplier。输出是关系网络线索，不等同于关联交易事实。
+    """
+    params = with_guarded_extra_params(
+        {
+            "entInfo": normalize_comma_separated(ent_info),
+            "persName": normalize_comma_separated(person_names),
+            "depth": depth,
+            "weight": relation_type,
+        },
+        extra_params,
+        ("entInfo", "persName", "depth", "weight"),
+    )
+    params["entInfo"] = normalize_comma_separated(params.get("entInfo"))
+    params["persName"] = normalize_comma_separated(params.get("persName"))
+    require_one_of(params, ("entInfo", "persName"))
+    total_items = sum(
+        len(params[name].split(",")) if params.get(name) else 0
+        for name in ("entInfo", "persName")
+    )
+    if total_items > 10:
+        raise ValueError("entInfo and persName accept at most 10 items in total")
+
+    client = get_client()
+    return await client.query_product(
+        prod_code=P0020031.product_code,
+        params=params,
+    )
+
+
+@mcp.tool()
+async def p0020044_query_intercompany_relationship(
+    ent_info: CompanyCollection,
+    depth: RelationshipDepth = "5",
+    relation_type: RelationshipWeightParameter = "0",
+    extra_params: AdvancedExtraParams = None,
+) -> dict[str, Any]:
+    """企业间关联关系查询。
+
+    查询最多 10 家企业之间的关联关系。ent_info 接受企业名称、统一社会信用代码
+    或注册号，列表或中英文逗号分隔字符串均可；depth 默认 5；
+    relation_type：0=投资和任职、1=仅任职、2=仅投资。
+    data.relationship[] 逐主体给出 haveAnyConnection 和 connections[]；
+    connections[].relations[] 的关系类型包括“股权投资”和“人员任职”。
+    """
+    params = with_guarded_extra_params(
+        {
+            "entInfo": normalize_comma_separated(ent_info),
+            "depth": depth,
+            "weight": relation_type,
+        },
+        extra_params,
+        ("entInfo", "depth", "weight"),
+    )
+    params["entInfo"] = normalize_comma_separated(params.get("entInfo"))
+    require_one_of(params, ("entInfo",))
+    require_at_most_items(params["entInfo"], 10, "entInfo")
+
+    client = get_client()
+    return await client.query_product(
+        prod_code=P0020044.product_code,
+        params=params,
+    )
+
+
+@mcp.tool()
+async def p0020129_query_controller_and_ubo(
+    ent_info: EnterpriseIdentifier,
+    extra_params: AdvancedExtraParams = None,
+) -> dict[str, Any]:
+    """企业实控人和最终受益人查询。
+
+    根据企业名称、统一社会信用代码或注册号查询实际控制人和最终受益人。
+    data.dataList[].controllerList[].controller 是实际控制人直接结论，
+    data.dataList[].finalBefList[].beneficiary 是最终受益人直接结论。
+    本产品返回名称型结论；控制比例、完整路径和计算口径应使用其他股权穿透产品补证。
+    """
+    client = get_client()
+    return await client.query_product(
+        prod_code=P0020129.product_code,
+        params=with_guarded_extra_params(
+            {"entInfo": ent_info},
+            extra_params,
+            ("entInfo",),
+        ),
+    )
+
+
+@mcp.tool()
+async def p0090011_query_ubo_full_paths(
+    ent_name: UboEnterpriseIdentifier,
+    extra_params: AdvancedExtraParams = None,
+) -> dict[str, Any]:
+    """企业最终受益人信息查询-全路径版。
+
+    根据企业名称、统一社会信用代码或注册号查询最终受益人及完整路径。
+    注意底层请求字段是 entName。结果位于 data.MatchInfoList[]（底层接口原始大小写）：
+    lessProcessList[] 是低于 25% 的递归穿透节点；finalList[].equlityProcessList[]
+    是受益路径（equlity 为底层接口原始拼写）；finalList[].finalBefList[] 给出
+    beneficiary、orgName、type、percent 和 title。应保留原始路径与比例，不自行改写口径。
+    """
+    client = get_client()
+    return await client.query_product(
+        prod_code=P0090011.product_code,
+        params=with_guarded_extra_params(
+            {"entName": ent_name},
+            extra_params,
+            ("entName",),
         ),
     )
 

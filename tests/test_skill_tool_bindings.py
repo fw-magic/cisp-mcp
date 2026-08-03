@@ -14,6 +14,14 @@ SKILL_PATH = (
     / "SKILL.md"
 )
 
+EQUITY_SKILL_PATH = (
+    Path(__file__).resolve().parents[1]
+    / ".agents"
+    / "skills"
+    / "股权结构分析"
+    / "SKILL.md"
+)
+
 EXPECTED_BINDINGS = {
     "p0010068_fuzzy_search_company_name": {"ent_name"},
     "p0010058_query_business_basic_deep": {
@@ -845,10 +853,49 @@ class SkillToolBindingTests(unittest.IsolatedAsyncioTestCase):
             skill_text,
         )
 
-    def test_skill_targets_current_twenty_seven_tool_server(self) -> None:
+    def test_skill_targets_current_thirty_three_tool_server(self) -> None:
         skill_text = SKILL_PATH.read_text(encoding="utf-8")
-        self.assertIn("当前 27 工具版本", skill_text)
+        self.assertIn("当前 33 工具版本", skill_text)
         self.assertIn("**SKILL 版本**：v2.7", skill_text)
+
+
+class EquityStructureSkillTests(unittest.TestCase):
+    def test_skill_binds_all_six_new_equity_tools(self) -> None:
+        skill_text = EQUITY_SKILL_PATH.read_text(encoding="utf-8")
+        for tool_name in (
+            "p0020129_query_controller_and_ubo",
+            "p0090011_query_ubo_full_paths",
+            "p0020044_query_intercompany_relationship",
+            "p0020014_query_suspected_relationships",
+            "p0020031_query_multi_point_relationships",
+            "p0020019_query_suspected_controller",
+        ):
+            with self.subTest(tool_name=tool_name):
+                self.assertIn(tool_name, skill_text)
+
+    def test_skill_preserves_real_response_parsing_rules(self) -> None:
+        skill_text = EQUITY_SKILL_PATH.read_text(encoding="utf-8")
+        for expected_rule in (
+            'product_status`：`4`=有结果，`1`=无结果，`3`=产品查询失败',
+            'direction="-1"',
+            "`endId → startId`",
+            "按 `roadId` 和原始顺序还原完整路径",
+            "`suspectList[].sus.<type>`",
+            "`suspectList[].<type>[]`",
+            'depth="2", relation_type="2"',
+            'final_flag="1"',
+        ):
+            with self.subTest(expected_rule=expected_rule):
+                self.assertIn(expected_rule, skill_text)
+
+    def test_skill_records_real_validation_and_upstream_failure(self) -> None:
+        skill_text = EQUITY_SKILL_PATH.read_text(encoding="utf-8")
+        self.assertIn("### 真实接口验证基线", skill_text)
+        self.assertIn("阳光电源股份有限公司", skill_text)
+        self.assertIn("招商银行股份有限公司", skill_text)
+        self.assertIn("名称和信用代码均返回状态 `3`", skill_text)
+        self.assertIn("深度 5、投资+任职产生 14 条 road", skill_text)
+        self.assertIn("`domainSus` 返回 200 个候选", skill_text)
 
 
 if __name__ == "__main__":
