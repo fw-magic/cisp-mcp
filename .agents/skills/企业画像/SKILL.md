@@ -1,18 +1,20 @@
 ---
 name: enterprise-profile
-description: 使用客户 Agent 中连接标识为 cisp-mcp 的水滴征信 MCP 锚定中国企业主体并获取工商、财务、土地、行业、关联关系、知识产权、许可资质、舆情与风险等内部结构化数据，同时使用 AI 网络搜索工具从正规网站补充近 12 个月企业动态、关键转折、企业官网自述、正规外部机构描述、关键决策人公开职业背景、生产基地与厂房设备等有形资产线索、近期公开事件和权威行业背景，以内部事实白名单约束 AI 生成自然的主体描述，并形成“内部主体底座＋外部近期观察＋经营阶段边界＋风险约束＋拜访重点”的核心观点；默认交付 Letter 尺寸 PDF，失败时回退完整 Markdown。适用于对公客户经理访前准备、企业拜访简报、客户全景画像、核心经营数据、产业画像与行业洞察、拜访问题清单、合作前背景了解，以及“企业画像”“生成企业画像”“拜访前帮我了解这家公司”“生成企业画像 PDF”等请求。
+description: 使用客户 Agent 中连接标识为 cisp-mcp 的水滴征信 MCP 锚定中国企业主体并获取工商、股东持股、财务、土地、行业、关联关系、知识产权、许可资质、舆情与风险等内部结构化数据，同时使用 AI 网络搜索工具从正规网站补充近 12 个月企业动态、关键转折、企业官网自述、正规外部机构描述、关键决策人公开职业背景、机构股东公开身份与投资关系说明、生产基地与厂房设备等有形资产线索、近期公开事件和权威行业背景，以内部事实白名单约束 AI 生成自然的主体描述，并形成“内部主体底座＋外部近期观察＋经营阶段边界＋风险约束＋拜访重点”的核心观点和高密度执行摘要；默认交付 Letter 尺寸 PDF，失败时回退完整 Markdown。适用于对公客户经理访前准备、企业拜访简报、客户全景画像、核心经营数据、产业画像与行业洞察、拜访问题清单、合作前背景了解，以及“企业画像”“生成企业画像”“拜访前帮我了解这家公司”“生成企业画像 PDF”等请求。
 ---
 
 > 内部数据与正规网站公开资料融合的企业画像。
 >
-> 面向对公客户经理的访前准备工具。输入企业名称或统一社会信用代码，先通过水滴征信 MCP 锚定主体并获取结构化专业数据，再通过 AI 网络搜索工具从正规网站补充企业动态、关键转折、企业官网自述、正规外部机构描述、关键决策人公开职业背景、生产基地与厂房设备等有形资产线索、近期公开事件和权威行业背景，生成与标准成品一致的紧凑 Letter 版式报告。
+> 面向对公客户经理的访前准备工具。输入企业名称或统一社会信用代码，先通过水滴征信 MCP 锚定主体并获取结构化专业数据，再通过 AI 网络搜索工具从正规网站补充企业动态、关键转折、企业官网自述、正规外部机构描述、关键决策人公开职业背景、机构股东公开身份与投资关系说明、生产基地与厂房设备等有形资产线索、近期公开事件和权威行业背景，生成与标准成品一致的紧凑 Letter 版式报告。
 >
 > 核心能力：
 > - 以内部主体事实为底座，融合关键转折、近期公开动作、经营阶段边界、风险约束和拜访重点，生成可追溯的综合核心观点
+> - 先构建执行摘要证据卡，再分别形成包含具体事实、事件阶段、风险驱动和核验问题的高密度执行摘要
 > - 由规则筛选内部事实白名单，再由 AI 组织自然的企业主体描述，失败时回退确定性文本
 > - 审慎归因企业官网自述和正规外部机构对企业业务定位的描述
 > - 主体工商核验与经营范围事实摘要
 > - 以内部人员名单和职务为锚点，使用正规外部页面补充关键决策人公开职业背景，并以“姓名｜职务｜背景”三列表格展示
+> - 以内部工商直接股东及持股比例为唯一表格底座，按“股东｜持股情况”展示；存在合格一级外部资料时增加“说明”列，补充机构股东身份或公开投资关系
 > - 只保留能够直接证明土地、厂房、生产基地、仓储设施、设备产线或在建工程的有形资产事实，使用内部土地记录与正规外部原始页面形成精简资产表
 > - 上市公司年度核心经营数据；缺少可靠财务资料时提供业务化的信息说明
 > - 基于省级三级行业范围形成行业数量、财务排名、知识产权排名和风险信号洞察
@@ -47,9 +49,9 @@ description: 使用客户 Agent 中连接标识为 cisp-mcp 的水滴征信 MCP 
 ## AI 网络搜索依赖与来源准入
 
 1. 只有内部工商深度成功并确认规范企业全称后，才使用 Agent 可用的 AI 网络搜索与网页浏览工具。该工具必须同时支持搜索结果和打开原始网页；不得把搜索结果页摘要、AI 摘要或未打开的片段作为证据。
-2. 每次生成报告都执行定向网络搜索，默认窗口为报告生成日前 12 个月。使用内部确认的规范企业全称、可信曾用名和内部工商行业名称构造查询，至少覆盖：企业官网简介及业务/产品/项目动态、政府或监管公告、交易所公告、正规机构或媒体对企业的介绍、内部已确认关键决策人的公开职业背景、生产基地/厂房/仓储/设备产线/在建工程等有形资产线索、近期公开事件、政府/统计机构/行业协会/高校/权威研究机构发布的行业背景。无发布日期的企业官网稳定介绍页、管理团队页、人物介绍页或设施介绍页不受 12 个月限制，但必须记录访问日期。
+2. 每次生成报告都执行定向网络搜索，默认窗口为报告生成日前 12 个月。使用内部确认的规范企业全称、可信曾用名和内部工商行业名称构造查询，至少覆盖：企业官网简介及业务/产品/项目动态、政府或监管公告、交易所公告、正规机构或媒体对企业的介绍、内部已确认关键决策人的公开职业背景、内部已确认机构股东的公开身份或投资关系、生产基地/厂房/仓储/设备产线/在建工程等有形资产线索、近期公开事件、政府/统计机构/行业协会/高校/权威研究机构发布的行业背景。无发布日期的企业官网稳定介绍页、管理团队页、人物介绍页、已确认机构股东官方稳定介绍页或设施介绍页不受 12 个月限制，但必须记录访问日期。
 3. 外部来源按以下等级准入：
-   - 一级：政府、监管机构、法院、交易所、统计机构及目标企业官方网站；
+   - 一级：政府、监管机构、法院、交易所、统计机构、目标企业官方网站，以及仅用于股东说明的已确认机构股东官方网站；
    - 二级：具有明确主办单位的正规行业协会、高校和权威研究机构；
    - 三级：具有编辑审核机制的主流媒体。三级来源必须能追溯到原始采访或一级来源；不能追溯时，必须由第二个相互独立的正规来源交叉印证。
 4. 排除百科、问答、论坛、个人博客、自媒体、社交平台、内容农场、商业企业信息聚合页、无原始出处转载、搜索结果页、模型生成内容，以及无法打开正文、无法确认发布主体或 URL 的页面。付费墙或登录墙导致正文不可核验时不得采用。
@@ -69,7 +71,7 @@ description: 使用客户 Agent 中连接标识为 cisp-mcp 的水滴征信 MCP 
 8. 报告正文不得出现工具代码、产品码、JSON 路径、schema、调用失败堆栈、额度或积分信息。
 9. 不输出身份证号、手机号、出生日期、年龄、家庭关系、住址、个人联系方式、个人社交账号、API Key、原始响应或其他非必要个人敏感信息；关键决策人背景只保留与企业拜访相关的公开职业履历、教育背景、专业方向和职责信息。
 10. 企业名称、信用代码、登记状态、成立时间、法定代表人、注册资本、地址、行业归属等标准基本信息仅使用内部数据。营收、利润、资产负债、现金流、员工规模及其他财务经营数值也仅使用内部数据；即使外部网站或年报披露相关值，也不得补填、覆盖或校正内部字段。
-11. 股权、司法执行、土地权利、税务、许可资质、知识产权等现有结构化数量、状态和权属字段继续只使用内部数据。关键决策人的姓名、当前职务、法定代表人身份和展示范围继续只使用内部字段；外部资料只允许补充内部已确认人员的公开职业背景，不得新增人员、覆盖当前职务或推断创始人、实际控制人、最终受益人、决策权限。有形资产允许使用本 Skill 准入的一级外部原始页面补充设施、设备产线或建设项目线索，但不得补填或校正内部土地记录、抵押数量、产权状态、账面价值、评估价值、面积、产能或设备数量。外部监管、法院或媒体页面只能作为“近期公开事件”线索进入核心观点、摘要、风险核验和拜访问句，不得替代内部数量、状态、权属或标准字段。
+11. 股权、司法执行、土地权利、税务、许可资质、知识产权等现有结构化数量、状态和权属字段继续只使用内部数据。股东名称、股东类型、持股比例、认缴出资额、出资币种和出资日期只使用内部工商字段；外部资料只允许补充内部已确认股东的公开身份、与目标企业的公开投资关系或带日期的股权事件说明，不得新增股东、补填或改写持股比例、推断当前持股状态、实际控制人、最终受益人、一致行动关系或控制权。关键决策人的姓名、当前职务、法定代表人身份和展示范围继续只使用内部字段；外部资料只允许补充内部已确认人员的公开职业背景，不得新增人员、覆盖当前职务或推断创始人、实际控制人、最终受益人、决策权限。有形资产允许使用本 Skill 准入的一级外部原始页面补充设施、设备产线或建设项目线索，但不得补填或校正内部土地记录、抵押数量、产权状态、账面价值、评估价值、面积、产能或设备数量。外部监管、法院或媒体页面只能作为“近期公开事件”线索进入核心观点、摘要、风险核验和拜访问句，不得替代内部数量、状态、权属或标准字段。
 12. 不生成市场份额、客户数量、客户渗透率、标杆客户、融资金额、授信、存款、代发、贷款建议或银行产品推荐，除非内部数据直接提供对应事实；上市公司营收、利润、资产负债、现金流和收益率仅按“核心经营数据生成规则”展示内部直接数值和明确报告期，行业财务信息仅按产业画像规则展示内部直接数值、精确排名及实际范围，不扩写经营质量或授信判断。
 13. 大模型可以归纳、压缩和组织本次内部证据及合格 `WEB` 证据，但不得把数据缺口改写成事实，不得把标题或企业官网自述升级为已经独立核验的业务动作。
 14. 未被内部证据或合格外部证据直接支持时，禁止使用“行业领先”“头部企业”“绝对控股”“经营健康”“优质客户”“资本实力强”“建议授信”等判断性表述。
@@ -192,6 +194,7 @@ description: 使用客户 Agent 中连接标识为 cisp-mcp 的水滴征信 MCP 
 | 外部企业动态 | `WEB.sources[]` 中 `scope="company_update"` 的 `source_id`, `site_name`, `title`, `url`, `published_at`, `accessed_at`, `supported_fact`, `subject_match`, `corroboration_status` |
 | 企业官网与外部描述 | `WEB.sources[]` 中 `scope="company_description"` 的对应字段；只保留业务定位、产品服务范围、技术或项目角色等可归因描述，不接受宣传排名和外部标准字段 |
 | 关键决策人公开背景 | `WEB.sources[]` 中 `scope="person_background"` 的对应字段；只用于内部已确认人员的职业履历、教育背景、专业方向和公开职责介绍，不用于确定姓名、当前职务、人员范围或决策权限 |
+| 外部股东说明 | `WEB.sources[]` 中 `scope="shareholder_context"` 的对应字段；只用于内部已确认股东的机构身份、与目标企业的公开投资关系或带日期股权事件，不用于确定股东名单、持股比例或控制关系 |
 | 外部有形资产线索 | `WEB.sources[]` 中 `scope="tangible_asset"` 的对应字段；只保留生产基地、厂房、仓储设施、研发或办公建筑、设备产线及在建工程的直接公开事实，不接收地址、经营范围、门店网络、客户项目或宣传性产能描述 |
 | 外部行业背景 | `WEB.sources[]` 中 `scope="industry_context"` 的对应字段；只能形成定性背景，不提供企业标准字段、行业排名、均值、市场规模或增长率 |
 | 商标总量、代表项 | `TM.brandListMeta.totalCount`, `TM.brandList[].tmName` |
@@ -234,15 +237,18 @@ description: 使用客户 Agent 中连接标识为 cisp-mcp 的水滴征信 MCP 
 内部主体确认后执行，不得提前用搜索结果猜测主体：
 
 1. 将报告生成日向前推 12 个月作为动态搜索窗口，使用规范企业全称分别组合“官网”“公司简介”“关于我们”“企业介绍”“产品”“项目”“业务动态”“机构介绍”“专访”“报道”“重整”“并购”“股权变化”“管理调整”“公告”“处罚”“诉讼”“事故”“整改”等关键词；可信曾用名只用于补充搜索，命中页面仍须核验与当前规范主体的关系。
-2. 先从 `B.personList` 整理最多 8 名展示人员；仅当该列表为空时，使用 `B.basicList[0].legRepName` 形成法定代表人兜底行。再对每名内部已确认人员，以“规范企业全称 + 姓名 + 内部职务”组合“简介”“履历”“简历”“管理团队”“董事”“高管”“任职”“教育背景”“工作经历”“专业背景”“公开演讲”等关键词定向搜索。外部搜索不得自行扩大关键决策人名单。
-3. 人物背景优先采用目标企业官网管理团队或人物介绍页、交易所公告及定期报告、政府或监管机构页面；其次采用正规行业协会、高校、权威研究机构和满足准入要求的主流媒体。人物介绍页可以不受 12 个月窗口限制，但优先采用最新页面；超过 12 个月的内容只能写成带时间的历史教育或职业经历，不得据此认定当前职务。
-4. 使用规范企业全称组合“生产基地”“厂房”“工厂”“产业园”“仓储”“仓库”“研发中心”“办公楼”“设备”“生产线”“在建工程”“项目备案”“环评”“规划许可”“建设进展”等关键词搜索有形资产线索。外部有形资产只接受政府、监管机构、自然资源或规划部门、交易所及目标企业官方网站等一级原始页面；三级媒体、行业协会、招商宣传稿和商业聚合页即使提及资产也不得进入本章节。
-5. 外部资产页面必须直接点名规范企业主体，并明确描述特定设施、设备产线或建设项目。注册地址、联系地址、经营范围、所属行业、分支机构、销售门店、服务网点、客户项目现场、荣誉、订单、融资、产品介绍和一般产能宣传均不构成有形资产证据。企业官网稳定设施介绍页可无发布日期但必须记录访问日期；超过 12 个月的政府、交易所或企业公告只能作为带明确日期的历史建设节点，不得据此表述当前仍持有、在建、已投产或正在使用。
-6. 使用内部工商行业名称组合“政策”“统计”“运行情况”“行业报告”等关键词，优先限定政府、统计机构、正规行业协会、高校和权威研究机构域名。不得使用外部网页重新判定企业行业归属。
-7. 先搜索，再逐页打开候选原始页面，执行来源等级、发布日期、主体匹配、正文事实、URL 和交叉验证检查。人物页面还必须在正文中同时确认人员姓名及其与规范企业全称的关系；资产页面还必须确认资产对象、企业角色和事件时点。仅搜索标题命中、仅同名、只关联曾任其他企业或关系无法确认时排除。合格页面按最终采用顺序分配 `W1`、`W2`……；同一规范 URL 只保留一次。
-8. 外部企业动态可以进入 `D.core_turning_point`、`D.core_external_context`、`D.core_viewpoint`、`D.value_judgment`、`D.opportunities`、`D.visit_advice`、`D.visit_questions` 或近期公开事件证据；合格企业官网自述和正规外部机构描述可以进入 `D.core_company_self_description`、`D.core_external_description` 和 `D.core_viewpoint`；合格人物背景只进入对应 `D.person_rows[].background`、`D.people_interpretation`，或作为已引用背景事实进入拜访问句；合格外部有形资产事实只进入 `D.tangible_asset_rows[]`、`D.assets_interpretation`，或作为已引用资产事实进入拜访问句；外部行业背景只进入 `D.industry_external_context`、相关行业定性解读和拜访问句。一般行业政策、市场趋势和宏观背景不得进入核心观点；只有一级来源明确点名目标企业、其项目或其直接业务动作时，才可按企业事件使用。每个使用位置在 `D.source_attributions` 登记对应 `source_id`。
-9. 企业官网动态使用“企业官网披露”归因；企业官网人物简介使用“企业官网介绍”归因；企业官网设施或设备信息使用“企业官网披露”并保留自述边界。三级媒体采用交叉验证来源时，把全部支持同一事实的 `source_id` 登记到 `EVIDENCE`，不得只保留其中一条。
-10. 网络工具可用且完成搜索但没有合格页面时设 `WEB.status="empty"`；工具不可用、超时或无法打开原始页面时设 `WEB.status="unavailable"`；至少采用一条来源时设 `WEB.status="success"`。搜索失败不改变任何内部维度状态，也不删除内部人员或内部资产记录。
+2. 为执行摘要增加专项搜索：上市公司优先检索交易所公告、定期报告、业绩说明会和投资者关系活动记录；所有企业优先检索重大项目或合同的原始公告及对手方页面、工厂或基地建设进度、产品发布与商业化阶段、担保/质押/回购/股权事件、监管处罚与整改状态。摘要候选页必须打开具体公告、活动记录或事件正文；新闻列表、公告索引、搜索结果和站内栏目首页不能作为摘要的唯一证据。外部财务数值仍不得回填、覆盖或校正内部财务字段，外部原始页面只可提供企业明确披露的事件阶段、最新状态和归因说明。
+3. 先从 `B.personList` 整理最多 8 名展示人员；仅当该列表为空时，使用 `B.basicList[0].legRepName` 形成法定代表人兜底行。再对每名内部已确认人员，以“规范企业全称 + 姓名 + 内部职务”组合“简介”“履历”“简历”“管理团队”“董事”“高管”“任职”“教育背景”“工作经历”“专业背景”“公开演讲”等关键词定向搜索。外部搜索不得自行扩大关键决策人名单。
+4. 人物背景优先采用目标企业官网管理团队或人物介绍页、交易所公告及定期报告、政府或监管机构页面；其次采用正规行业协会、高校、权威研究机构和满足准入要求的主流媒体。人物介绍页可以不受 12 个月窗口限制，但优先采用最新页面；超过 12 个月的内容只能写成带时间的历史教育或职业经历，不得据此认定当前职务。
+5. 从 `B.shareholderList` 整理拟展示的内部直接股东后，仅对其中名称明确的股东定向搜索。机构股东使用“规范企业全称 + 股东全称”组合“股东”“持股”“投资”“增资”“战略投资”“国资”“母公司”“股权变更”“公告”等关键词；自然人股东不单独搜索个人背景，只允许目标企业、政府监管或交易所原始页面直接披露其与目标企业的股权事件。搜索不得新增股东，也不得使用外部页面确定或校正持股比例。
+6. 股东说明只接受政府、国资监管、金融监管、交易所、目标企业官网或已确认机构股东官网等一级原始页面。页面必须同时确认内部股东名称、规范企业全称及二者关系；可提炼机构性质、公开投资角色、目标企业或股东官网披露的隶属/投资关系，以及带明确日期的增资、受让、战略投资或股权变更事件。商业信息聚合页、媒体概括、基金销售页、个人主页和无法追溯的转载固定排除。机构股东官网内容写“股东官网披露”，不得据此证明目标企业当前股东名册或持股比例。
+7. 使用规范企业全称组合“生产基地”“厂房”“工厂”“产业园”“仓储”“仓库”“研发中心”“办公楼”“设备”“生产线”“在建工程”“项目备案”“环评”“规划许可”“建设进展”等关键词搜索有形资产线索。外部有形资产只接受政府、监管机构、自然资源或规划部门、交易所及目标企业官方网站等一级原始页面；三级媒体、行业协会、招商宣传稿和商业聚合页即使提及资产也不得进入本章节。
+8. 外部资产页面必须直接点名规范企业主体，并明确描述特定设施、设备产线或建设项目。注册地址、联系地址、经营范围、所属行业、分支机构、销售门店、服务网点、客户项目现场、荣誉、订单、融资、产品介绍和一般产能宣传均不构成有形资产证据。企业官网稳定设施介绍页可无发布日期但必须记录访问日期；超过 12 个月的政府、交易所或企业公告只能作为带明确日期的历史建设节点，不得据此表述当前仍持有、在建、已投产或正在使用。
+9. 使用内部工商行业名称组合“政策”“统计”“运行情况”“行业报告”等关键词，优先限定政府、统计机构、正规行业协会、高校和权威研究机构域名。不得使用外部网页重新判定企业行业归属。
+10. 先搜索，再逐页打开候选原始页面，执行来源等级、发布日期、主体匹配、正文事实、URL 和交叉验证检查。人物页面还必须在正文中同时确认人员姓名及其与规范企业全称的关系；股东页面必须同时确认内部股东名称、规范企业全称和公开关系；资产页面还必须确认资产对象、企业角色和事件时点。仅搜索标题命中、仅同名、只关联曾任其他企业或关系无法确认时排除。合格页面按最终采用顺序分配 `W1`、`W2`……；同一规范 URL 只保留一次。
+11. 外部企业动态可以进入 `D.core_turning_point`、`D.core_external_context`、`D.core_viewpoint`、`D.summary_evidence`、`D.value_judgment`、`D.opportunities`、`D.risk_summary`、`D.visit_advice`、`D.visit_questions` 或近期公开事件证据；合格企业官网自述和正规外部机构描述可以进入 `D.core_company_self_description`、`D.core_external_description` 和 `D.core_viewpoint`；合格人物背景只进入对应 `D.person_rows[].background`、`D.people_interpretation`，或作为已引用背景事实进入拜访问句；合格股东说明只进入对应 `D.shareholder_rows[].note`、`D.equity_interpretation`，或作为已引用股权事实进入拜访问句；合格外部有形资产事实只进入 `D.tangible_asset_rows[]`、`D.assets_interpretation`，或作为已引用资产事实进入拜访问句；外部行业背景只进入 `D.industry_external_context`、相关行业定性解读和拜访问句。一般行业政策、市场趋势和宏观背景不得进入核心观点或执行摘要；只有一级来源明确点名目标企业、其项目或其直接业务动作时，才可按企业事件使用。每个使用位置在 `D.source_attributions` 登记对应 `source_id`。
+12. 企业官网动态使用“企业官网披露”归因；企业官网人物简介使用“企业官网介绍”归因；企业或股东官网的股东说明分别使用“企业官网披露”或“股东官网披露”；企业官网设施或设备信息使用“企业官网披露”并保留自述边界。重大合同、项目或合作优先用交易所、政府、监管、目标企业或对手方原始页面交叉验证；无法取得第二个原始页面时可保留企业单方披露，但必须明确单方披露边界。三级媒体采用交叉验证来源时，把全部支持同一事实的 `source_id` 登记到 `EVIDENCE`，不得只保留其中一条。
+13. 网络工具可用且完成搜索但没有合格页面时设 `WEB.status="empty"`；工具不可用、超时或无法打开原始页面时设 `WEB.status="unavailable"`；至少采用一条来源时设 `WEB.status="success"`。搜索失败不改变任何内部维度状态，也不删除内部人员、内部股东或内部资产记录。
 
 记录每个维度的状态：
 
@@ -316,7 +322,7 @@ description: 使用客户 Agent 中连接标识为 cisp-mcp 的水滴征信 MCP 
     "sources": [
       {
         "source_id": "W1",
-        "scope": "company_update|company_description|person_background|tangible_asset|industry_context|public_event",
+        "scope": "company_update|company_description|person_background|shareholder_context|tangible_asset|industry_context|public_event",
         "site_name": "发布网站或机构名称",
         "source_level": "一级|二级|三级",
         "source_type": "government|regulator|court|exchange|statistics|company_official|association|university|research_institute|mainstream_media",
@@ -325,8 +331,8 @@ description: 使用客户 Agent 中连接标识为 cisp-mcp 的水滴征信 MCP 
         "published_at": null,
         "accessed_at": "YYYY-MM-DD",
         "supported_fact": "该页面直接支持的最小事实",
-        "applicable_sections": ["core", "summary", "people", "assets"],
-        "subject_match": "exact|verified_alias|person_company_match|asset_company_match|industry_scope",
+        "applicable_sections": ["core", "summary", "people", "equity", "assets"],
+        "subject_match": "exact|verified_alias|person_company_match|shareholder_company_match|asset_company_match|industry_scope",
         "corroboration_status": "primary|traced_to_primary|cross_checked|company_self_disclosure",
         "corroborating_source_ids": []
       }
@@ -372,6 +378,12 @@ description: 使用客户 Agent 中连接标识为 cisp-mcp 的水滴征信 MCP 
     "core_risk_constraint": "最重要的内部风险事实、主体范围、时点状态和必要的外部事件线索",
     "core_visit_focus": "由前述变化、风险和信息缺口形成的 2 至 3 项拜访核验重点",
     "core_viewpoint": "按固定叙事顺序融合内部主体底座和合格外部事实形成的最终核心观点",
+    "summary_evidence": {
+      "value_facts": [{"fact": "改变访前判断的主体、能力或经营事实", "event_date": null, "stage": null, "boundary": null, "evidence_ids": ["internal:<字段或状态>", "external:Wn"]}],
+      "opportunity_events": [{"fact": "近 12 个月具体产品、项目、合同、基地或合作动作", "event_date": "YYYY-MM-DD 或明确报告期", "stage": "来源直接披露的计划、审批、签署、示范、建设、交付、投运或完成等阶段", "boundary": "单方披露、框架协议、尚待交付或其他必要边界", "evidence_ids": ["external:Wn"]}],
+      "risk_drivers": [{"fact": "内部风险命中或企业/监管原始页面直接披露的原因与最新状态", "event_date": "YYYY-MM-DD 或明确报告期", "stage": null, "boundary": "主体、口径、状态和信息限制", "evidence_ids": ["internal:<归一化风险事实>", "external:Wn"]}],
+      "visit_priorities": [{"topic": "需要拜访核验的关键事项", "basis_ids": ["internal:<事实或缺口>", "external:Wn"]}]
+    },
     "value_judgment": "企业定位、可见能力信号和拜访价值的事实归纳",
     "opportunities": "目标企业自身公开事件、有效荣誉、许可或业务范围形成的访谈机会线索",
     "risk_summary": "命中风险维度、数量、范围和数据边界的摘要",
@@ -388,8 +400,15 @@ description: 使用客户 Agent 中连接标识为 cisp-mcp 的水滴征信 MCP 
     ],
     "people_interpretation": null,
     "has_equity_or_network": false,
-    "shareholder_rows": [],
-    "network_summary": null,
+    "has_shareholder_notes": false,
+    "shareholder_rows": [
+      {
+        "name": "内部直接股东名称",
+        "holding_display": "内部持股比例，比例缺失时按规则使用认缴出资信息或固定边界说明",
+        "note": null,
+        "note_source_ids": []
+      }
+    ],
     "equity_interpretation": null,
     "has_assets": false,
     "tangible_asset_rows": [
@@ -456,10 +475,13 @@ description: 使用客户 Agent 中连接标识为 cisp-mcp 的水滴征信 MCP 
     "core_risk_constraint": ["实际进入核心风险约束的 internal:<归一化风险事实> 或 external:Wn"],
     "core_visit_focus": ["支持核验重点的 internal:<事实和数据缺口> 或 external:Wn"],
     "core_viewpoint": ["逐句登记上述核心观点分项实际使用的 internal:<字段或状态> 与 external:Wn"],
+    "summary_evidence": ["逐项登记执行摘要证据卡使用的 internal:<字段、归一化事实或状态> 与 external:Wn；事件同时保留日期、阶段和边界"],
     "coverage_summary": ["internal:META 中各业务维度状态和 web_search_status"],
     "source_attributions": ["逐章节登记实际显示的内部业务维度和 external:Wn；外部 ID 必须存在于 WEB.sources"],
     "person_rows": ["逐行登记姓名和职务对应的 internal:B.personList 或 internal:B.basicList[0].legRepName；背景事实另登记 external:Wn"],
     "people_interpretation": ["实际使用的 internal:<人员字段或资料边界> 与 external:Wn"],
+    "shareholder_rows": ["逐行登记股东名称和持股情况对应的 internal:B.shareholderList 字段；说明事实另登记 external:Wn"],
+    "equity_interpretation": ["实际使用的 internal:B.shareholderList/REL 字段、资料边界与 external:Wn"],
     "tangible_asset_rows": ["逐行登记实际使用的 internal:LAND/B 明确抵押物字段或 external:Wn；不登记行业、经营范围、注册地址和未展示字段"],
     "assets_interpretation": ["实际进入有形或无形资产展示的 internal:<字段和边界> 与 external:Wn"],
     "industry_positioning": ["实际使用的 internal:B.basicList[0] 行业、经营范围和经工商事实交叉验证的 internal:REL 字段"],
@@ -491,14 +513,16 @@ description: 使用客户 Agent 中连接标识为 cisp-mcp 的水滴征信 MCP 
 整理规则：
 
 - `B`、`ID`、`OV_*`、`LAND`、`IND`、`REL`、`FIN_*`、`TM` 至 `OP` 保存对应工具的必要原值；`REL` 必须先删除个人证件号。`WEB` 只保存实际执行的查询和通过来源准入、正文核验且可能进入报告的网页证据；被排除的候选页不得进入 `WEB.sources`。`D` 只保存确定性简述、忠实压缩文案、条件布尔值和固定表格所需的派生展示项。
-- 工商深度成功后，`D.company_overview_facts`、`D.company_overview_fallback`、`D.core_internal_baseline`、`D.core_capability`、`D.core_operating_stage`、`D.core_visit_focus`、`D.core_viewpoint`、`D.value_judgment`、`D.opportunities`、`D.risk_summary`、`D.visit_advice`、`D.basic_interpretation` 和 `D.visit_questions` 为必填；`D.core_company_self_description`、`D.core_external_description`、`D.core_turning_point`、`D.core_external_context`、`D.core_risk_constraint` 有证据时填写，没有证据时保持 `null`。不得因生成困难隐藏“一、核心观点”“二、执行摘要”或需求核验问题。
+- 工商深度成功后，`D.company_overview_facts`、`D.company_overview_fallback`、`D.core_internal_baseline`、`D.core_capability`、`D.core_operating_stage`、`D.core_visit_focus`、`D.core_viewpoint`、`D.summary_evidence`、`D.value_judgment`、`D.opportunities`、`D.risk_summary`、`D.visit_advice`、`D.basic_interpretation` 和 `D.visit_questions` 为必填；其中 `summary_evidence.value_facts` 与 `summary_evidence.visit_priorities` 至少各一项，机会或风险没有合格事实时对应数组允许为空。`D.core_company_self_description`、`D.core_external_description`、`D.core_turning_point`、`D.core_external_context`、`D.core_risk_constraint` 有证据时填写，没有证据时保持 `null`。不得因生成困难隐藏“一、核心观点”“二、执行摘要”或需求核验问题。
 - 完成所有条件板块显隐判断后，按“核心观点 → 执行摘要 → 客户全景画像 → 产业画像与行业洞察（可选）→ 需求识别与拜访核验 → 风险预警与合规提示（可选）”过滤不可见板块，再从“一”开始连续填写 `D.section_numbers`。产业画像显示时依次为“一、二、三、四、五”，风险章节显示时继续为“六”；产业画像隐藏时需求识别仍为“四”，风险章节显示时为“五”。不得跳号、重号或根据历史编号保留空位；“报告使用说明”不编号，小节“（一）～（五）”不参与重编号。
 - `D.has_core_operations` 在工商主体确认后固定为 `true`，用于确保财务数据不足时仍显示业务提示；其他 `D.has_*` 只在对应板块至少存在一项有效内部事实或本 Skill 明确允许的合格外部事实时设为 `true`，不得为了保留版面而设为 `true`。
-- `D.source_attributions.<section>.internal_dimensions[]` 只列实际为该章节提供可见事实的内部业务维度，不得列入 `empty`、`failed`、`not_called` 或未展示维度；`external_source_ids[]` 只列实际进入该章节正文的 `WEB.sources[].source_id`，按首次出现顺序去重。人员表展示时 `people.internal_dimensions[]` 必须包含实际使用的“工商登记（主要人员）”或“工商登记（法定代表人）”。`basic/equity/operations` 的 `external_source_ids[]` 固定为空；`people.external_source_ids[]` 只允许登记实际进入人员背景列或人员信息解读的 `scope="person_background"` 来源，`assets.external_source_ids[]` 只允许登记实际进入有形资产表或资产解读的 `scope="tangible_asset"` 来源，其他外部事实登记到 `core/summary/industry/needs/risk`。核心观点只接收符合“综合核心观点生成规则”的企业级事实。
+- `D.source_attributions.<section>.internal_dimensions[]` 只列实际为该章节提供可见事实的内部业务维度，不得列入 `empty`、`failed`、`not_called` 或未展示维度；该数组只用于内部证据覆盖和判断是否显示内部来源行，不得拼接到报告可见的 MCP 名称后。`external_source_ids[]` 只列实际进入该章节正文的 `WEB.sources[].source_id`，按首次出现顺序去重。人员表展示时 `people.internal_dimensions[]` 必须包含实际使用的“工商登记（主要人员）”或“工商登记（法定代表人）”；股权表展示时 `equity.internal_dimensions[]` 必须包含“工商登记（股东及出资）”。`basic/operations` 的 `external_source_ids[]` 固定为空；`people.external_source_ids[]` 只允许登记实际进入人员背景列或人员信息解读的 `scope="person_background"` 来源，`equity.external_source_ids[]` 只允许登记实际进入股东说明列或股权信息解读的 `scope="shareholder_context"` 来源，`assets.external_source_ids[]` 只允许登记实际进入有形资产表或资产解读的 `scope="tangible_asset"` 来源，其他外部事实登记到 `core/summary/industry/needs/risk`。核心观点只接收符合“综合核心观点生成规则”的企业级事实。
 - 外部事实所在句末必须附 `[外部：Wn]`；同一事实由多个外部来源支持时附全部 ID，例如 `[外部：W2、W3]`。企业官网自述必须在正文中同时出现“企业官网披露”。内部事实不添加行内 ID，通过章节的“内部：”来源行追溯。
 - 基本信息只保留非空字段。展示层的无损格式化仅包括：纯数字整数部分增加千分位；严格匹配 `YYYY-MM-DD` 的日期显示为“YYYY年M月D日”；曾用名中的半角逗号、全角逗号或分号统一为“、”；已知币种代码显示其接口同时返回的中文名称；文档明确为比率的 `IND` 十进制值使用任意精度十进制乘以 100、删除无意义尾零后追加 `%`。必须保留全部有效数字和小数位，不得四舍五入；无法可靠识别时直接显示原值。
 - `D.registered_capital_display` 使用无损格式化后的 `regCap` 与 `regCapCur` 组合为“金额单位（币种）”；接口明确 `regCap` 单位为万元时追加“万元”，不得重复单位。实缴资本同理。
-- 股东最多展示 15 名，整理为 `D.shareholder_rows[] = {name, ratio_display, amount_display}`。比例可解析时仅用于排序；比例、认缴额和币种在展示层只允许上述无损格式化，不可解析时保持接口顺序和原值。
+- 股东表只复用【股权结构分析】的“直接股东基础事实层”，不执行多层穿透、实控人或最终受益人分析：以 `B.shareholderList[]` 为唯一直接股东名单和持股数值来源，最多展示 15 名。比例可解析时按 `fundedRatio` 从高到低排序，比例缺失或不可解析的记录保持接口相对顺序并置后；不得因为缺少比例而删除股东，也不得把最大股东写成实际控制人。
+- 整理为 `D.shareholder_rows[] = {name, holding_display, note, note_source_ids}`。`holding_display` 优先写“持股比例 {fundedRatio}”；同时存在 `subConAmt` 时可追加“；认缴出资 {subConAmt}{subConCur}”。比例缺失但认缴出资有效时只写认缴出资；两者均缺失时固定写“内部资料未列明持股比例”。比例、认缴额和币种只允许无损格式化，不得用认缴额倒算比例、合计比例、补零、舍入或换算。
+- `D.has_equity_or_network=true` 仅在 `D.shareholder_rows` 至少一行时成立；内部股东列表为空或没有有效股东名称时隐藏整个“股权结构与关联关系”小节，不输出空表，也不以关系网络记录单独触发本节。`REL` 只可按既有规则对内部股东关系做交叉核验，不得新增股东、持股数值或关联方名单。
 - 关键决策人最多展示 8 名，先完全按内部字段整理为 `D.person_rows[] = {name, position, is_legal_representative, background, background_source_ids}`。只有 `isFr` 原值明确表示真时，才将布尔字段设为 `true`；`position` 由内部 `position` 与“法定代表人”去重组合，外部网页不得修改；两者均缺失时固定写“内部资料未列明职务”，不得留空。`B.personList` 为空但 `B.basicList[0].legRepName` 非空时，生成一条 `{name: legRepName, position: "法定代表人", is_legal_representative: true, background: "公开资料未形成可核验的职业背景介绍。", background_source_ids: []}` 作为兜底。外部搜索不得新增人员行。
 - 对每条 `D.person_rows`，只从 `scope="person_background"` 且 `subject_match="person_company_match"` 的合格页面提炼与访前准备有关的教育背景、公开职业履历、专业方向、历史任职和页面明确披露的职责介绍；每项外部事实在单元格句末附 `[外部：Wn]`，并把相同 ID 写入该行 `background_source_ids[]`、`EVIDENCE.person_rows` 和 `D.source_attributions.people.external_source_ids[]`。企业官网内容写“企业官网介绍”，其他来源写明发布机构；不得照搬宣传评价。
 - 人物背景优先采用最新、直接、原始页面。外部页面披露的当前职务与内部 `position` 不一致时，职务列仍使用内部值；背景列只可写“{来源}于{日期}曾披露其担任……，与当前内部登记职务存在时间或口径差异，建议核实”并附来源 ID，不得由模型选择或合并。历史任职必须带可核验时间或明确写“曾任”，不得改写为现任。
@@ -515,6 +539,18 @@ description: 使用客户 Agent 中连接标识为 cisp-mcp 的水滴征信 MCP 
 - “产业画像与行业洞察”的企业行业归属、经营范围、排名、均值、比率和其他量化表格只使用本次 `B`、`IND` 和经工商事实交叉验证的 `REL` 证据；允许合格 `WEB` 证据形成定性政策、行业运行背景和访谈方向，但不得用网络搜索、模型知识或参考样稿补充企业标准字段、市场规模、CAGR、竞争格局、上下游名单、交易关系或任何缺失量化值。“与我行合作现状”“（二）产品精准匹配”和“（三）定制化营销方案”仍不进入当前骨架。
 - `D.has_risks=true` 时必须生成 `D.risk_interpretation`；只总结命中事实、范围和需核实事项，不评级、不推演未来损失。
 - 每个非空 `D` 文案字段都必须在 `EVIDENCE` 中登记来源；内部来源写成 `internal:B/ID/OV_*/LAND/IND/REL/FIN_*/TM...OP.<字段或状态>`，外部来源写成 `external:Wn`。任何 `external:Wn` 都必须能在 `WEB.sources` 找到完整元数据并出现在对应章节的 `D.source_attributions.<section>.external_source_ids[]`。
+
+#### 股权结构与关联关系生成规则
+
+1. 本节位于“（二）关键决策人信息”之后，与其同为 `###` 三级标题，固定标题为“（三）股权结构与关联关系”。只展示目标企业第一层内部工商股东，不做多层股权穿透，不生成结构图，不分析实际控制人、最终受益人、一致行动人或控制权。
+2. 对 `B.shareholderList[]` 逐条读取 `shareholderName`、`shareholderType`、`fundedRatio`、`subConAmt`、`subConCur` 和 `conDate`。股东名称为空的记录不展示；同一股东名称存在多条记录时不得擅自相加比例或认缴额，保留接口顺序分别展示，或在字段完全一致时只删除完全重复记录。
+3. `D.shareholder_rows[].name` 只使用内部 `shareholderName`；`holding_display` 只使用内部 `fundedRatio/subConAmt/subConCur` 按前述规则组合。外部网页中的股东名单、持股比例、认缴额、出资日期和“控股股东”称谓不得进入这两个字段，也不得用于纠正内部数据。
+4. 仅当 `WEB.sources` 存在 `scope="shareholder_context"`、`source_level="一级"`、`subject_match="shareholder_company_match"` 的合格来源时，才可生成对应行的 `note`。说明限于以下最小事实：政府或国资监管页面直接披露的机构性质或监管归属；交易所、目标企业官网或股东官网直接披露的投资角色或双方关系；带明确日期的增资、受让、战略投资或股权变更事件。企业官网内容写“企业官网披露”，股东官网内容写“股东官网披露”，每项事实句末附 `[外部：Wn]`。
+5. `note` 不得写外部持股比例、认缴出资、当前股东状态、实际控制人、最终受益人、一致行动、表决权、控制权、关联交易、资金实力、国企/民企推断或经营评价。政府或国资监管页面没有直接使用“国有”“国资监管”等明确表述时，不得仅凭名称推断机构性质；基金、合伙企业或资管主体不得仅凭名称推断管理人、出资人或最终受益人。
+6. 外部页面只披露历史事件时必须写“{来源}于{日期}披露……”，不得升级为当前股权状态。外部描述与内部股东名称或持股情况冲突时，表格前两列仍保留内部原值；说明列只可写明来源日期及口径差异并建议核实，无法简洁保留边界时删除该外部说明。
+7. `D.has_shareholder_notes=true` 仅在至少一条 `D.shareholder_rows[].note` 通过来源验收时成立。此时使用“股东｜持股情况｜说明”三列表；没有任何合格外部说明时设为 `false`，整张表降级为“股东｜持股情况”两列表，不显示空的“说明”列。三列表中没有对应说明的个别股东以“—”显示，不得用模型常识补齐。
+8. `D.equity_interpretation` 只概括表内直接股东构成、内部持股信息完整性、已引用的公开股东说明和需现场核实的关系边界。禁止把股东集中度、最大股东或机构身份升级为控制权结论；不得计算合计持股比例。没有外部说明时不得在解读中引入任何外部股东背景。
+9. `EVIDENCE.shareholder_rows` 逐行登记 `internal:B.shareholderList[].shareholderName/fundedRatio/subConAmt/subConCur` 的实际使用字段；说明事实另登记 `external:Wn`。`D.source_attributions.equity.external_source_ids[]` 仅登记表格说明列或 `equity_interpretation` 实际引用的来源，按正文首次出现顺序去重；没有说明事实时保持空数组，不生成外部来源行。
 
 #### 有形资产生成规则
 
@@ -712,20 +748,32 @@ D.core_viewpoint =
 13. 核心观点负责形成“企业身份与能力 → 可归因外部观察 → 当前变化 → 经营和风险边界 → 拜访重点”的综合判断；执行摘要负责分别展开核心价值、机会、风险和拜访建议。两者可以引用同一证据，但不得整句重复。不得在核心观点中堆砌全部基本信息、风险数量、知识产权数量或执行摘要四项。
 14. `EVIDENCE.core_capability/core_company_self_description/core_external_description/core_turning_point/core_external_context/core_operating_stage/core_risk_constraint/core_visit_focus` 分别登记实际使用的最小内部字段或 `external:Wn`；`EVIDENCE.core_viewpoint` 按句登记对应分项证据。无法绑定证据的句子必须删除或改为待核实事项。
 
+#### 4.8 构建执行摘要证据卡
+
+执行摘要是供访前决策快速阅读的证据摘要，不是核心观点的缩写。先从已经归一化且通过来源验收的事实构建 `D.summary_evidence`，再生成四项正文；不得让大模型直接从原始响应或网页列表临场挑选素材。
+
+1. 按“是否改变当前判断 → 是否足够具体 → 是否能形成行动问题”筛选摘要级事实。优先保留近 12 个月且明确包含目标企业、动作、日期或报告期、当前阶段和必要边界的事实；稳定的主体定位或能力事实不受 12 个月限制。仅有宣传评价、一般行业趋势、数量堆砌或无法形成拜访问题的内容不进入证据卡。
+2. `value_facts` 保留 2 至 4 项：至少一项内部主体或能力事实，并优先加入一项经营阶段、重大变化或风险边界。它回答“企业现在是什么、正在发生什么、为何值得拜访”，不得复刻基本信息表。
+3. `opportunity_events` 最多 3 项。每项必须写明具体产品、项目、合同、基地、渠道或合作动作及日期/报告期；`stage` 只保留来源直接披露的“计划、审批、签署、框架协议、示范、建设、交付、投运、整改、解除、完成”等实际阶段，不得把发布、签约、框架协议、示范或在建升级为批量订单、收入确认、投产或商业化完成。重大合同或合作无法获得对手方/监管原始页面交叉验证时，在 `boundary` 写明企业单方披露。
+4. `risk_drivers` 最多 3 项，先纳入 `D.risk_evidence_groups` 中对当前判断最重要的内部命中事实；如企业公告、交易所问询回复、投资者关系活动记录、监管或法院原始页面直接解释原因或更新状态，可作为归因或状态补充并明确“企业披露/监管公告”。外部页面中的营收、利润、现金流等数值不得回填或替代内部财务字段；没有权威原因说明时只写结果和信息边界，不自行归因。不得以记录数量直接推断严重程度。
+5. `visit_priorities` 形成 2 至 4 项，每项必须绑定前述事实或明确数据缺口。优先核验项目/合同里程碑、订单转化与交付回款、产能建设和资本开支、波动原因与恢复条件、担保/质押/整改最新状态等；不得提出与证据卡无关的通用问题。
+6. 新闻列表、公告索引、搜索结果页、栏目首页和只显示标题的页面不得进入 `summary_evidence`。摘要引用外部事实时必须使用具体原始正文的规范 URL；同一事件存在目标企业和对手方原始页面时优先交叉登记，事实冲突时保留各自日期、口径和边界。
+7. `EVIDENCE.summary_evidence` 逐项登记证据卡来源；`EVIDENCE.value_judgment/opportunities/risk_summary/visit_advice` 分别登记实际使用项。`D.source_attributions.summary.external_source_ids[]` 必须等于执行摘要四项正文实际引用的外部 ID 并集，按首次出现顺序去重，不得把只在证据卡中候选但未进入正文的来源显示在报告中。
+
 ### 5. 生成大模型派生文案
 
-先完成确定性字段整理，单独让大模型从 `D.company_overview_facts` 生成并验收 `D.core_internal_baseline`，再让大模型基于已经归一化的核心观点分项和其他证据一次性生成 `D.core_viewpoint` 及其余 `D` 文案，最后执行语义验收。不得直接把原始响应交给排版阶段临场概括。`D.company_overview_facts`、`D.company_overview_fallback`、`D.tangible_asset_rows`、`D.core_operation_rows` 和事实表格不属于模型派生分析；`D.core_internal_baseline`、`D.core_viewpoint`、执行摘要、各画像解读、需求核验说明和风险综合提示属于受证据约束的总结分析。除各分节统一使用“信息解读：”作为业务标签外，不添加模型来源标识。
+先完成确定性字段整理，单独让大模型从 `D.company_overview_facts` 生成并验收 `D.core_internal_baseline`，再构建并验收 `D.summary_evidence`，然后让大模型基于已经归一化的核心观点分项、执行摘要证据卡和其他证据一次性生成 `D.core_viewpoint` 及其余 `D` 文案，最后执行语义验收。不得直接把原始响应交给排版阶段临场概括。`D.company_overview_facts`、`D.company_overview_fallback`、`D.summary_evidence`、`D.tangible_asset_rows`、`D.core_operation_rows` 和事实表格不属于模型派生分析；`D.core_internal_baseline`、`D.core_viewpoint`、执行摘要、各画像解读、需求核验说明和风险综合提示属于受证据约束的总结分析。除各分节统一使用“信息解读：”作为业务标签外，不添加模型来源标识。
 
 生成要求：
 
 1. `core_internal_baseline`：严格按“AI 生成内部主体描述”规则，只使用 `D.company_overview_facts` 生成自然内部描述；验收失败时使用 `D.company_overview_fallback`。
 2. `core_viewpoint`：严格按“综合核心观点生成规则”形成企业身份、能力信号、企业官网或正规外部描述、关键转折、近期动作、经营阶段边界、风险约束和拜访重点的连贯叙事；条件分项没有证据时直接省略，不得让模型补齐。引用外部事实时附来源 ID。
 3. `core_company_self_description` 和 `core_external_description`：仅在存在合格 `company_description` 来源时生成，逐句保留官网或外部机构归因，过滤宣传排名、经营数值、未来目标和标准字段，引用外部事实时附来源 ID。
-4. `value_judgment`：60 至 120 个汉字。按“企业是什么、有哪些可见能力信号、为什么值得本次拜访进一步了解”的顺序，归纳内部登记、行业、许可、资质、知识产权及内部或合格外部公开经营线索；不得退化为数量清单，同一句中连续列举的数量不超过 3 个，不使用市场地位、经营质量或授信判断。引用外部事实时附来源 ID。
-5. `opportunities`：60 至 150 个汉字。写 1 至 3 条“访谈机会线索”；有目标企业自身内部事件或合格外部动态时说明事件、归因和待了解事项，外部事实附来源 ID；没有合格事件时明确写“本次未形成可直接核验的近期机会事件”，再从内部业务范围、有效许可或荣誉中提出核验方向。
-6. `risk_summary`：50 至 140 个汉字。只使用 `D.risk_evidence_groups` 中 `status=hit` 的事实，概括最需要关注的 1 至 3 个维度、原始数量、主体范围和信息限制，不重复列举零值维度；无命中时写“公开资料中暂无可供展示的相关记录”，同时声明不等同于不存在相关事项。
-7. `visit_advice`：60 至 150 个汉字。形成一个沟通切入点和 2 至 3 个核验重点，只写“建议了解”“建议核实”“可重点询问”；引用外部事实时附来源 ID。
-8. 每个已显示画像小节的 `*_interpretation`：通常 50 至 140 个汉字，按“事实综合 → 可能的业务含义 → 拜访核验方向”组织。`people_interpretation` 只能使用内部人员事实和表中已引用的合格人物背景；不得把职业履历升级为决策权判断。法定代表人兜底或全部背景缺失场景允许缩短至 30 个汉字，但必须说明公开资料未形成可核验的职业背景补充，且决策权限和具体分工仍待拜访确认。证据不足时使用“可能表明”“可以作为”“提示关注”“值得进一步了解”等审慎措辞，不得留空。
+4. `value_judgment`：80 至 140 个汉字（不计来源标记），只使用 `summary_evidence.value_facts`。按“当前定位与能力事实 → 当前变化或经营边界 → 拜访价值”的顺序形成 1 至 2 句；至少出现两个可核验的企业专属事实，不得退化为数量清单，同一句中连续列举的数量不超过 3 个，不使用市场地位、经营质量或授信判断。引用外部事实时附来源 ID。
+5. `opportunities`：100 至 180 个汉字（不计来源标记），优先只使用 `summary_evidence.opportunity_events`，形成两句并最多写 3 项。存在合格事件时，至少明确写出一项具体事件的名称或对象、日期/报告期、当前阶段、归因和待了解事项；禁止用“官网近期披露业务动态”“近期发布新产品”“持续推进国际化”等泛称替代具体事件，也不得混淆产品发布、框架协议、示范、建设、批量订单、交付和收入确认。没有合格事件时允许缩短，固定写“本次未形成可直接核验的近期机会事件”，再从 `summary_evidence.value_facts` 中已登记的内部业务范围、有效许可或荣誉提出一项具体核验方向。
+6. `risk_summary`：80 至 170 个汉字（不计来源标记），只使用 `summary_evidence.risk_drivers` 及对应 `D.risk_evidence_groups` 中 `status=hit` 的事实。概括最需要关注的 1 至 3 个维度、原始数量或结果、主体范围、最新状态和信息限制；存在企业、交易所或监管原始页面直接披露的原因时，可归因列出 1 至 2 个主要驱动，但不得用模型自行解释。不得重复零值维度或由记录数量推断严重程度。无命中时允许缩短，写“公开资料中暂无可供展示的相关记录”，同时声明不等同于不存在相关事项。
+7. `visit_advice`：80 至 160 个汉字（不计来源标记），只使用 `summary_evidence.visit_priorities`，形成一个与前述具体事件或风险相连的沟通切入点和 2 至 4 个核验重点。问题必须落到里程碑、订单/交付/回款、资本开支、波动原因、恢复条件或风险状态等可回答事项，只写“建议了解”“建议核实”“可重点询问”；引用外部事实时附来源 ID。
+8. 每个已显示画像小节的 `*_interpretation`：通常 50 至 140 个汉字，按“事实综合 → 可能的业务含义 → 拜访核验方向”组织。`people_interpretation` 只能使用内部人员事实和表中已引用的合格人物背景；不得把职业履历升级为决策权判断。`equity_interpretation` 只能使用内部直接股东事实、内部交叉核验结果和表中已引用的合格股东说明；不得根据最大股东、比例集中或机构性质推断控制权。法定代表人兜底或全部背景缺失场景允许缩短至 30 个汉字，但必须说明公开资料未形成可核验的职业背景补充，且决策权限和具体分工仍待拜访确认。证据不足时使用“可能表明”“可以作为”“提示关注”“值得进一步了解”等审慎措辞，不得留空。
 9. `tangible_asset_rows`、`operations_boundary` 和 `core_operation_rows`：分别按“有形资产生成规则”和“核心经营数据生成规则”确定性生成，不进入大模型重写；`assets_interpretation` 只能读取已展示资产行，只有 `D.has_core_operation_rows=true` 时才生成 `operations_interpretation`。
 10. `industry_climate_interpretation` 和 `industry_benchmark_interpretation`：各 50 至 140 个汉字，只解释已展示的行业统计、精确排名和范围，指出可用于访谈的业务含义；不得把企业数变化解释为市场增长，不得把排名改写为市场地位。
 11. `industry_risk_interpretation`：仅在 `D.has_industry_risk=true` 时生成，50 至 100 个汉字，说明行业风险比率的年份、地区行业范围和拜访核验方向，不生成风险评级或企业自身风险结论。
@@ -737,10 +785,12 @@ D.core_viewpoint =
 - 内部事实白名单、AI 内部主体描述、综合核心观点、执行摘要和分节信息解读承担不同职责。大模型不得更改 `D.company_overview_facts` 或 `D.company_overview_fallback`，只能按规则从白名单选择和组织事实；同一事实可在其他文案中再次提及，但必须改变信息层级和表达目的。
 - 所有总结分析必须同时包含事实依据、审慎的业务含义和可执行的拜访核验方向；事实不足时把判断降级为假设或问题。
 - 文案必须具体到目标企业和报告所列事实，禁止套用“发展前景广阔”“综合实力较强”“合作空间巨大”等通用评价。
+- 执行摘要在证据充分时四项正文合计目标为 340 至 600 个汉字（不计来源标记），以事实密度为先，不为达到字数重复事实或填充套话；证据稀疏、机会为空或风险无命中时允许短于下限。每项优先形成“事实/事件 → 审慎含义或边界 → 核验动作”，不得四项反复复述同一事实。
+- 执行摘要不得单独使用“近期动态”“业务多元”“持续发力”“积极布局”“前景广阔”“值得关注”“可围绕相关业务开展访谈”等无法指向具体企业事实的表述。`WEB.status="success"` 且存在 `applicable_sections` 包含 `summary` 的合格重大事件时，`opportunities` 必须采用至少一项摘要级事件并引用具体原始页面；只有摘要级事件未通过证据卡筛选时才可使用无事件回退。
 - 除行业分析明确提供的精确排名外，禁止推导市场地位；任何排名均不得扩写成“行业领先”“头部企业”或“龙头企业”。禁止推导实际控制关系、风险等级、偿债能力、资金需求、授信结论或具体产品适配；不得复制思迈特样稿中的市场规模、CAGR、竞争对手、政策判断、强判断、估算值或模拟数据。
 - 最终报告文案必须通过业务语言检查，把内部查询状态、接口结果、搜索过程改写为公开信息的事实陈述、信息说明或待核实事项；来源区保留必要的“内部/外部”标签、发布日期、访问日期和链接。
 - 生成后逐项核对 `EVIDENCE`。无法找到证据的句子必须删除或改为待核实问题。
-- 大模型只重写除 `D.company_overview_facts`、`D.company_overview_fallback`、`D.tangible_asset_rows`、`D.core_operation_rows`、`D.operations_boundary` 和行业事实表格以外的 `D` 文案；`D.core_internal_baseline` 只能使用内部白名单，`D.core_viewpoint` 只能使用已经整理并绑定证据的核心观点分项。不得更改 `B`、`ID`、`OV_*`、`LAND`、`IND`、`REL`、`FIN_*`、`TM` 至 `OP` 原值、`WEB` 来源元数据、查询状态、列表数量、内部事实白名单、确定性回退文本、有形资产表、核心经营数据表、行业表格或条件布尔值。
+- 大模型只重写除 `D.company_overview_facts`、`D.company_overview_fallback`、`D.summary_evidence`、`D.tangible_asset_rows`、`D.core_operation_rows`、`D.operations_boundary` 和行业事实表格以外的 `D` 文案；`D.core_internal_baseline` 只能使用内部白名单，`D.core_viewpoint` 只能使用已经整理并绑定证据的核心观点分项，执行摘要四项只能使用已经验收的 `D.summary_evidence`。不得更改 `B`、`ID`、`OV_*`、`LAND`、`IND`、`REL`、`FIN_*`、`TM` 至 `OP` 原值、`WEB` 来源元数据、查询状态、列表数量、内部事实白名单、执行摘要证据卡、确定性回退文本、有形资产表、核心经营数据表、行业表格或条件布尔值。
 
 ## 报告输出格式（严格填空骨架 · 模型只填值、不造结构）
 
@@ -757,7 +807,8 @@ D.core_viewpoint =
 > 7. “需求识别与拜访核验”只显示“（一）需求线索核验”，把已有事实和数据缺口转成现场问题；不生成银行产品推荐、紧迫度评级或营销方案。
 > 8. “风险预警与合规提示”按“主体与行政合规、司法与执行、股权及资产权利负担、税务与许可合规、财务经营关注、近期公开事件”六组整理证据，只展示其中明确命中的企业事实；明确零值维度只放入表后边界说明，最新纳税评级和许可状态只作合规提示，不生成风险等级；风险表后必须生成综合提示。
 > 9. `D.company_overview_facts` 或 `D.company_overview_fallback` 验收失败时按确定性规则重新构建；`D.core_internal_baseline` 验收失败时只允许基于同一事实白名单重写一次，仍失败则使用回退文本；`D.core_viewpoint` 验收失败时只基于已经通过证据验收的核心观点分项重新生成，禁止重新搜索或补造事实；其他必填总结字段生成失败时才重写对应大模型派生字段。不得交付缺少核心观点、执行摘要或已显示小节信息解读的报告。
-> 10. 每个来源区先输出实际使用的内部维度，再按正文首次引用顺序输出外部来源。外部事实必须带 `[外部：Wn]`，来源区必须能用同一 ID 解析到网站、标题、发布日期、访问日期和原始链接；不得输出未被正文引用的网页。
+> 10. 每个来源区先按实际使用的内部维度判断是否输出固定内部来源行，再按正文首次引用顺序输出外部来源。外部事实必须带 `[外部：Wn]`，内部证据模型仍须能用同一 ID 解析到网站、标题、发布日期、访问日期和原始链接；报告可见外部来源行只展示来源 ID、网站名称、发布日期和链接，不展示标题与访问日期。不得输出未被正文引用的网页。
+> 11. 骨架中的 `<p align="center">—————————————————数据来源————————————————</p>` 是来源分隔线语义标记。Markdown 回退保留该居中标记；PDF 或 DOCX 排版时必须转换为下方规定的全宽居中分隔组件，禁止作为普通左对齐正文段落或依赖空格定位。
 
 ```markdown
 # 企业画像
@@ -770,10 +821,10 @@ D.core_viewpoint =
 
 {{D.core_viewpoint}}
 
-—————————————————数据来源————————————————
+<p align="center">—————————————————数据来源————————————————</p>
 
-内部：水滴征信 MCP（{{join D.source_attributions.core.internal_dimensions|separator="、"}}）｜数据日期：{{META.generated_at}}
-{{#eachSource WEB.sources|ids=D.source_attributions.core.external_source_ids}}外部：{{source_id}}｜{{site_name}}｜{{title}}｜{{#if published_at}}发布日期：{{published_at}}{{else}}发布日期：未标明{{/if}}｜访问日期：{{accessed_at}}｜链接：{{url}}{{/eachSource}}
+内部：水滴征信 MCP｜数据日期：{{META.generated_at}}
+{{#eachSource WEB.sources|ids=D.source_attributions.core.external_source_ids}}外部：{{source_id}}｜{{site_name}}｜{{#if published_at}}发布日期：{{published_at}}{{else}}发布日期：未标明{{/if}}｜链接：{{url}}{{/eachSource}}
 
 ## {{D.section_numbers.summary}}、执行摘要
 
@@ -785,10 +836,10 @@ D.core_viewpoint =
 
 **拜访建议：** {{D.visit_advice}}
 
-—————————————————数据来源————————————————
+<p align="center">—————————————————数据来源————————————————</p>
 
-{{#if D.source_attributions.summary.internal_dimensions}}内部：水滴征信 MCP（{{join D.source_attributions.summary.internal_dimensions|separator="、"}}）｜数据日期：{{META.generated_at}}{{/if}}
-{{#eachSource WEB.sources|ids=D.source_attributions.summary.external_source_ids}}外部：{{source_id}}｜{{site_name}}｜{{title}}｜{{#if published_at}}发布日期：{{published_at}}{{else}}发布日期：未标明{{/if}}｜访问日期：{{accessed_at}}｜链接：{{url}}{{/eachSource}}
+{{#if D.source_attributions.summary.internal_dimensions}}内部：水滴征信 MCP｜数据日期：{{META.generated_at}}{{/if}}
+{{#eachSource WEB.sources|ids=D.source_attributions.summary.external_source_ids}}外部：{{source_id}}｜{{site_name}}｜{{#if published_at}}发布日期：{{published_at}}{{else}}发布日期：未标明{{/if}}｜链接：{{url}}{{/eachSource}}
 
 ## {{D.section_numbers.profile}}、客户全景画像
 
@@ -810,9 +861,9 @@ D.core_viewpoint =
 
 **信息解读：** {{D.basic_interpretation}}
 
-—————————————————数据来源————————————————
+<p align="center">—————————————————数据来源————————————————</p>
 
-内部：水滴征信 MCP（{{join D.source_attributions.basic.internal_dimensions|separator="、"}}）｜数据日期：{{META.generated_at}}
+内部：水滴征信 MCP｜数据日期：{{META.generated_at}}
 
 {{#if D.person_rows}}
 ### （二）关键决策人信息
@@ -823,28 +874,31 @@ D.core_viewpoint =
 
 **信息解读：** {{D.people_interpretation}}
 
-—————————————————数据来源————————————————
+<p align="center">—————————————————数据来源————————————————</p>
 
-内部：水滴征信 MCP（{{join D.source_attributions.people.internal_dimensions|separator="、"}}）｜数据日期：{{META.generated_at}}
-{{#eachSource WEB.sources|ids=D.source_attributions.people.external_source_ids}}外部：{{source_id}}｜{{site_name}}｜{{title}}｜{{#if published_at}}发布日期：{{published_at}}{{else}}发布日期：未标明{{/if}}｜访问日期：{{accessed_at}}｜链接：{{url}}{{/eachSource}}
+内部：水滴征信 MCP｜数据日期：{{META.generated_at}}
+{{#eachSource WEB.sources|ids=D.source_attributions.people.external_source_ids}}外部：{{source_id}}｜{{site_name}}｜{{#if published_at}}发布日期：{{published_at}}{{else}}发布日期：未标明{{/if}}｜链接：{{url}}{{/eachSource}}
 {{/if}}
 
 {{#if D.has_equity_or_network}}
 ### （三）股权结构与关联关系
 
-{{#if B.shareholderList}}
-| 股东名称 | 持股比例 | 认缴出资额 |
+{{#if D.has_shareholder_notes}}
+| 股东 | 持股情况 | 说明 |
 | --- | --- | --- |
-{{#each D.shareholder_rows|max=15}}| {{name}} | {{ratio_display}} | {{amount_display}} |{{/each}}
+{{#each D.shareholder_rows|max=15}}| {{name}} | {{holding_display}} | {{#if note}}{{note}}{{else}}—{{/if}} |{{/each}}
+{{else}}
+| 股东 | 持股情况 |
+| --- | --- |
+{{#each D.shareholder_rows|max=15}}| {{name}} | {{holding_display}} |{{/each}}
 {{/if}}
-
-{{#if D.network_summary}}关联关系：{{D.network_summary}}{{/if}}
 
 **信息解读：** {{D.equity_interpretation}}
 
-—————————————————数据来源————————————————
+<p align="center">—————————————————数据来源————————————————</p>
 
-内部：水滴征信 MCP（{{join D.source_attributions.equity.internal_dimensions|separator="、"}}）｜数据日期：{{META.generated_at}}
+内部：水滴征信 MCP｜数据日期：{{META.generated_at}}
+{{#eachSource WEB.sources|ids=D.source_attributions.equity.external_source_ids}}外部：{{source_id}}｜{{site_name}}｜{{#if published_at}}发布日期：{{published_at}}{{else}}发布日期：未标明{{/if}}｜链接：{{url}}{{/eachSource}}
 {{/if}}
 
 {{#if D.has_assets}}
@@ -874,10 +928,10 @@ D.core_viewpoint =
 
 **信息解读：** {{D.assets_interpretation}}
 
-—————————————————数据来源————————————————
+<p align="center">—————————————————数据来源————————————————</p>
 
-{{#if D.source_attributions.assets.internal_dimensions}}内部：水滴征信 MCP（{{join D.source_attributions.assets.internal_dimensions|separator="、"}}）｜数据日期：{{META.generated_at}}{{/if}}
-{{#eachSource WEB.sources|ids=D.source_attributions.assets.external_source_ids}}外部：{{source_id}}｜{{site_name}}｜{{title}}｜{{#if published_at}}发布日期：{{published_at}}{{else}}发布日期：未标明{{/if}}｜访问日期：{{accessed_at}}｜链接：{{url}}{{/eachSource}}
+{{#if D.source_attributions.assets.internal_dimensions}}内部：水滴征信 MCP｜数据日期：{{META.generated_at}}{{/if}}
+{{#eachSource WEB.sources|ids=D.source_attributions.assets.external_source_ids}}外部：{{source_id}}｜{{site_name}}｜{{#if published_at}}发布日期：{{published_at}}{{else}}发布日期：未标明{{/if}}｜链接：{{url}}{{/eachSource}}
 {{/if}}
 
 {{#if D.has_core_operations}}
@@ -892,9 +946,9 @@ D.core_viewpoint =
 
 **信息解读：** {{D.operations_interpretation}}
 
-—————————————————数据来源————————————————
+<p align="center">—————————————————数据来源————————————————</p>
 
-内部：水滴征信 MCP（{{join D.source_attributions.operations.internal_dimensions|separator="、"}}）｜数据日期：{{META.generated_at}}
+内部：水滴征信 MCP｜数据日期：{{META.generated_at}}
 {{/if}}
 {{/if}}
 
@@ -937,10 +991,10 @@ D.core_viewpoint =
 **信息解读：** {{D.industry_risk_interpretation}}
 {{/if}}
 
-—————————————————数据来源————————————————
+<p align="center">—————————————————数据来源————————————————</p>
 
-{{#if D.source_attributions.industry.internal_dimensions}}内部：水滴征信 MCP（{{join D.source_attributions.industry.internal_dimensions|separator="、"}}）｜数据日期：{{META.generated_at}}{{/if}}
-{{#eachSource WEB.sources|ids=D.source_attributions.industry.external_source_ids}}外部：{{source_id}}｜{{site_name}}｜{{title}}｜{{#if published_at}}发布日期：{{published_at}}{{else}}发布日期：未标明{{/if}}｜访问日期：{{accessed_at}}｜链接：{{url}}{{/eachSource}}
+{{#if D.source_attributions.industry.internal_dimensions}}内部：水滴征信 MCP｜数据日期：{{META.generated_at}}{{/if}}
+{{#eachSource WEB.sources|ids=D.source_attributions.industry.external_source_ids}}外部：{{source_id}}｜{{site_name}}｜{{#if published_at}}发布日期：{{published_at}}{{else}}发布日期：未标明{{/if}}｜链接：{{url}}{{/eachSource}}
 {{/if}}
 
 ## {{D.section_numbers.needs}}、需求识别与拜访核验
@@ -953,10 +1007,10 @@ D.core_viewpoint =
 | --- | --- |
 {{#each D.visit_questions}}| **{{topic}}** | {{basis}}；建议现场核实：{{question}} |{{/each}}
 
-—————————————————数据来源————————————————
+<p align="center">—————————————————数据来源————————————————</p>
 
-{{#if D.source_attributions.needs.internal_dimensions}}内部：水滴征信 MCP（{{join D.source_attributions.needs.internal_dimensions|separator="、"}}）｜数据日期：{{META.generated_at}}{{/if}}
-{{#eachSource WEB.sources|ids=D.source_attributions.needs.external_source_ids}}外部：{{source_id}}｜{{site_name}}｜{{title}}｜{{#if published_at}}发布日期：{{published_at}}{{else}}发布日期：未标明{{/if}}｜访问日期：{{accessed_at}}｜链接：{{url}}{{/eachSource}}
+{{#if D.source_attributions.needs.internal_dimensions}}内部：水滴征信 MCP｜数据日期：{{META.generated_at}}{{/if}}
+{{#eachSource WEB.sources|ids=D.source_attributions.needs.external_source_ids}}外部：{{source_id}}｜{{site_name}}｜{{#if published_at}}发布日期：{{published_at}}{{else}}发布日期：未标明{{/if}}｜链接：{{url}}{{/eachSource}}
 
 {{#if D.has_risks}}
 ## {{D.section_numbers.risk}}、风险预警与合规提示
@@ -973,10 +1027,10 @@ D.core_viewpoint =
 
 {{#if D.risk_information_boundary}}资料范围：{{D.risk_information_boundary}}{{/if}}
 
-—————————————————数据来源————————————————
+<p align="center">—————————————————数据来源————————————————</p>
 
-{{#if D.source_attributions.risk.internal_dimensions}}内部：水滴征信 MCP（{{join D.source_attributions.risk.internal_dimensions|separator="、"}}）｜数据日期：{{META.generated_at}}{{/if}}
-{{#eachSource WEB.sources|ids=D.source_attributions.risk.external_source_ids}}外部：{{source_id}}｜{{site_name}}｜{{title}}｜{{#if published_at}}发布日期：{{published_at}}{{else}}发布日期：未标明{{/if}}｜访问日期：{{accessed_at}}｜链接：{{url}}{{/eachSource}}
+{{#if D.source_attributions.risk.internal_dimensions}}内部：水滴征信 MCP｜数据日期：{{META.generated_at}}{{/if}}
+{{#eachSource WEB.sources|ids=D.source_attributions.risk.external_source_ids}}外部：{{source_id}}｜{{site_name}}｜{{#if published_at}}发布日期：{{published_at}}{{else}}发布日期：未标明{{/if}}｜链接：{{url}}{{/eachSource}}
 {{/if}}
 
 ## 报告使用说明
@@ -1001,14 +1055,14 @@ PDF 是唯一版式验收基准。优先沿用当前环境中最近一次已验�
 
 - 页面：Letter，215.9 × 279.4 mm；上、下页边距 20 mm，左、右页边距 25 mm。
 - 正文：宋体或可用的等价中文宋体，10.5 pt，固定行高 15 pt；表格正文 9 pt，固定行高 12 pt。不得使用渲染器默认行高或单倍行距。
-- 标题：黑体或等价中文黑体；主标题 18 pt 黑色居中，一级标题 14 pt、二级标题 12 pt，标题蓝色 `#4F81BD`。所有 `##` 一级标题段前 12 pt、段后 6 pt；标题位于页首时不额外增加段前空白。
+- 标题：黑体或等价中文黑体；主标题 18 pt 黑色居中，一级标题 14 pt、二级标题 12 pt，章节标题蓝固定为 `#4F81BD`。所有 `##` 一级标题段前 12 pt、段后 6 pt；标题位于页首时不额外增加段前空白。
 - 元信息：报告编号、生成时间、密级使用 9 pt、固定行高 12 pt 并居中；客户名称使用 12 pt 加粗居中。
-- 数据来源：板块末尾加入灰色 `#808080` 居中分隔线。内部行使用“内部：水滴征信 MCP（数据维度）｜数据日期：{generated_at}”；外部行使用“外部：Wn｜网站名称｜标题｜发布日期：日期或未标明｜访问日期：日期｜链接：URL”。每条来源单独成段，使用 9 pt、固定行高 12 pt、常规字重；长标题和 URL 允许自然换行，不得截断链接或压缩字号。
-- 报告使用说明正文：四条说明单独使用宋体或等价中文宋体 9 pt、固定行高 12 pt，常规字重；“报告使用说明”标题仍使用一级标题样式，不随正文缩小。
+- 数据来源：板块末尾加入灰色 `#808080` 来源分隔组件。组件宽度必须等于当前正文可用宽度 165.9 mm，“数据来源”文字的水平中心必须与正文可用区域中心重合，左右线段等长；文字两侧各保留 4 mm 间距，线宽 0.5 pt。禁止把连续破折号作为普通左对齐段落，也禁止用空格、制表符或可变字符数模拟居中。ReportLab 使用自定义 `Flowable` 或无边框三列全宽表格实现，标题列居中、左右线段列等宽；DOCX 或其他渲染器使用等效的全宽三段式组件。内部行固定使用“内部：水滴征信 MCP｜数据日期：{generated_at}”，不得在 MCP 后添加业务维度括注；外部行固定使用“外部：Wn｜网站名称｜发布日期：日期或未标明｜链接：URL”，不得展示页面标题和访问日期。每条来源单独成段，使用 9 pt、固定行高 12 pt、常规字重；长 URL 允许自然换行，不得截断链接或压缩字号。页面标题和访问日期仍须保留在 `WEB.sources` 与内部验收记录中。
+- 报告使用说明正文：严格复用参考成品样式。四条说明各自作为独立项目，使用实心圆点 `•`，宋体或等价中文宋体常规字重，9 pt，固定行高 12 pt，文字和圆点统一为灰色 `#666666`（RGB `102, 102, 102`），左对齐且不作首行缩进；圆点左边缘与正文可用区域左边界对齐，项目正文起点相对圆点左边缘右移约 5.5 pt，发生换行时使用相同位置的悬挂缩进。四项之间 `spaceBefore=0`、`spaceAfter=0`，不得插入空白段落；“报告目的：”“信息真实性：”“数据时效性：”“保密义务：”及其后正文全部保持常规字重，不得只加粗标签。`报告使用说明` 标题仍使用 14 pt、`#4F81BD` 的一级标题样式，不随正文缩小或变灰。
 - 正文段落：核心观点、执行摘要、信息解读、普通说明、人员列表、产业链定位和风险说明统一使用 15 pt 行高。核心观点和信息解读正文首行缩进 2 个汉字；执行摘要四项不缩进。普通正文段落段后 4 pt；PDF 使用段后样式控制间距，不插入空白段落，Markdown 回退在自然段之间保留一个空行。
 - 字重：黑色正文必须使用宋体或等价中文宋体的常规字重，禁止整段使用字体名含 `Black`、`Bold`、`Semibold` 的变体。核心观点、执行摘要标签后的内容、信息解读标签后的正文、表格具体数据、股东名、人员名、代表记录、风险说明和报告使用说明均不得加粗。
 - 主标题、客户名称、蓝色章节标题和表头行必须加粗。执行摘要的“核心价值判断：”“主要机会：”“主要风险：”“拜访建议：”，各分节“信息解读：”，资产段的“有形资产：”“无形资产：”，以及表格中的业务标签项也必须加粗；只允许这些元素使用粗体。业务标签项包括企业基本信息字段名、资产类型、经营指标、行业观察或对标维度、行业风险信号、需求核验主题和企业风险维度；股东名、人员名及其他实体名称不属于标签项。
-- 表格：黑色 0.5 pt 网格线，无表头底色；表头和表格正文统一使用 12 pt 行高。表头必须使用实际中文粗体字形、左对齐并跨页重复；符合上述定义的业务标签项必须使用实际中文粗体字形，其余正文保持常规字重、左对齐，单元格垂直居中。允许表格按可用空间自然分页，较长单元格可跨页拆分。
+- 表格：所有可见表格的表头行统一使用参考成品中的浅蓝色底纹 `#D9EAF7`（RGB `217, 234, 247`），表头文字固定为黑色；该颜色是独立的“表头蓝”，不得替换为章节标题蓝 `#4F81BD`、渲染器主题色或近似色。黑色 0.5 pt 网格线；表头和表格正文统一使用 12 pt 行高。表头必须使用实际中文粗体字形、左对齐并跨页重复，跨页重复的表头必须保持相同浅蓝底纹；符合上述定义的业务标签项必须使用实际中文粗体字形，其余正文保持常规字重、左对齐，单元格垂直居中。除表头外，普通数据行不使用 `#D9EAF7` 底纹。允许表格按可用空间自然分页，较长单元格可跨页拆分。
 - 不使用 `KeepTogether`、`keepWithNext`、整块容器或手动分页符保护章节、段落、信息解读、数据来源或表格起始部分；允许这些内容随页面剩余空间自然续页。
 - 不因避免断句、孤立标题或来源文字而主动移动整块内容；跨页表格只重复表头，不重复小节标题。
 - 不得出现裁切、重叠、乱码或由强制分页造成的异常空白。除最后一页外，若后续仍有连续正文而当前页空白超过可用正文区约三分之一，视为分页失败。
@@ -1018,7 +1072,7 @@ PDF 是唯一版式验收基准。优先沿用当前环境中最近一次已验�
 
 表格列宽按可用正文宽度 165.9 mm 固定分配：
 
-企业基本信息 35 / 130.9；关键决策人信息 27 / 38 / 100.9；股东 84 / 32 / 49.9；有形资产 30 / 80 / 55.9；无形资产 34 / 28 / 103.9；核心经营数据 36 / 74 / 55.9；行业景气度 38 / 58 / 69.9；行业对标 34 / 38 / 42 / 51.9；行业风险 38 / 55 / 72.9；需求线索核验 42 / 123.9；风险预警 38 / 55 / 72.9。单位均为 mm。
+企业基本信息 35 / 130.9；关键决策人信息 27 / 38 / 100.9；股东三列表 50 / 40 / 75.9，股东两列表 75 / 90.9；有形资产 30 / 80 / 55.9；无形资产 34 / 28 / 103.9；核心经营数据 36 / 74 / 55.9；行业景气度 38 / 58 / 69.9；行业对标 34 / 38 / 42 / 51.9；行业风险 38 / 55 / 72.9；需求线索核验 42 / 123.9；风险预警 38 / 55 / 72.9。单位均为 mm。
 
 ### 中文字体与加粗渲染（强制）
 
@@ -1042,21 +1096,23 @@ pdfmetrics.registerFontFamily(
 ```
 
 - 行内标签不得把带 `**` 的 Markdown 原样交给 ReportLab。只对骨架中的静态粗体标签转换为 `<b>标签</b>`，动态正文先执行 XML 转义后再拼接。例如执行摘要必须按 `<b>核心价值判断：</b> {常规正文}` 构造同一个 `Paragraph`；`信息解读：`、`有形资产：`、`无形资产：`同理。标签后的正文必须回到常规字体。
-- 表头行必须显式使用已注册的中文粗体字体；若单元格使用 `Paragraph`，使用粗体 Paragraph 样式或 `<b>...</b>`；若使用普通字符串，使用 `TableStyle(("FONTNAME", (0, 0), (-1, 0), "SongtiSC-Bold"))`。表格业务标签单元格也必须显式指定粗体，不能只保留 Markdown 的 `**`。
-- 使用 ReportLab 时，除报告使用说明外的非标题正文 `ParagraphStyle` 必须显式设置 `fontSize=10.5, leading=15`；报告使用说明四条正文必须使用独立样式并显式设置 `fontSize=9, leading=12`；表格单元格 `ParagraphStyle` 必须显式设置 `fontSize=9, leading=12`；元信息和数据来源样式必须显式设置 `fontSize=9, leading=12`。使用 DOCX 中转或其他渲染器时设置等效固定行高，不得用“单倍”“多倍”等由渲染器自行解释的相对行距。
+- 表头行必须显式使用已注册的中文粗体字体；若单元格使用 `Paragraph`，使用粗体 Paragraph 样式或 `<b>...</b>`；若使用普通字符串，使用 `TableStyle(("FONTNAME", (0, 0), (-1, 0), "SongtiSC-Bold"))`。ReportLab 必须同时为首行设置 `TableStyle(("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#D9EAF7")))` 和黑色文字，并使用 `repeatRows=1` 保证跨页表头重复；DOCX 中转或其他渲染器必须为每个表头单元格设置等效的 `D9EAF7` 实色填充，禁止透明度、渐变、主题色或自动配色。表格业务标签单元格也必须显式指定粗体，不能只保留 Markdown 的 `**`。
+- 使用 ReportLab 时，除报告使用说明外的非标题正文 `ParagraphStyle` 必须显式设置 `fontSize=10.5, leading=15`。报告使用说明必须删除 Markdown 行首的 `- `，对 XML 转义后的每条正文显式添加 `• ` 前缀，再分别构造为 `Paragraph("• " + text, usage_style)`；禁止使用 `bulletText` 或 ReportLab 默认列表组件，因为其自动字形间距会使正文起点偏离参考成品。`usage_style` 至少显式设置 `fontName="SongtiSC"`、`fontSize=9`、`leading=12`、`textColor=colors.HexColor("#666666")`、`leftIndent=5.5`、`firstLineIndent=-5.5`、`spaceBefore=0`、`spaceAfter=0`。段落容器从正文左边界开始：首行以负缩进把圆点拉回左边界，`•` 加半角空格后的正文起点距圆点左边缘约 5.5 pt，续行从 `leftIndent` 位置继续。DOCX 中转或其他渲染器使用等效的实心圆点、5.5 pt 悬挂缩进、固定 12 pt 行高和零段间距，不得使用默认列表主题、自动颜色或相对行距。表格单元格 `ParagraphStyle` 必须显式设置 `fontSize=9, leading=12`；元信息和数据来源样式必须显式设置 `fontSize=9, leading=12`。
 - 开始排版正式报告前，先用最终字体配置生成仅含“正文测试”“粗体测试”的临时 PDF。用 PDF 字体元数据确认两段分别映射到常规和粗体 PostScript 字形，并渲染预览确认肉眼可辨；预检失败时不得继续生成正式 PDF。
 
 ### 生成与验收
 
-1. 执行语义验收：确认 `company_overview_facts.identity.org_name` 与规范企业全称一致，`company_overview_fallback` 至少包含规范企业全称且没有 `[外部：`；`core_internal_baseline` 非空、首句包含规范企业全称、没有外部事实或来源标记，并且每个事实都存在于白名单且原值一致。确认 `core_viewpoint` 非空、首句使用已经验收的内部主体描述、结构顺序符合综合核心观点规则，并且每个 `[外部：Wn]` 都能解析到合格来源。确认 `core_capability`、`core_operating_stage`、`core_visit_focus`、执行摘要四项和 `basic_interpretation` 非空；`core_company_self_description`、`core_external_description`、`core_turning_point`、`core_external_context`、`core_risk_constraint` 仅在有证据时出现。存在内部主要人员或法定代表人兜底时，`person_rows` 必须非空且只包含内部确认人员，报告必须展示“姓名｜职务｜背景”三列表格；每行 `name/position` 可追溯到内部字段，`background` 不得为空。`has_assets=true` 时必须存在至少一行 `tangible_asset_rows` 或一项无形资产事实；有形资产表每行 `asset_type/fact/boundary` 非空且最多 6 行，没有合格有形资产时不得显示“有形资产”标签。每个已显示且包含事实的画像小节、行业景气、行业对标、行业风险、需求核验和企业风险综合提示均按骨架使用“信息解读：”标签；`has_core_operation_rows=true` 时核心经营数据表非空且 `operations_interpretation` 非空，`has_core_operation_rows=false` 时只显示固定业务提示且 `operations_interpretation=null`；`has_industry_insight=true` 时存在 `industry_positioning`，并满足“至少一类内部行业事实表非空”或“内部工商行业非空且 `industry_external_context` 非空”之一；仅外部背景触发时三个行业量化表保持为空。`has_industry_risk=true` 时存在 `industry_risk_interpretation`；`has_risks=true` 时必须存在至少一行 `risks`、完整的六组 `risk_evidence_groups`、非空 `risk_interpretation`，并且每行都能追溯到 `status=hit` 的同名证据组。确认所有可见大章节编号从“一”开始连续递增，不跳号、不重号。
-2. 核对内部证据覆盖：每个非空 `D` 文案字段在 `EVIDENCE` 中至少有一个来源；逐句删除无来源判断。检查金额、比例、日期、数量和币种的底层原值完全一致，展示层只进行了允许的无损格式化、财务比率直接追加 `%` 或行业比率精确百分比展示；有形资产没有计算土地面积、价格或抵押金额合计。检查企业基本信息、行业归属、核心经营数据、员工规模、人员姓名、当前职务和法定代表人身份没有使用 `WEB`，核心经营数据只使用同一内部年度报告和同日期合并资产负债补充、没有混入季度、母公司报表或外部年报；逐行确认 `person_rows` 没有外部新增人员、没有用网页覆盖职务。逐行确认内部有形资产只来自 `LAND` 或 `B` 中明确点名具体有形资产对象的记录，未使用行业、经营范围、注册地址、网站、分支、资本、许可、荣誉、知识产权或招投标。检查状态字段互斥，上市公司主要会计指标、资产负债补充、年度员工补充、土地供应、土地出让、土地抵押和四类行业分析未被合并为单一状态，`REL` 不含 `legalPersonCard`，内部来源行未列入 `empty`、`failed` 或 `not_called` 维度，`D.coverage_summary` 未暴露内部查询步骤。检查产业画像内部量化范围统一使用 `D.industry_scope_display`，且不含 `regionId/nicId` 原值、代码括注或“三级行业C382”式内部编码。
-3. 核对外部证据覆盖：检查 `WEB.status`、12 个月窗口、实际查询词和每条 `WEB.sources` 的 `source_id/site_name/source_level/source_type/title/url/accessed_at/supported_fact/applicable_sections/subject_match/corroboration_status` 完整；无发布日期只允许企业官网稳定介绍、管理团队、人物介绍或设施介绍页并显示“未标明”。检查每个 `[外部：Wn]` 都存在于 `WEB.sources`、`EVIDENCE` 和当前章节 `external_source_ids[]`，每个可见外部来源都被正文实际引用，同一章节没有重复来源。对 `scope="person_background"` 逐条确认内部姓名、目标企业关系和正文事实同时匹配；同名歧义、仅搜索摘要、个人或社交页面不得采用，历史任职带时间或“曾任”，冲突职务没有覆盖内部列。对 `scope="tangible_asset"` 逐条确认来源为一级原始页面、规范企业主体、具体资产对象、企业角色和时点同时匹配；企业官网自述带“企业官网披露”，历史资产节点没有升级为当前状态，且没有采用外部面积、价格、价值、产能、设备数量、抵押金额或产权结论。检查三级媒体可追溯到一级来源或至少有两个独立正规来源，企业官网人物背景带“企业官网介绍”，百科、自媒体、社交平台、聚合页、招商宣传、无出处转载、搜索摘要和模型生成内容均未采用。检查冲突来源按规则保留边界，没有由模型合并冲突值。
-4. 检查内容边界：不得把 `REL` 主体写成供应商、客户、控股企业或上下游，不得把行业企业数写成市场规模或增长率，不得把精确排名扩写为市场地位；人物背景不得包含出生日期、年龄、家庭关系、住址、联系方式、个人社交账号等非必要个人信息，不得从教育或履历推断决策权限、控制关系或具体分工；有形资产不得出现仅由行业、经营范围、地址、门店、分支、客户项目、订单、产品或宣传推导的资产结论，不得把土地公开记录或设施使用场景写成自有产权、当前持有或账面价值；外部行业背景不得产生企业标准字段、企业财务值、行业排名、行业均值、市场规模、增长率、CAGR、市场份额、竞争对手或上下游名单；核心经营数据不得包含估算值、行业均值倒推值、客户数量、客户渗透率、标杆客户、融资或荣誉；不得出现无直接证据的实控关系、融资、客户数量、风险评级、授信结论或产品推荐；内部舆情和外部事件线索必须通过目标企业事件主体过滤，外部监管或司法事件不得回填内部结构化数量与状态。
-5. 检查内容质量：`company_overview_facts` 的字段准入及 `company_overview_fallback` 的片段顺序、条件分支、标点和风险空值规则必须符合确定性规范；`core_internal_baseline` 必须是白名单事实的自然表达，不得变更原值或增加判断。`core_viewpoint` 必须形成“身份与能力 → 可归因外部观察 → 当前变化 → 经营和风险边界 → 拜访重点”的综合叙事，官网与外部描述最多各一句、外部动态不超过两项、历史节点不超过两个；官网与外部描述必须有明确归因，不得包含宣传排名、外部经营数值、未来目标、外部标准字段、一般行业背景或无证据阶段判断。人物背景必须是短句式职业简介，保留来源归因和时间边界；无合格资料时使用固定边界说明，不得留空或补造。有形资产必须使用三列精简表，每行只保留可核验资产事实和必要权利边界，不生成经营背景段、地址段、主要区域/用途概括、土地合计或通用缺口长句。执行摘要和分节总结不得整句复制核心观点，必须包含事实综合、审慎的业务含义和拜访核验方向，不得出现空泛套话；信息缺口写成自然的信息说明或待核实问题。
-6. `company_overview_facts`、`company_overview_fallback`、`tangible_asset_rows`、`core_operation_rows`、`operations_boundary` 或内部行业事实表格验收不通过时，只用同一证据模型重新执行对应确定性规则并更新相应 `EVIDENCE`；`core_internal_baseline` 验收不通过时按规则重写一次后回退，`core_viewpoint` 验收不通过时只使用已经验收的核心分项重新生成。外部来源或事实验收不通过时删除对应 `WEB.sources`、正文事实、来源 ID 和章节引用，不重新搜索补造；其他语义验收失败时只重新生成受影响的大模型派生文案。不得重新调用已成功的 MCP 工具，不得让大模型修改内部事实白名单、确定性回退文本、有形资产表、核心经营数据表或内部行业事实表格。仍无足够证据时使用边界型表述，不得隐藏核心观点或执行摘要。
-7. 按“报告输出格式（严格填空骨架 · 模型只填值、不造结构）”替换占位符并执行预定义条件。检查报告中不存在未替换占位符、条件标签、内部字段路径、空表或未解析的来源 ID；检查所有内部来源行以“内部：”开头，所有外部来源行以“外部：”开头并包含标题、发布日期、访问日期和链接，再开始排版。
+来源分隔线专项验收纳入下方第 9 步：逐页渲染后测量“数据来源”文字包围盒中心与正文可用区域中心，水平偏差不得超过 2 pt；左右线段长度差不得超过 2 pt，且不得与标题文字相交。任一来源分隔线仍从左页边距起排、仅占半幅、左右线段明显不等长或依赖破折号字符自然宽度时，视为版式验收失败并重新排版。
+
+1. 执行语义验收：确认 `company_overview_facts.identity.org_name` 与规范企业全称一致，`company_overview_fallback` 至少包含规范企业全称且没有 `[外部：`；`core_internal_baseline` 非空、首句包含规范企业全称、没有外部事实或来源标记，并且每个事实都存在于白名单且原值一致。确认 `core_viewpoint` 非空、首句使用已经验收的内部主体描述、结构顺序符合综合核心观点规则，并且每个 `[外部：Wn]` 都能解析到合格来源。确认 `core_capability`、`core_operating_stage`、`core_visit_focus`、执行摘要四项和 `basic_interpretation` 非空；`core_company_self_description`、`core_external_description`、`core_turning_point`、`core_external_context`、`core_risk_constraint` 仅在有证据时出现。执行摘要专项确认 `summary_evidence.value_facts` 和 `summary_evidence.visit_priorities` 至少各一项，四项正文只能使用证据卡并分别登记 `EVIDENCE`；有摘要级机会事件时 `opportunities` 至少写出一项具体事件的对象、日期/报告期和阶段，有权威风险原因或最新状态时 `risk_summary` 必须保留明确归因和边界，`visit_advice` 的每个重点必须能回指证据卡。存在内部主要人员或法定代表人兜底时，`person_rows` 必须非空且只包含内部确认人员，报告必须展示“姓名｜职务｜背景”三列表格；每行 `name/position` 可追溯到内部字段，`background` 不得为空。存在有效内部直接股东时，`shareholder_rows` 必须非空并展示在关键决策人下方的同级“股权结构与关联关系”小节；每行 `name/holding_display` 只可追溯到内部 `B.shareholderList`，`equity_interpretation` 非空。`has_shareholder_notes=true` 时必须至少一行存在带 `[外部：Wn]` 的合格说明并展示“股东｜持股情况｜说明”三列表；没有合格说明时必须设为 `false` 并展示“股东｜持股情况”两列表，完全不生成“说明”列。没有有效内部股东时必须隐藏整个小节。`has_assets=true` 时必须存在至少一行 `tangible_asset_rows` 或一项无形资产事实；有形资产表每行 `asset_type/fact/boundary` 非空且最多 6 行，没有合格有形资产时不得显示“有形资产”标签。每个已显示且包含事实的画像小节、行业景气、行业对标、行业风险、需求核验和企业风险综合提示均按骨架使用“信息解读：”标签；`has_core_operation_rows=true` 时核心经营数据表非空且 `operations_interpretation` 非空，`has_core_operation_rows=false` 时只显示固定业务提示且 `operations_interpretation=null`；`has_industry_insight=true` 时存在 `industry_positioning`，并满足“至少一类内部行业事实表非空”或“内部工商行业非空且 `industry_external_context` 非空”之一；仅外部背景触发时三个行业量化表保持为空。`has_industry_risk=true` 时存在 `industry_risk_interpretation`；`has_risks=true` 时必须存在至少一行 `risks`、完整的六组 `risk_evidence_groups`、非空 `risk_interpretation`，并且每行都能追溯到 `status=hit` 的同名证据组。确认所有可见大章节编号从“一”开始连续递增，不跳号、不重号。
+2. 核对内部证据覆盖：每个非空 `D` 文案字段在 `EVIDENCE` 中至少有一个来源；逐句删除无来源判断。检查金额、比例、日期、数量和币种的底层原值完全一致，展示层只进行了允许的无损格式化、财务比率直接追加 `%` 或行业比率精确百分比展示；有形资产没有计算土地面积、价格或抵押金额合计。检查企业基本信息、行业归属、核心经营数据、员工规模、人员姓名、当前职务、法定代表人身份、股东名称和持股情况没有使用 `WEB`，核心经营数据只使用同一内部年度报告和同日期合并资产负债补充、没有混入季度、母公司报表或外部年报；逐行确认 `person_rows` 没有外部新增人员、没有用网页覆盖职务；逐行确认 `shareholder_rows` 没有外部新增股东、没有用外部比例覆盖或校正内部值、没有按认缴额倒算比例或计算持股合计。逐行确认内部有形资产只来自 `LAND` 或 `B` 中明确点名具体有形资产对象的记录，未使用行业、经营范围、注册地址、网站、分支、资本、许可、荣誉、知识产权或招投标。检查状态字段互斥，上市公司主要会计指标、资产负债补充、年度员工补充、土地供应、土地出让、土地抵押和四类行业分析未被合并为单一状态，`REL` 不含 `legalPersonCard`，内部来源行未列入 `empty`、`failed` 或 `not_called` 维度，`D.coverage_summary` 未暴露内部查询步骤。检查产业画像内部量化范围统一使用 `D.industry_scope_display`，且不含 `regionId/nicId` 原值、代码括注或“三级行业C382”式内部编码。
+3. 核对外部证据覆盖：检查 `WEB.status`、12 个月窗口、实际查询词和每条 `WEB.sources` 的 `source_id/site_name/source_level/source_type/title/url/accessed_at/supported_fact/applicable_sections/subject_match/corroboration_status` 完整；无发布日期只允许企业官网稳定介绍、管理团队、人物介绍、已确认机构股东官方稳定介绍或设施介绍页并显示“未标明”。检查每个 `[外部：Wn]` 都存在于 `WEB.sources`、`EVIDENCE` 和当前章节 `external_source_ids[]`，每个可见外部来源都被正文实际引用，同一章节没有重复来源；`D.source_attributions.summary.external_source_ids[]` 必须与执行摘要四项正文引用的外部 ID 并集完全一致。逐条确认执行摘要外部来源指向具体原始正文，不是新闻列表、公告索引、搜索结果、栏目首页或仅标题页面；事件阶段和日期必须能在正文定位，重大合同或合作只有单方披露时已写明边界。对 `scope="person_background"` 逐条确认内部姓名、目标企业关系和正文事实同时匹配；同名歧义、仅搜索摘要、个人或社交页面不得采用，历史任职带时间或“曾任”，冲突职务没有覆盖内部列。对 `scope="shareholder_context"` 逐条确认来源为一级原始页面、股东名称与内部行匹配、规范企业主体及双方关系同时明确；说明不得含外部持股比例、外部新增股东或未经直接披露的国资、控制、实控人、受益人、一致行动和关联交易结论，历史股权事件必须保留日期。对 `scope="tangible_asset"` 逐条确认来源为一级原始页面、规范企业主体、具体资产对象、企业角色和时点同时匹配；企业官网自述带“企业官网披露”，历史资产节点没有升级为当前状态，且没有采用外部面积、价格、价值、产能、设备数量、抵押金额或产权结论。检查三级媒体可追溯到一级来源或至少有两个独立正规来源，企业官网人物背景带“企业官网介绍”，百科、自媒体、社交平台、聚合页、招商宣传、无出处转载、搜索摘要和模型生成内容均未采用。检查冲突来源按规则保留边界，没有由模型合并冲突值。
+4. 检查内容边界：不得把 `REL` 主体写成供应商、客户、控股企业或上下游，不得把行业企业数写成市场规模或增长率，不得把精确排名扩写为市场地位；人物背景不得包含出生日期、年龄、家庭关系、住址、联系方式、个人社交账号等非必要个人信息，不得从教育或履历推断决策权限、控制关系或具体分工；股权表不得用最大股东、持股集中、股东名称或机构性质推断实际控制人、最终受益人、一致行动或控制权，不得展示外部持股比例或外部新增股东；有形资产不得出现仅由行业、经营范围、地址、门店、分支、客户项目、订单、产品或宣传推导的资产结论，不得把土地公开记录或设施使用场景写成自有产权、当前持有或账面价值；外部行业背景不得产生企业标准字段、企业财务值、行业排名、行业均值、市场规模、增长率、CAGR、市场份额、竞争对手或上下游名单；核心经营数据不得包含估算值、行业均值倒推值、客户数量、客户渗透率、标杆客户、融资或荣誉；不得出现无直接证据的实控关系、融资、客户数量、风险评级、授信结论或产品推荐；内部舆情和外部事件线索必须通过目标企业事件主体过滤，外部监管或司法事件不得回填内部结构化数量与状态。
+5. 检查内容质量：`company_overview_facts` 的字段准入及 `company_overview_fallback` 的片段顺序、条件分支、标点和风险空值规则必须符合确定性规范；`core_internal_baseline` 必须是白名单事实的自然表达，不得变更原值或增加判断。`core_viewpoint` 必须形成“身份与能力 → 可归因外部观察 → 当前变化 → 经营和风险边界 → 拜访重点”的综合叙事，官网与外部描述最多各一句、外部动态不超过两项、历史节点不超过两个；官网与外部描述必须有明确归因，不得包含宣传排名、外部经营数值、未来目标、外部标准字段、一般行业背景或无证据阶段判断。人物背景必须是短句式职业简介，保留来源归因和时间边界；无合格资料时使用固定边界说明，不得留空或补造。股权结构表必须按内部直接股东规则生成；有合格说明时才显示三列，没有合格说明时必须完整删除“说明”列，不能用一整列“暂无”“未披露”占位。有形资产必须使用三列精简表，每行只保留可核验资产事实和必要权利边界，不生成经营背景段、地址段、主要区域/用途概括、土地合计或通用缺口长句。执行摘要四项不得整句复制核心观点或彼此复述；证据充分时总长度和各项长度进入目标区间，每项包含企业专属事实，机会写明具体事件及阶段，风险保留主体/状态/归因边界，拜访建议回指前述事实。出现“近期动态”“业务多元”“持续发力”“积极布局”“前景广阔”“值得关注”等泛词时，必须与同句具体对象、日期/报告期和动作绑定，否则验收失败；分节总结同样必须包含事实综合、审慎的业务含义和拜访核验方向。信息缺口写成自然的信息说明或待核实问题。
+6. `company_overview_facts`、`company_overview_fallback`、`summary_evidence`、`tangible_asset_rows`、`core_operation_rows`、`operations_boundary` 或内部行业事实表格验收不通过时，只用同一证据模型重新执行对应确定性规则并更新相应 `EVIDENCE`；`core_internal_baseline` 验收不通过时按规则重写一次后回退，`core_viewpoint` 验收不通过时只使用已经验收的核心分项重新生成，执行摘要验收不通过时只使用已经验收的 `summary_evidence` 重写对应一项。外部来源或事实验收不通过时删除对应 `WEB.sources`、证据卡候选、正文事实、来源 ID 和章节引用，不重新搜索补造；其他语义验收失败时只重新生成受影响的大模型派生文案。不得重新调用已成功的 MCP 工具，不得让大模型修改内部事实白名单、执行摘要证据卡、确定性回退文本、有形资产表、核心经营数据表或内部行业事实表格。仍无足够证据时使用边界型表述，不得隐藏核心观点或执行摘要。
+7. 按“报告输出格式（严格填空骨架 · 模型只填值、不造结构）”替换占位符并执行预定义条件。检查报告中不存在未替换占位符、条件标签、内部字段路径、空表或未解析的来源 ID；检查所有内部来源行严格采用“内部：水滴征信 MCP｜数据日期：{generated_at}”，没有 MCP 后的维度括注；检查所有外部来源行严格采用“外部：Wn｜网站名称｜发布日期｜链接”，没有页面标题和访问日期，再开始排版。`WEB.sources` 中的标题与访问日期仍必须完整并通过内部证据验收。
 8. 使用当前环境已有的文档或 PDF 能力生成 `output/pdf/{company_name}-企业画像.pdf`。如需 DOCX 中间文件，只把它作为本次临时产物。
-9. 逐页渲染或预览最终 PDF，检查中文字体、Letter 页面、页边距、字号、正文 15 pt 行高、报告使用说明正文 9 pt 字号与 12 pt 行高、表格 12 pt 行高、章节和段落间距、首行缩进、表头样式、标签项字重、列宽、来源 URL 自然换行、自然分页、裁切、重叠和异常空白。正文连续多行必须肉眼可见稳定行间留白，不得出现字形上下紧贴；不得通过减小字号、字符缩放或压缩段后间距抵消行高。使用 `pdfplumber` 或等价工具逐字符检查字体元数据：主标题、客户名称、全部蓝色章节标题、每个表头、每处“核心价值判断：”“主要机会：”“主要风险：”“拜访建议：”“信息解读：”“有形资产：”“无形资产：”以及每个可见表格业务标签必须映射到本次注册的实际粗体 PostScript 字形；任一目标仍使用 Regular 即验收失败。相邻的执行摘要内容、信息解读正文、来源正文和表格数据必须映射到常规字形；报告使用说明四条正文必须映射到常规字形且字号为 9 pt；除白名单元素外，黑色正文使用 `Black`、`Bold` 或 `Semibold` 字形也验收失败。字体元数据通过后仍须检查逐页 PNG，确认粗体与正文肉眼可辨，并确认正文与表格行高符合固定值。除最后一页外，后续仍有连续正文但当前页空白超过可用正文区约三分之一时，取消强制分页或整块容器后重新渲染。
+9. 逐页渲染或预览最终 PDF，检查中文字体、Letter 页面、页边距、字号、正文 15 pt 行高、报告使用说明正文 9 pt 字号与 12 pt 行高、表格 12 pt 行高、章节和段落间距、首行缩进、表头样式、标签项字重、列宽、来源 URL 自然换行、自然分页、裁切、重叠和异常空白。逐表确认首行及每个跨页重复表头均为完整的 `#D9EAF7` 实色底纹、黑色文字，普通数据行未误用该底纹；不得遗漏企业基本信息、关键决策人、股权结构、有形资产、无形资产、核心经营数据、行业景气度、行业对标、行业风险、需求线索核验和风险预警中的任一实际显示表格。使用 `pdfplumber` 或等价工具检查表头矩形的非描边填充色，归一化 RGB 必须为 `(217/255, 234/255, 247/255)`，允许的通道误差不超过 `1/255`；检测到主题替代色、透明填充、渐变、只填充部分单元格或跨页表头颜色不一致即验收失败。单独验收“报告使用说明”：必须恰有四个实心圆点 `•`，每个圆点左边缘与正文左边界的水平偏差不超过 1 pt；四条正文及圆点均为 9 pt 常规宋体、非描边颜色 `#666666`，归一化 RGB 为 `(0.4, 0.4, 0.4)`，单通道误差不超过 `1/255`；标签不得使用粗体。正文起点应在圆点左边缘右侧约 5.5 pt，允许误差 1 pt；相邻单行项目的文字顶部或基线间距为 12 pt，允许误差 0.5 pt，换行项目内部同样使用 12 pt 行距；四项之间不得出现额外段间距，续行必须与项目正文起点对齐而不是与圆点对齐。正文连续多行必须肉眼可见稳定行间留白，不得出现字形上下紧贴；不得通过减小字号、字符缩放或压缩段后间距抵消行高。使用 `pdfplumber` 或等价工具逐字符检查字体元数据：主标题、客户名称、全部蓝色章节标题、每个表头、每处“核心价值判断：”“主要机会：”“主要风险：”“拜访建议：”“信息解读：”“有形资产：”“无形资产：”以及每个可见表格业务标签必须映射到本次注册的实际粗体 PostScript 字形；任一目标仍使用 Regular 即验收失败。相邻的执行摘要内容、信息解读正文、来源正文和表格数据必须映射到常规字形；报告使用说明四条正文和圆点必须映射到常规字形且字号为 9 pt；除白名单元素外，黑色正文使用 `Black`、`Bold` 或 `Semibold` 字形也验收失败。字体和矢量颜色元数据通过后仍须检查逐页 PNG，确认浅蓝表头完整一致、报告使用说明灰色圆点列表与参考成品一致、粗体与正文肉眼可辨，并确认正文与表格行高符合固定值。除最后一页外，后续仍有连续正文但当前页空白超过可用正文区约三分之一时，取消强制分页或整块容器后重新渲染。
 10. 验收通过后删除本次临时 JSON、DOCX、预览图片及一次性辅助文件，只保留最终 PDF。
 11. 不把生成过程中临时编写的代码、命令、`EVIDENCE`、统一证据 JSON 或未采用的网页候选写入报告或聊天回复。
 12. 当前环境无法创建或验收 PDF、中文字体不可用或转换失败时，不循环重试；删除不完整文件并回退完整 Markdown，说明“PDF 生成未完成：{原因}，已回退 Markdown”。
@@ -1072,10 +1128,10 @@ pdfmetrics.registerFontFamily(
 1. 使用中文，用户明确要求其他语言时除外。
 2. 标题名称逐字使用固定骨架；条件板块隐藏后按实际可见的大章节顺序连续重编号。不得出现跳号、重号、空标题、空表或整排“未披露”。
 3. 事实与访谈建议分开。建议使用“建议核实”“可重点了解”，不写“应授信”“建议放款”“可合作”等结论。
-4. 内部来源统一写“内部：水滴征信 MCP（业务维度）”，外部来源统一写“外部：Wn｜网站名称｜标题｜发布日期｜访问日期｜链接”；不得写 CISP、产品码、工具名或字段路径。
+4. 内部来源统一写“内部：水滴征信 MCP｜数据日期：{generated_at}”，不得显示业务维度括注；外部来源统一写“外部：Wn｜网站名称｜发布日期｜链接”，不得显示页面标题和访问日期；不得写 CISP、产品码、工具名或字段路径。标题和访问日期只保留在内部证据模型中。
 5. “产业画像与行业洞察”只在存在有效内部行业分析事实，或内部工商行业已确认且存在合格外部行业背景时展示；仅外部触发时不显示量化表格。“与我行合作现状”、授信/存款/代发明细和具体银行产品推荐固定不展示。
 6. “企业画像”是报告产品名称，不限制总页数；内容随有效数据自动增减。
 7. 最终 PDF 必须经过逐页渲染验收；无法验收时不得交付 PDF，直接回退 Markdown。
 8. 工商深度成功后，最终报告必须包含以内部事实为底座的综合核心观点、执行摘要四项和企业基本信息解读；不得以数据不足为由删除。扩展维度不足时，核心观点至少保留规范企业全称、已确认的内部业务基础、信息边界和拜访核验重点，不得用外部网页或模型常识补齐标准事实。
 
-**SKILL 版本**：v2.12 ｜ **适配数据源**：连接标识为 `cisp-mcp` 的水滴征信 MCP 当前 34 工具版本 + AI 网络搜索工具核验的正规网站原始页面 ｜ **外部默认窗口**：企业动态与资产节点近 12 个月；官网稳定人物/设施页及带明确日期的可核验历史事实不限于该窗口 ｜ **页面规格**：Letter 215.9 × 279.4 mm ｜ **默认交付**：PDF，失败回退 Markdown
+**SKILL 版本**：v2.18 ｜ **适配数据源**：连接标识为 `cisp-mcp` 的水滴征信 MCP 当前 34 工具版本 + AI 网络搜索工具核验的正规网站原始页面 ｜ **外部默认窗口**：企业动态、股权事件与资产节点近 12 个月；官网稳定人物/机构股东/设施页及带明确日期的可核验历史事实不限于该窗口 ｜ **页面规格**：Letter 215.9 × 279.4 mm ｜ **默认交付**：PDF，失败回退 Markdown
