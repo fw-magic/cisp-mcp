@@ -28,10 +28,10 @@
 > 8. “定制化营销方案”固定展示贷款需求线索、产品候选和推进路径。产品候选是营销假设，不是客户已确认需求或授信结论。
 > 9. “风险预警与合规提示”固定显示；无风险命中时只展示资料边界与必要准入核验，不生成空表或低风险结论。“拜访建议与话题清单”固定显示并与营销机会编号闭环。
 > 10. `D.company_overview_facts` 或 `D.company_overview_fallback` 验收失败时按确定性规则重新构建；`D.core_internal_baseline` 验收失败时只允许基于同一事实白名单重写一次，仍失败则使用回退文本；`D.core_viewpoint` 验收失败时只基于已经通过证据验收的核心观点分项重新生成，禁止重新搜索或补造事实；其他必填总结字段生成失败时才重写对应大模型派生字段。不得交付缺少核心观点、执行摘要或已显示小节信息解读的报告。
-> 11. 骨架中的 `<p align="center">—————————————————数据来源————————————————</p>` 是来源分隔线语义标记。Markdown 回退保留该居中标记；PDF 或 DOCX 排版时必须转换为下方规定的全宽居中分隔组件，禁止作为普通左对齐正文段落或依赖空格定位。
+> 11. 数据来源仅在全文结尾汇总展示，位置固定在“报告使用说明”之前，使用骨架中的两列表格，不在各章节末尾重复展示。
 
 ```markdown
-# 客户访前一页纸（贷款及综合金融营销版）
+# 客户访前一页纸
 
 报告编号：{{META.report_id}}  ｜  生成时间：{{META.generated_at}}  ｜  密级：机密
 
@@ -40,11 +40,6 @@
 ## {{D.section_numbers.core}}、核心观点
 
 {{D.core_viewpoint}}
-
-<p align="center">—————————————————数据来源————————————————</p>
-
-内部：水滴征信 MCP｜数据日期：{{META.generated_at}}
-{{#if D.source_attributions.core.external_source_ids}}外部：{{joinUniqueSourceSiteNames WEB.sources|ids=D.source_attributions.core.external_source_ids|separator="、"|quote="《》"}}{{/if}}
 
 ## {{D.section_numbers.summary}}、执行摘要
 
@@ -94,11 +89,6 @@
 
 {{D.executive_visit_strategy}}
 
-<p align="center">—————————————————数据来源————————————————</p>
-
-{{#if D.source_attributions.summary.internal_dimensions}}内部：水滴征信 MCP｜数据日期：{{META.generated_at}}{{/if}}
-{{#if D.source_attributions.summary.external_source_ids}}外部：{{joinUniqueSourceSiteNames WEB.sources|ids=D.source_attributions.summary.external_source_ids|separator="、"|quote="《》"}}{{/if}}
-
 ## {{D.section_numbers.profile}}、客户全景画像
 
 ### （一）企业基本信息
@@ -119,10 +109,6 @@
 
 **信息解读：** {{D.basic_interpretation}}
 
-<p align="center">—————————————————数据来源————————————————</p>
-
-内部：水滴征信 MCP｜数据日期：{{META.generated_at}}
-
 {{#if D.person_rows}}
 ### （二）关键决策人信息
 
@@ -132,10 +118,6 @@
 
 **信息解读：** {{D.people_interpretation}}
 
-<p align="center">—————————————————数据来源————————————————</p>
-
-内部：水滴征信 MCP｜数据日期：{{META.generated_at}}
-{{#if D.source_attributions.people.external_source_ids}}外部：{{joinUniqueSourceSiteNames WEB.sources|ids=D.source_attributions.people.external_source_ids|separator="、"|quote="《》"}}{{/if}}
 {{/if}}
 
 {{#if D.has_equity_or_network}}
@@ -153,10 +135,6 @@
 
 **信息解读：** {{D.equity_interpretation}}
 
-<p align="center">—————————————————数据来源————————————————</p>
-
-内部：水滴征信 MCP｜数据日期：{{META.generated_at}}
-{{#if D.source_attributions.equity.external_source_ids}}外部：{{joinUniqueSourceSiteNames WEB.sources|ids=D.source_attributions.equity.external_source_ids|separator="、"|quote="《》"}}{{/if}}
 {{/if}}
 
 {{#if D.has_assets}}
@@ -186,10 +164,6 @@
 
 **信息解读：** {{D.assets_interpretation}}
 
-<p align="center">—————————————————数据来源————————————————</p>
-
-{{#if D.source_attributions.assets.internal_dimensions}}内部：水滴征信 MCP｜数据日期：{{META.generated_at}}{{/if}}
-{{#if D.source_attributions.assets.external_source_ids}}外部：{{joinUniqueSourceSiteNames WEB.sources|ids=D.source_attributions.assets.external_source_ids|separator="、"|quote="《》"}}{{/if}}
 {{/if}}
 
 {{#if D.has_core_operations}}
@@ -204,9 +178,6 @@
 
 **信息解读：** {{D.operations_interpretation}}
 
-<p align="center">—————————————————数据来源————————————————</p>
-
-内部：水滴征信 MCP｜数据日期：{{META.generated_at}}
 {{/if}}
 {{/if}}
 
@@ -270,11 +241,6 @@
 
 资料边界：{{D.industry_information_boundary}}
 
-<p align="center">—————————————————数据来源————————————————</p>
-
-{{#if D.source_attributions.industry.internal_dimensions}}内部：水滴征信 MCP｜数据日期：{{META.generated_at}}{{/if}}
-{{#if D.source_attributions.industry.external_source_ids}}外部：{{joinUniqueSourceSiteNames WEB.sources|ids=D.source_attributions.industry.external_source_ids|separator="、"|quote="《》"}}{{/if}}
-
 ## {{D.section_numbers.marketing}}、定制化营销方案
 
 ### （一）融资需求线索
@@ -323,11 +289,6 @@
 | --- | --- | --- | --- | --- |
 {{#each D.marketing_sequence}}| **{{stage}}** | {{#if related_opportunity_ids}}{{join related_opportunity_ids|separator="、"}}{{else}}融资需求诊断{{/if}}{{#if related_risk_ids}}；{{join related_risk_ids|separator="、"}}{{/if}} | {{objective}} | {{actions}} | {{exit_criteria}} |{{/each}}
 
-<p align="center">—————————————————数据来源————————————————</p>
-
-{{#if D.source_attributions.marketing.internal_dimensions}}内部：水滴征信 MCP｜数据日期：{{META.generated_at}}{{/if}}
-{{#if D.source_attributions.marketing.external_source_ids}}外部：{{joinUniqueSourceSiteNames WEB.sources|ids=D.source_attributions.marketing.external_source_ids|separator="、"|quote="《》"}}{{/if}}
-
 ## {{D.section_numbers.risk}}、风险预警与合规提示
 
 {{#if D.has_risks}}
@@ -352,11 +313,6 @@
 
 {{#if D.risk_information_boundary}}资料范围：{{D.risk_information_boundary}}{{/if}}
 
-<p align="center">—————————————————数据来源————————————————</p>
-
-{{#if D.source_attributions.risk.internal_dimensions}}内部：水滴征信 MCP｜数据日期：{{META.generated_at}}{{/if}}
-{{#if D.source_attributions.risk.external_source_ids}}外部：{{joinUniqueSourceSiteNames WEB.sources|ids=D.source_attributions.risk.external_source_ids|separator="、"|quote="《》"}}{{/if}}
-
 ## {{D.section_numbers.visit}}、拜访建议与话题清单
 
 ### （一）本次拜访目标
@@ -365,15 +321,15 @@
 
 ### （二）推荐话题
 
-| 关联机会 | 话题 | 企业事实开场 | 转入贷款需求的衔接方式 |
+| 话题 | 企业事实开场 | 转入贷款需求的衔接方式 | 关联机会 |
 | --- | --- | --- | --- |
-{{#each D.recommended_topics}}| **{{#if related_opportunity_ids}}{{join related_opportunity_ids|separator="、"}}{{else}}融资需求诊断{{/if}}** | {{topic}} | {{opening_basis}} | {{transition}} |{{/each}}
+{{#each D.recommended_topics}}| {{topic}} | {{opening_basis}} | {{transition}} | **{{#if related_opportunity_ids}}{{join related_opportunity_ids|separator="、"}}{{else}}融资需求诊断{{/if}}** |{{/each}}
 
 ### （三）关键问题
 
-| 顺序 | 关联主线 | 建议对象 | 主题与依据 | 问法 | 对候选方案的影响 |
-| --- | --- | --- | --- | --- | --- |
-{{#each D.visit_questions}}| {{sequence}} | {{#if related_opportunity_ids}}{{join related_opportunity_ids|separator="、"}}{{else}}融资需求诊断{{/if}}{{#if related_risk_ids}}；{{join related_risk_ids|separator="、"}}{{/if}} | {{audience}} | **{{topic}}**：{{basis}} | {{question}} | {{answer_impact}} |{{/each}}
+| 问法 | 对象 | 主题依据 | 方案影响 | 关联 |
+| --- | --- | --- | --- | --- |
+{{#each D.visit_questions}}| {{question}} | {{audience}} | **{{topic}}**：{{basis}} | {{answer_impact}} | {{#if related_opportunity_ids}}{{join related_opportunity_ids|separator="、"}}{{else}}融资需求诊断{{/if}}{{#if related_risk_ids}}；{{join related_risk_ids|separator="、"}}{{/if}} |{{/each}}
 
 ### （四）建议取得的资料
 
@@ -385,10 +341,12 @@
 
 {{#each D.taboo_notes}}- {{this}}{{/each}}
 
-<p align="center">—————————————————数据来源————————————————</p>
+## 数据来源
 
-{{#if D.source_attributions.visit.internal_dimensions}}内部：水滴征信 MCP｜数据日期：{{META.generated_at}}{{/if}}
-{{#if D.source_attributions.visit.external_source_ids}}外部：{{joinUniqueSourceSiteNames WEB.sources|ids=D.source_attributions.visit.external_source_ids|separator="、"|quote="《》"}}{{/if}}
+| 类型 | 来源 |
+| --- | --- |
+| 内部 | 水滴征信 MCP｜数据日期：{{META.generated_at}} |
+{{#if WEB.sources}}| 外部 | {{joinUniqueSourceSiteNames WEB.sources|separator="、"|quote="《》"}} |{{/if}}
 
 ## 报告使用说明
 
@@ -400,5 +358,4 @@
 
 ### 标题白名单
 
-最终报告只能出现骨架中实际存在的标题，标题名称必须逐字使用，禁止同义替换：`核心观点`、`执行摘要`、`核心特征`、`主要机会`、`主要风险`、`拜访建议`、`客户全景画像`、`（一）企业基本信息`、`（二）关键决策人信息`、`（三）股权结构与关联关系`、`（四）企业资产状况`、`（五）核心经营数据`、`产业画像与行业洞察`、`（一）产业链位置与经营模式`、`（二）行业周期与资金占用`、`（三）行业对标与经营参照`、`（四）政策与融资环境`、`（五）行业风险与贷款启示`、`定制化营销方案`、`（一）融资需求线索`、`（二）贷款产品候选`、`（三）推进路径`、`风险预警与合规提示`、`拜访建议与话题清单`、`（一）本次拜访目标`、`（二）推荐话题`、`（三）关键问题`、`（四）建议取得的资料`、`（五）禁忌提示`、`报告使用说明`。
-
+最终报告只能出现骨架中实际存在的标题，标题名称必须逐字使用，禁止同义替换：`核心观点`、`执行摘要`、`核心特征`、`主要机会`、`主要风险`、`拜访建议`、`客户全景画像`、`（一）企业基本信息`、`（二）关键决策人信息`、`（三）股权结构与关联关系`、`（四）企业资产状况`、`（五）核心经营数据`、`产业画像与行业洞察`、`（一）产业链位置与经营模式`、`（二）行业周期与资金占用`、`（三）行业对标与经营参照`、`（四）政策与融资环境`、`（五）行业风险与贷款启示`、`定制化营销方案`、`（一）融资需求线索`、`（二）贷款产品候选`、`（三）推进路径`、`风险预警与合规提示`、`拜访建议与话题清单`、`（一）本次拜访目标`、`（二）推荐话题`、`（三）关键问题`、`（四）建议取得的资料`、`（五）禁忌提示`、`数据来源`、`报告使用说明`。
