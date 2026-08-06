@@ -1,6 +1,6 @@
 <!-- resource-id: cisp://skill/client-pre-visit-one-pager/evidence-model -->
 <!-- resource-version: 0-dev -->
-<!-- source-skill-version: v5.3-profile-candidate-pool -->
+<!-- source-skill-version: v5.5-history-founded-at -->
 
 # 统一证据模型与业务维度整理规则
 
@@ -166,7 +166,7 @@
     "core_profile_candidate_facts": [
       {
         "candidate_fact_id": "CPF-01",
-        "fact_type": "positioning|honor|brand_product|business_foundation|operating_scale|current_stage|registry_support",
+        "fact_type": "positioning|honor|brand_product|business_foundation|operating_scale|history_evolution|registry_support",
         "statement": "可直接用于企业简介的最小事实或候选表述",
         "subject": "目标企业规范名称或已核验别名",
         "period_or_date": null,
@@ -176,11 +176,13 @@
         "source_refs": ["internal:<字段或状态>", "external:Wn", "candidate:Cn"],
         "limitations": null,
         "selection_priority": 1,
-        "selected_for_profile": true
+        "target_field": "core_company_profile|core_history_evolution",
+        "selected_for_profile": true,
+        "selected_for_history": false
       }
     ],
-    "core_company_profile": "从 core_profile_candidate_facts 中按固定结构选材生成的企业简介定位段；存在合格候选时必须采用，不依赖 core_internal_baseline，工商字段非必显，不显示来源归因",
-    "core_history_evolution": "按时间组织的关键沿革、重大转折与当前状态；可靠证据不足时为 null 并整段省略",
+    "core_company_profile": "从 core_profile_candidate_facts 中按固定结构选材生成的企业简介第一段；只写稳定定位、荣誉、品牌、产品、业务基础和经营规模，存在合格候选时必须采用，不依赖 core_internal_baseline，工商字段非必显，不显示来源归因",
+    "core_history_evolution": "企业简介第二段；按时间组织成立、并购重整、投资人入股、股权与控制权变化、经营管理权交接、管理层调整、重大转折及当前状态；本段生成且成立时间可得时，必须以成立时间作为沿革起点，仅有成立时间时不单独生成本段",
     "core_development_direction": "当前聚焦方向及已经采取的实际行动；无法同时核实方向与行动时说明资料边界",
     "core_risk_prompt": "主要风险事实总结及其带来的关注事项；无明确风险命中时说明资料覆盖边界和基础核验要求",
     "core_visit_objective": "围绕 OPP 提炼贷款及综合金融服务场景；无明确 OPP 时转为融资需求和合作条件诊断",
@@ -364,9 +366,9 @@
     "core_repayment_logic": ["实际支持可能还款来源的 internal:<字段> 或 external:Wn；无事实时登记资料缺口"],
     "core_credit_support": ["实际支持可核验增信资源的 internal:<字段> 或 external:Wn；不得登记推测"],
     "core_visit_focus": ["支持核验重点的 internal:<事实和数据缺口> 或 external:Wn"],
-    "core_profile_candidate_facts": ["逐项登记 CPF 编号、事实类型、候选原文、主体关系、证据状态、置信度、限制、选择优先级、是否进入简介，以及 internal:<字段或状态>、external:Wn 或 candidate:Cn"],
+    "core_profile_candidate_facts": ["逐项登记 CPF 编号、事实类型、候选原文、主体关系、证据状态、置信度、限制、选择优先级、目标字段、是否进入第一段、是否进入第二段，以及 internal:<字段或状态>、external:Wn 或 candidate:Cn"],
     "core_company_profile": ["逐句登记实际采用的 CPF-xx 及其 internal:<字段或状态>、external:Wn 或 candidate:Cn；存在合格候选时至少映射一项，来源标识只用于内部追溯、不进入核心观点正文"],
-    "core_history_evolution": ["按时间逐项登记关键沿革、重大转折和当前状态实际使用的 internal:<字段或状态> 与 external:Wn；字段为 null 时使用空数组"],
+    "core_history_evolution": ["按时间逐项登记第二段实际采用的 CPF-xx，以及成立时间、并购重整、投资人入股、股权或控制权变化、经营管理权交接、管理层调整、重大转折和当前状态所使用的 internal:<字段或状态>、external:Wn 或 candidate:Cn；第二段生成且成立时间可得时必须登记并采用该时间，字段为 null 时使用空数组"],
     "core_development_direction": ["逐句登记当前聚焦方向和已采取行动实际使用的 internal:<字段或状态> 与 external:Wn；资料不足回退时登记对应资料边界"],
     "core_risk_prompt": ["逐句登记风险事实、资料边界和由此形成的关注事项所使用的 internal:<归一化风险事实或状态> 与 external:Wn"],
     "core_visit_objective": ["逐句登记服务场景、融资诊断或合作条件所依据的 internal:<字段或资料缺口>、external:Wn 与相关 OPP 主数据"],
@@ -424,7 +426,7 @@
 - 大章节编号固定为“一、核心观点 → 二、执行摘要 → 三、客户全景画像 → 四、产业画像与行业洞察 → 五、定制化营销方案 → 六、风险预警与合规提示 → 七、拜访建议与话题清单”。客户画像与产业画像必须彼此独立；行业事实表仍可按证据显隐，但不得隐藏、跳号、重号或更名七个大章节；“报告使用说明”不编号。
 - `D.has_core_operations` 在工商主体确认后固定为 `true`，用于确保财务数据不足时仍显示业务提示；其他 `D.has_*` 只在对应板块至少存在一项有效内部事实或本 Skill 明确允许的合格外部事实时设为 `true`，不得为了保留版面而设为 `true`。
 - `D.source_attributions.<section>.internal_dimensions[]` 列实际提供事实或资料缺口的内部业务维度；`external_source_ids[]` 可以同时登记 `Wn` 与 `Cn`。同一来源可以跨人物、股权、资产、营销、风险与拜访章节复用，不受单一 scope 限制。
-- `D.core_profile_candidate_facts` 是企业简介唯一选材池。`positioning/honor/brand_product/business_foundation/operating_scale/current_stage` 且 `relationship_path=direct|verified_alias` 的候选均为合格候选；荣誉、称号、品牌和行业身份允许使用 `search_snippet_only/platform_clue/unverified/conflicting`，不要求直接、高可靠或交叉验证证据。存在合格候选时，`D.core_company_profile` 必须至少采用一项；若存在 `positioning/honor/brand_product` 候选，则至少采用其中一项。`registry_support` 仅为低优先级补充，不构成必显项。
+- `D.core_profile_candidate_facts` 是企业简介两段的唯一选材池。`positioning/honor/brand_product/business_foundation/operating_scale` 且 `relationship_path=direct|verified_alias` 的候选可进入第一段；荣誉、称号、品牌和行业身份允许使用 `search_snippet_only/platform_clue/unverified/conflicting`，不要求直接、高可靠或交叉验证证据。`history_evolution` 专用于第二段，包括成立时间、并购、破产或重整、投资人入股、增资、股权/控股股东/实际控制人变化、持股比例、经营管理权交接、董事长/法定代表人/管理层调整、上市退市、重大项目转折及由此形成的当前阶段，禁止进入第一段。第二段因其他关键沿革条件生成时，成立时间可得则必须优先作为沿革起点；仅有成立时间不单独触发第二段。存在第一段合格候选时，`D.core_company_profile` 必须至少采用一项；若存在 `positioning/honor/brand_product` 候选，则至少采用其中一项。`registry_support` 仅为低优先级补充，不构成必显项。
 - 基本信息只保留非空字段。展示层的无损格式化仅包括：纯数字整数部分增加千分位；严格匹配 `YYYY-MM-DD` 的日期显示为“YYYY年M月D日”；曾用名中的半角逗号、全角逗号或分号统一为“、”；已知币种代码显示其接口同时返回的中文名称；文档明确为比率的 `IND` 十进制值使用任意精度十进制乘以 100、删除无意义尾零后追加 `%`。必须保留全部有效数字和小数位，不得四舍五入；无法可靠识别时直接显示原值。
 - `D.registered_capital_display` 使用无损格式化后的 `regCap` 与 `regCapCur` 组合为“金额单位（币种）”；接口明确 `regCap` 单位为万元时追加“万元”，不得重复单位。实缴资本同理。
 - 股东表先展示内部直接股东原值，再展示外部股东、历史股东、穿透关系、实际控制人、最终受益人和一致行动候选。人数不设上限；内部与外部口径分列，推断关系标明依据和置信度。
