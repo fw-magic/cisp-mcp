@@ -1,6 +1,6 @@
 <!-- resource-id: cisp://skill/client-pre-visit-one-pager/tool-binding -->
 <!-- resource-version: 0-dev -->
-<!-- source-skill-version: v5.1-numbered-summary -->
+<!-- source-skill-version: v5.3-profile-candidate-pool -->
 
 # 内部工具绑定、字段映射与查询顺序
 
@@ -72,8 +72,8 @@
 | `LIC` | `p0010084_query_license_info.data` |
 | `HON` | `p0110003_query_honor_qualification_info.data` |
 | `OP` | `p0050007_p0050008_query_public_opinion_info` |
-| `WEB` | AI 网络搜索查询记录及通过准入核验的外部原始网页证据；只保存允许进入报告的事实和来源元数据 |
-| `D` | 从内部原值和合格 `WEB` 证据忠实压缩形成的派生文案，不新增事实 |
+| `WEB` | AI 网络搜索查询记录、搜索摘要候选及打开的外部原始网页证据；企业简介候选允许保留未打开摘要 |
+| `D` | 从内部原值、`WEB.sources` 与 `WEB.candidates` 忠实压缩形成的候选事实池和派生文案，不新增事实 |
 | `META` | 查询时间、报告编号、格式等报告元数据 |
 
 占位符语法：
@@ -88,6 +88,7 @@
 - 内部主体事实白名单：`D.company_overview_facts`
 - 内部确定性回退文本：`{{D.company_overview_fallback}}`
 - AI 内部主体描述：`{{D.core_internal_baseline}}`
+- 核心观点企业简介候选事实池：`D.core_profile_candidate_facts`；仅用于生成和验收，不直接渲染
 - 核心观点企业简介：`{{D.core_company_profile}}`
 - 核心观点关键沿革（可选）：`{{D.core_history_evolution}}`
 - 核心观点重点发展方向：`{{D.core_development_direction}}`
