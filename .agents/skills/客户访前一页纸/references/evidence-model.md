@@ -1,6 +1,6 @@
 <!-- resource-id: cisp://skill/client-pre-visit-one-pager/evidence-model -->
 <!-- resource-version: 0-dev -->
-<!-- source-skill-version: v4.3-unified-risk -->
+<!-- source-skill-version: v4.4-summary-lines -->
 
 # 统一证据模型与业务维度整理规则
 
@@ -170,6 +170,7 @@
         "opportunity_id": "OPP-01",
         "opportunity_type": "贷款机会|融资线索|综合金融机会",
         "opportunity_title": "简洁、客户化的机会名称",
+        "executive_summary_sentence": "按‘客户专属经营动作或资金触发＋带来的金融需求、空间或机会’生成的执行摘要精简句，句末不含编号",
         "trigger_signal": "带日期或报告期、阶段和主体边界的企业专属触发事实或信号",
         "financial_direction": "可能的贷款用途、融资需求或非贷款综合金融服务方向",
         "timing": "近期|中期|待核验",
@@ -185,6 +186,7 @@
         "risk_id": "RISK-01",
         "risk_type": "已核实风险|风险观察|待核实事项",
         "risk_title": "简洁、客户化的风险或待核实事项名称",
+        "executive_summary_sentence": "按‘关键事实或风险来源＋风险、历史包袱或不确定性’生成的执行摘要精简句，句末不含编号",
         "fact_or_signal_boundary": "事实或信号、主体范围、日期或期间、来源、当前状态与不确定性边界",
         "affected_opportunity_ids": ["OPP-01"],
         "possible_impact": "对相关机会的准入、用途、期限、还款、增信、资料或推进节奏的条件式影响",
@@ -370,8 +372,8 @@
     "operations_boundary": ["internal:FIN_LISTED.mainfinadata 状态、有效年度报告选择结果和必要的信息边界"],
     "operations_interpretation": ["实际展示的 internal:<核心经营数据字段和选定报告期>"],
     "executive_core_features": ["逐句登记支持客户身份、经营阶段、近期转折和拜访价值的 internal:<字段> 或 external:Wn"],
-    "opportunity_register": ["逐项登记 OPP 的机会类型、触发事实或信号、金融切入方向、时点、证据强度、边界、匹配逻辑、核验重点及 internal:<字段>、external:Wn 或 candidate:Cn"],
-    "risk_register": ["逐项登记 RISK 的风险类型、事实或信号、主体、时点、状态、证据强度、受影响 OPP、可能影响、核验方向及 internal:<字段>、external:Wn 或 candidate:Cn"],
+    "opportunity_register": ["逐项登记 OPP 的执行摘要精简句、机会类型、触发事实或信号、金融切入方向、时点、证据强度、边界、匹配逻辑、核验重点及 internal:<字段>、external:Wn 或 candidate:Cn"],
+    "risk_register": ["逐项登记 RISK 的执行摘要精简句、风险类型、事实或信号、主体、时点、状态、证据强度、受影响 OPP、可能影响、核验方向及 internal:<字段>、external:Wn 或 candidate:Cn"],
     "executive_visit_strategy": ["登记支持优先 OPP、关键 RISK、切入点、核验事项和下一步的事实及信息缺口"],
     "loan_product_candidates": ["逐项登记所引用的融资需求行、还款来源、增信线索和准入缺口证据"],
     "service_product_candidates": ["逐项登记所引用的“综合金融机会”类 OPP、产品匹配逻辑、合作缺口和开场话术"],

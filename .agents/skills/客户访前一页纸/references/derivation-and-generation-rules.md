@@ -1,6 +1,6 @@
 <!-- resource-id: cisp://skill/client-pre-visit-one-pager/derivation-and-generation-rules -->
 <!-- resource-version: 0-dev -->
-<!-- source-skill-version: v4.3-unified-risk -->
+<!-- source-skill-version: v4.4-summary-lines -->
 
 # 派生字段与报告文案生成规则
 
@@ -134,14 +134,18 @@ D.core_viewpoint =
 
 1. 先生成 `D.executive_core_features`，用 2 至 4 项已核实事实概括客户身份、经营阶段、近期关键转折和贷款营销价值，80 至 160 字；至少一项来自内部主体事实。不得在本段提前推荐产品、作授信判断或重复机会表。
 2. 从内部事实、外部正文、搜索摘要、行业机制、品牌荣誉、注册资本、员工数量、扩张计划、招聘、门店、产能、政策、历史事件和模型分析中全量构建机会候选，全部进入 `opportunity_register`。`opportunity_type` 只允许三种值：贷款或融资路径、可能用途及企业专属触发较明确者标为“贷款机会”；缺少用途、金额、期限、承担主体或还款闭环者标为“融资线索”；存款、结算、现金管理、票据、收单、代发、个人金融、银行卡、托管、跨境、投行、保险等贷款之外的服务标为“综合金融机会”。“贷款机会”只表示融资触发与用途路径较完整，不表示已满足准入或授信条件；“融资线索”仍表示尚待核实；“综合金融机会”仍表示贷款之外的金融服务。
-3. 每个 OPP 完整记录 `opportunity_type`、`opportunity_title`、`trigger_signal`、`financial_direction`、`timing`、`evidence_strength`、`boundary`、`fit_logic`、`verification_focus` 和 `evidence_ids`。允许 `仅摘要`、`模型推断` 和 `未知`，缺失字段转成核验问题，不阻止创建编号。
+3. 每个 OPP 完整记录 `opportunity_type`、`opportunity_title`、`executive_summary_sentence`、`trigger_signal`、`financial_direction`、`timing`、`evidence_strength`、`boundary`、`fit_logic`、`verification_focus` 和 `evidence_ids`。允许 `仅摘要`、`模型推断` 和 `未知`，缺失字段转成核验问题，不阻止创建编号。
 4. 不设数量上限。同一触发事实支持不同用途、产品、客户角色、还款路径或业务团队时可以拆分；完全相同的重复项才合并。所有机会按 `OPP-01...` 唯一且连续编号，先按“贷款机会→融资线索→综合金融机会”排序，同类再按证据强度、时间新近性和业务相关性排序，并在全文保持稳定。
 5. `opportunity_register` 是唯一机会主数据。营销方案、推进路径、推荐话题、拜访问题和资料清单只引用 `OPP-xx`；贷款产品候选对应前两种机会类型，综合金融产品候选对应第三种机会类型。
 6. 全部风险、观察和风险相关待核实事项进入唯一 `risk_register`，`risk_type` 只允许三种值：直接且已核实、可能影响准入或推进的风险标为“已核实风险”；历史、关联、行业、人物、治理、弱来源、冲突和推断性风险标为“风险观察”；只有摘要、同名可能、资料缺口或正文无法核验的风险线索标为“待核实事项”。
-7. 每个 RISK 完整填写 `risk_type`、`risk_title`、`fact_or_signal_boundary`、`affected_opportunity_ids`、`possible_impact`、`evidence_strength`、`verification` 和 `evidence_ids`；无法绑定具体机会时标记企业级或行业级。
+7. 每个 RISK 完整填写 `risk_type`、`risk_title`、`executive_summary_sentence`、`fact_or_signal_boundary`、`affected_opportunity_ids`、`possible_impact`、`evidence_strength`、`verification` 和 `evidence_ids`；无法绑定具体机会时标记企业级或行业级。
 8. `risk_register` 是唯一风险主数据。所有条目按 `RISK-01...` 唯一且连续编号，先按“已核实风险→风险观察→待核实事项”排序，同类再按证据强度、时间新近性和业务相关性排序；风险章节、问题和材料只引用该编号。
 9. 生成 `D.executive_visit_strategy`，覆盖优先的“贷款机会”类 OPP、值得追问的“融资线索”类 OPP、可快速切入的“综合金融机会”类 OPP、必须先处理的“已核实风险”类 RISK，以及需温和核实的“风险观察”和“待核实事项”类 RISK；不限制条目数量，但摘要正文优先展示相关性最高的项目并指向后文全量台账。
-10. 执行摘要展示完整编号台账；模型推断附“模型分析假设”。
+10. 执行摘要只展示完整编号索引，不展示详细台账。每个 OPP 和 RISK 分别生成一条 `executive_summary_sentence`，通常使用 15 至 55 个汉字，只表达一个中心意思，不在字段内写编号或句末标点：
+    - OPP 固定采用“客户专属经营动作、资金触发或业务场景＋带来的金融需求、融资空间或综合金融机会”的表达方式；优先使用“存在……需求”“带来……需求”“形成……空间”等自然句式。
+    - RISK 固定采用“关键事实或风险来源＋风险、历史包袱或不确定性”的表达方式，可以是精简判断句或名词性短句，不展开影响传导和处置建议。
+    - 仅在有证据且能显著提高辨识度时保留一个关键金额、规模、数量或状态；不得堆叠多个数字，不写机会类型、风险类型、证据强度、完整来源、详细边界、影响机会、核验清单或产品参数，不使用分号串联多个判断。
+    - 模板统一在句末追加“（OPP-xx）”或“（RISK-xx）”。详细字段分别留在“机会台账深化”和“风险预警与合规提示”表格；模型推断的完整证据边界仍在后文标注“模型分析假设”。
 
 #### 4.9 保留客户全景画像
 

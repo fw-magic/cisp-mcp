@@ -1,6 +1,6 @@
 <!-- resource-id: cisp://skill/client-pre-visit-one-pager/report-template -->
 <!-- resource-version: 0-dev -->
-<!-- source-skill-version: v4.3-unified-risk -->
+<!-- source-skill-version: v4.4-summary-lines -->
 
 # 最终报告固定骨架
 
@@ -22,7 +22,7 @@
 > 2. 仅允许按骨架中已经写明的 `{{#if ...}}` 条件隐藏画像内部事实表或产业模块内的可选事实表；七个大章节不得隐藏或重编号。
 > 3. 不输出任何未被替换的占位符、条件标签、工具名、字段路径或内部状态。
 > 4. 表格某行所有事实字段均为空时删除该行；某条件板块无有效事实时隐藏整块。不得用模型常识、未通过准入的网页或示例值补齐。
-> 5. “核心观点”以内部主体为底座并引用优先 OPP/RISK；“执行摘要”固定展示核心特征、主要机会、主要风险和拜访建议，且在此首次定义全文唯一的 OPP/RISK 编号及其类型。
+> 5. “核心观点”以内部主体为底座并引用优先 OPP/RISK；“执行摘要”固定展示核心特征、主要机会、主要风险和拜访建议。主要机会和主要风险仅按编号各展示一句精简话，不使用表格、不重复后文详细字段；机会类型、风险类型、证据、边界和核验信息在后续台账展示。
 > 6. “客户全景画像”独立展示企业基本信息、关键决策人、股权、资产和核心经营数据；不得与产业画像合并。
 > 7. “产业画像与行业洞察”独立展示产业链位置、行业周期与资金占用、行业对标、政策融资环境和行业风险贷款启示；行业资料不足时保留章节并展示事实边界与核验问题，不生成空表。
 > 8. “定制化营销方案”固定展示机会台账深化、产品候选和推进路径。产品候选是营销假设，不是客户已确认需求或授信结论。
@@ -50,9 +50,9 @@
 ### 主要机会
 
 {{#if D.opportunity_register}}
-| 机会编号 | 主要机会 | 触发事实或信号 | 金融切入方向 | 研判与核验 | 机会类型 |
-| --- | --- | --- | --- | --- | --- |
-{{#each D.opportunity_register}}| **{{opportunity_id}}** | {{opportunity_title}} | {{trigger_signal}}；边界：{{boundary}} | {{financial_direction}} | {{timing}}；{{evidence_strength}}；{{verification_focus}} | {{opportunity_type}} |{{/each}}
+{{#each D.opportunity_register}}
+- {{executive_summary_sentence}}（**{{opportunity_id}}**）
+{{/each}}
 {{else}}
 现有资料尚未形成可列示的营销机会，本次拜访以融资需求、非贷款金融服务、用途、金额期限、还款来源和合作条件诊断为主，不创建模拟 OPP。
 {{/if}}
@@ -60,9 +60,9 @@
 ### 主要风险
 
 {{#if D.risk_register}}
-| 风险编号 | 主要风险 | 事实、信号与边界 | 影响机会 | 研判与核验 | 风险类型 |
-| --- | --- | --- | --- | --- | --- |
-{{#each D.risk_register}}| **{{risk_id}}** | {{risk_title}} | {{fact_or_signal_boundary}} | {{#if affected_opportunity_ids}}{{join affected_opportunity_ids|separator="、"}}{{else}}企业级{{/if}} | {{possible_impact}}；{{evidence_strength}}；{{verification}} | {{risk_type}} |{{/each}}
+{{#each D.risk_register}}
+- {{executive_summary_sentence}}（**{{risk_id}}**）
+{{/each}}
 {{else}}
 现有资料未形成可列示的风险、观察或待核实事项；这不等同于不存在风险，仍需取得基础准入资料并核验当前状态。
 {{/if}}
