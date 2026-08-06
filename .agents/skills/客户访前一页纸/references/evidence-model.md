@@ -1,6 +1,6 @@
 <!-- resource-id: cisp://skill/client-pre-visit-one-pager/evidence-model -->
 <!-- resource-version: 0-dev -->
-<!-- source-skill-version: v4.1-open -->
+<!-- source-skill-version: v4.3-unified-risk -->
 
 # 统一证据模型与业务维度整理规则
 
@@ -86,7 +86,7 @@
         "confidence": "高|中|低|未知",
         "relationship_path": "direct|verified_alias|two_hop|indirect|ambiguous",
         "time_state": "current|historical|undated|conflicting",
-        "inclusion_layer": ["FACT|OPP|LEAD|SERVICE|RISK|WATCH|QUESTION"],
+        "inclusion_layer": ["FACT|OPP|RISK"],
         "limitations": "正文、主体、时点、冲突或登录限制"
       }
     ],
@@ -113,7 +113,7 @@
         "relationship_source_ids": [],
         "identity_keys": [],
         "time_state": "current|historical|undated|conflicting",
-        "inclusion_layer": ["FACT|OPP|LEAD|SERVICE|RISK|WATCH|QUESTION"],
+        "inclusion_layer": ["FACT|OPP|RISK"],
         "limitations": null
       }
     ]
@@ -168,58 +168,29 @@
     "opportunity_register": [
       {
         "opportunity_id": "OPP-01",
-        "opportunity_title": "简洁、客户化的贷款机会名称",
-        "trigger_fact": "带日期或报告期、阶段和主体边界的企业专属融资触发",
-        "need_scenario": "流动资金周转|采购备货|订单履约|应收账款周转|项目建设|设备更新|并购重整|其他企业贷款场景",
-        "likely_use_of_funds": "由触发事实直接指向的可能贷款用途",
+        "opportunity_type": "贷款机会|融资线索|综合金融机会",
+        "opportunity_title": "简洁、客户化的机会名称",
+        "trigger_signal": "带日期或报告期、阶段和主体边界的企业专属触发事实或信号",
+        "financial_direction": "可能的贷款用途、融资需求或非贷款综合金融服务方向",
         "timing": "近期|中期|待核验",
-        "evidence_strength": "强线索|中线索|弱线索",
+        "evidence_strength": "强线索|中线索|弱线索|仅摘要|模型推断|未知",
         "boundary": "金额、阶段、执行状态或企业确认情况等必要边界",
+        "fit_logic": "触发事实或信号如何对应资金用途、融资路径或综合金融服务",
+        "verification_focus": "需核实的用途、金额、期限、承担主体、还款来源、现有合作或其他关键条件",
         "evidence_ids": ["internal:<字段或状态>", "external:Wn"]
       }
     ],
-    "lead_register": [
-      {
-        "lead_id": "LEAD-01",
-        "lead_title": "尚未形成完整融资闭环的需求发现线索",
-        "signal": "企业动作、行业传导、扩张、门店、招聘、政策、资产或资金循环信号",
-        "possible_financial_need": "可能对应的融资或综合金融需求",
-        "missing_links": "用途、金额、期限、还款来源、承担主体等缺口",
-        "evidence_strength": "强线索|中线索|弱线索|仅摘要|模型推断",
-        "evidence_ids": []
-      }
-    ],
-    "service_register": [
-      {
-        "service_id": "SERVICE-01",
-        "service_title": "非贷款综合金融机会",
-        "service_type": "存款|结算|现金管理|票据|收单|代发|银行卡|个人金融|托管|跨境|投行|保险|其他",
-        "trigger_signal": "客户专属或行业/人员规模等触发信号",
-        "fit_logic": "为什么值得在拜访中讨论",
-        "verification": "需核实的现状和合作条件",
-        "evidence_ids": []
-      }
-    ],
-    "major_risk_register": [
+    "risk_register": [
       {
         "risk_id": "RISK-01",
-        "risk_title": "会改变贷款准入、结构或推进顺序的主要风险",
-        "fact_boundary": "已核实事实、主体、日期或期间、当前状态与资料边界",
+        "risk_type": "已核实风险|风险观察|待核实事项",
+        "risk_title": "简洁、客户化的风险或待核实事项名称",
+        "fact_or_signal_boundary": "事实或信号、主体范围、日期或期间、来源、当前状态与不确定性边界",
         "affected_opportunity_ids": ["OPP-01"],
-        "loan_impact": "对相关机会的准入、用途、期限、还款、增信、资料或推进节奏的条件式影响",
+        "possible_impact": "对相关机会的准入、用途、期限、还款、增信、资料或推进节奏的条件式影响",
+        "evidence_strength": "已核实|强线索|中线索|弱线索|仅摘要|模型推断|未知",
         "verification": "需核实的当前状态、证明材料或缓释方向",
         "evidence_ids": ["internal:<归一化风险事实>", "external:Wn"]
-      }
-    ],
-    "watch_register": [
-      {
-        "watch_id": "WATCH-01",
-        "watch_title": "历史、关联、行业、人物、治理、弱来源或冲突风险观察",
-        "signal_boundary": "信号、主体范围、时点、来源与不确定性",
-        "possible_impact": "对经营、融资、准入或推进的潜在影响",
-        "verification": "核验问题或所需材料",
-        "evidence_strength": "强线索|中线索|弱线索|仅摘要|模型推断",
-        "evidence_ids": []
       }
     ],
     "executive_visit_strategy": "围绕优先 OPP、关键 RISK、建议切入点、必须核验事项和预期下一步形成的拜访建议",
@@ -301,18 +272,6 @@
     ],
     "industry_risk_interpretation": "行业风险经经营现金流传导后可能影响的用途、期限、还款或增信安排",
     "industry_information_boundary": "行业资料与企业专属经营事实、融资需求和授信准入之间的边界",
-    "financing_need_rows": [
-      {
-        "opportunity_id": "OPP-01",
-        "need_scenario": "贷款需求场景",
-        "trigger_fact": "带日期/报告期和阶段的企业专属触发事实",
-        "likely_use_of_funds": "由事实直接指向的可能贷款用途",
-        "timing": "近期|中期|待核验",
-        "evidence_strength": "强线索|中线索|弱线索",
-        "verification_focus": "为形成贷款方案必须现场确认的问题",
-        "evidence_ids": ["与 opportunity_register 中同一 OPP 完全一致的证据 ID"]
-      }
-    ],
     "loan_product_candidates": [
       {
         "priority": "首选|备选|观察",
@@ -328,7 +287,7 @@
     "service_product_candidates": [
       {
         "priority": "首选|备选|观察|探索",
-        "service_id": "SERVICE-01",
+        "opportunity_id": "OPP-01",
         "product_family": "存款|结算|现金管理|票据|收单|代发|银行卡|个人金融|托管|跨境|投行|保险|其他综合金融产品",
         "fit_logic": "触发信号→客户场景→产品或服务的匹配逻辑",
         "qualification_gaps": "现有合作、授权、交易规模、系统和合规缺口",
@@ -341,7 +300,6 @@
       {"stage": "后续推进", "related_opportunity_ids": ["OPP-01"], "related_risk_ids": [], "objective": "提交正式业务流程", "actions": "按银行制度推进", "exit_criteria": "客户授权且基础资料齐备"}
     ],
     "marketing_boundary": "产品方向均为访前营销假设，具体产品名称、额度、期限、利率、担保和准入以目标银行制度及审批为准",
-    "has_risks": false,
     "risk_evidence_groups": {
       "subject_compliance": {"status": "hit|context|empty|unavailable", "facts": []},
       "judicial_enforcement": {"status": "hit|context|empty|unavailable", "facts": []},
@@ -353,16 +311,6 @@
       "industry_and_market": {"status": "hit|context|empty|unavailable", "facts": []},
       "public_event_clues": {"status": "hit|context|empty|unavailable", "facts": []}
     },
-    "risks": [
-      {
-        "risk_id": "RISK-01",
-        "affected_opportunity_ids": ["OPP-01"],
-        "topic": "关注事项",
-        "detail": "已核实事实、主体、日期/期间、状态和范围边界",
-        "sales_implication": "对产品准入、担保结构、期限、资料或推进顺序的条件式影响",
-        "verification": "应核实的当前状态、证明材料或可讨论缓释方向"
-      }
-    ],
     "risk_zero_dimensions": "以、连接的明确零值维度",
     "risk_compliance_context": "最新纳税评级、明确许可状态及必要的时间边界",
     "risk_information_boundary": "以业务语言说明无明细、时间较早、资料缺失或不同范围不可合并",
@@ -396,7 +344,7 @@
     "core_visit_focus": ["支持核验重点的 internal:<事实和数据缺口> 或 external:Wn"],
     "core_viewpoint": ["逐句登记上述核心观点分项实际使用的 internal:<字段或状态> 与 external:Wn"],
     "core_opportunity_ids": ["逐项回指 opportunity_register 中实际进入核心观点的 OPP 编号"],
-    "core_risk_ids": ["逐项回指 major_risk_register 中实际进入核心观点的 RISK 编号"],
+    "core_risk_ids": ["逐项回指 risk_register 中实际进入核心观点的 RISK 编号"],
     "coverage_summary": ["internal:META 中各业务维度状态和 web_search_status"],
     "source_attributions": ["逐章节登记实际显示的内部业务维度和 external:Wn；外部 ID 必须存在于 WEB.sources"],
     "person_rows": ["逐行登记姓名和职务对应的 internal:B.personList 或 internal:B.basicList[0].legRepName；背景事实另登记 external:Wn"],
@@ -422,18 +370,13 @@
     "operations_boundary": ["internal:FIN_LISTED.mainfinadata 状态、有效年度报告选择结果和必要的信息边界"],
     "operations_interpretation": ["实际展示的 internal:<核心经营数据字段和选定报告期>"],
     "executive_core_features": ["逐句登记支持客户身份、经营阶段、近期转折和拜访价值的 internal:<字段> 或 external:Wn"],
-    "opportunity_register": ["逐项登记 OPP 的企业专属触发、日期或报告期、阶段、用途、边界及 internal:<字段> 或 external:Wn"],
-    "lead_register": ["逐项登记 LEAD 的信号、推断链、缺失环节及 internal:<字段>、external:Wn 或 candidate:Cn"],
-    "service_register": ["逐项登记 SERVICE 的综合金融触发、匹配逻辑及 internal:<字段>、external:Wn 或 candidate:Cn"],
-    "major_risk_register": ["逐项登记 RISK 的归一化风险事实、主体、时点、状态、受影响 OPP 和 internal:<字段> 或 external:Wn"],
-    "watch_register": ["逐项登记 WATCH 的历史、关联、行业、人物、冲突、弱来源或推断线索及证据状态"],
+    "opportunity_register": ["逐项登记 OPP 的机会类型、触发事实或信号、金融切入方向、时点、证据强度、边界、匹配逻辑、核验重点及 internal:<字段>、external:Wn 或 candidate:Cn"],
+    "risk_register": ["逐项登记 RISK 的风险类型、事实或信号、主体、时点、状态、证据强度、受影响 OPP、可能影响、核验方向及 internal:<字段>、external:Wn 或 candidate:Cn"],
     "executive_visit_strategy": ["登记支持优先 OPP、关键 RISK、切入点、核验事项和下一步的事实及信息缺口"],
-    "financing_need_rows": ["逐行回指 opportunity_register 中同一 OPP，触发事实、用途、时点、强度和证据不得改变"],
     "loan_product_candidates": ["逐项登记所引用的融资需求行、还款来源、增信线索和准入缺口证据"],
-    "service_product_candidates": ["逐项登记所引用的 SERVICE、产品匹配逻辑、合作缺口和开场话术"],
+    "service_product_candidates": ["逐项登记所引用的“综合金融机会”类 OPP、产品匹配逻辑、合作缺口和开场话术"],
     "marketing_sequence": ["逐阶段登记关联 OPP、RISK 及由候选产品与缺口导出的推进动作"],
     "risk_evidence_groups": ["逐组登记实际使用的 internal:B/OV_RISK/OV_TAX/LAND/LIC/HON/FIN_LISTED/OP 或 external:Wn 及主体、时间、状态和范围"],
-    "risks": ["逐行回指 major_risk_register 中同一 RISK 及其 affected_opportunity_ids，不以原始响应临场新增或改号"],
     "risk_compliance_context": ["实际使用的 internal:OV_TAX/LIC/HON 字段及其年份、有效期和状态边界"],
     "risk_information_boundary": ["internal:<明细可用性、时间范围、非上市公司财务资料状态及不可合并范围> 或 external:Wn"],
     "risk_interpretation": ["实际进入风险表和合规提示的 internal:<归一化事实> 或 external:Wn"],
@@ -449,8 +392,8 @@
 整理规则：
 
 - `B`、`ID`、`OV_*`、`LAND`、`IND`、`REL`、`FIN_*`、`TM` 至 `OP` 保存对应工具的必要原值；`REL` 必须先删除个人证件号。`WEB.candidates` 保存全部搜索候选和打开状态，`WEB.sources` 保存能打开的页面；除重复、无关、敏感或恶意内容外不删除候选。`D` 保存事实、线索、综合金融机会、风险观察、问题和受约束推断。
-- 工商深度成功后，七个业务模块固定显示。`opportunity_register`、`lead_register`、`service_register`、`major_risk_register`、`watch_register` 和 `visit_questions` 共同构成开放线索池。没有直接融资触发时，仍可从经营结构、行业传导、扩张、人员规模、政策、历史事件或模型分析建立 LEAD/SERVICE/WATCH/QUESTION；不得用模拟数据补事实。
-- `opportunity_register/lead_register/service_register` 是机会主数据，`major_risk_register/watch_register` 是风险主数据。后续章节按编号引用；发现新证据时可以新增、拆分、合并或重排，但必须同步更新全文引用和审计映射。
+- 工商深度成功后，七个业务模块固定显示。`opportunity_register`、`risk_register` 和 `visit_questions` 共同构成开放线索池。没有直接融资触发时，仍可从经营结构、行业传导、扩张、人员规模、政策、历史事件或模型分析建立“融资线索”或“综合金融机会”类 OPP，也可建立相应风险类型的 RISK；不得用模拟数据补事实。
+- `opportunity_register` 是唯一机会主数据，`risk_register` 是唯一风险主数据。所有营销机会统一按 `OPP-01...` 连续编号，所有风险、观察和风险相关待核实事项统一按 `RISK-01...` 连续编号；发现新证据时可以新增、拆分、合并或重排，但必须同步更新全文引用和审计映射。
 - 大章节编号固定为“一、核心观点 → 二、执行摘要 → 三、客户全景画像 → 四、产业画像与行业洞察 → 五、定制化营销方案 → 六、风险预警与合规提示 → 七、拜访建议与话题清单”。客户画像与产业画像必须彼此独立；行业事实表仍可按证据显隐，但不得隐藏、跳号、重号或更名七个大章节；“报告使用说明”不编号。
 - `D.has_core_operations` 在工商主体确认后固定为 `true`，用于确保财务数据不足时仍显示业务提示；其他 `D.has_*` 只在对应板块至少存在一项有效内部事实或本 Skill 明确允许的合格外部事实时设为 `true`，不得为了保留版面而设为 `true`。
 - `D.source_attributions.<section>.internal_dimensions[]` 列实际提供事实或资料缺口的内部业务维度；`external_source_ids[]` 可以同时登记 `Wn` 与 `Cn`。同一来源可以跨人物、股权、资产、营销、风险与拜访章节复用，不受单一 scope 限制。
@@ -461,17 +404,17 @@
 - `D.has_equity_or_network=true` 在存在内部股东、外部股东候选、历史股东、关系网络、实控人/最终受益人候选或资料缺口时成立。`REL` 和外部页面均可扩展关联主体、持股和控制关系候选，并标明口径与置信度。
 - 关键决策人不设数量上限。内部人员、法定代表人、外部管理层候选、历史管理层、股东代表和公开活动中的关键角色均可进入 `D.person_rows[]`，以 `person_origin` 区分来源。
 - 人物背景可以来自直接关系页或两跳身份桥接。每项背景登记关系来源、履历来源、身份键、置信度和冲突；企业官网、交易所、原任职机构年报、高校、媒体、百科、社交账号均可采用并按等级标注。
-- 内外部职务冲突时分列“内部当前口径”“外部披露口径”和日期，不覆盖、不删除。历史任职、教育、专业、创业、行业经验、公开职责、访谈观点和可能决策角色均可展示；推断的决策角色标为 WATCH/QUESTION。
+- 内外部职务冲突时分列“内部当前口径”“外部披露口径”和日期，不覆盖、不删除。历史任职、教育、专业、创业、行业经验、公开职责、访谈观点和可能决策角色均可展示；推断的决策角色标为“风险观察”或“待核实事项”类 RISK。
 - 没有外部背景时保留人员并生成针对该人的背景核验问题；仅有弱来源时照常展示并标记低置信度。
 - 有形资产与无形资产均全量展示，不设代表项数量上限；分页元数据和实际明细数量分别说明。
 - 荣誉资质只展示本报告采纳的代表记录数量，不得称全量，不得使用“返回”描述。
 - 舆情不设数量上限，保留标题、日期、来源、情感标签、主体关系和证据状态。目标企业为主体、关联主体、概念股、行业举例、顺带提及、同名可能或纯市场价格波动均可进入不同层级；只有完全重复项去重。
-- 企业风险先按“主体与行政合规 → 司法与执行 → 股权及资产权利负担 → 税务与许可合规 → 财务经营关注 → 近期公开事件”六组归一化到 `D.risk_evidence_groups`，再生成 `D.risks[] = {topic, detail, sales_implication, verification}`；禁止让大模型直接读取原始响应临场分类。
+- 企业风险先按“主体与行政合规 → 司法与执行 → 股权及资产权利负担 → 税务与许可合规 → 财务经营关注 → 交易条款 → 关联方与治理 → 行业与市场 → 近期公开事件”九组归一化到 `D.risk_evidence_groups`，再生成唯一 `D.risk_register`；禁止让大模型直接读取原始响应临场分类。
 - 风险事实只写目标企业自身记录；关联主体、股东或人员记录必须单独标明主体范围，不得并入企业自身失信、执行或债务结论。只有明确大于零的统计、非空且主体范围可确认的风险列表、明确异常的许可或资质状态、选定年度财务记录中的直接负值或合格的目标企业自身负面舆情才能进入风险表。
-- 明确为零、纳税评级和许可状态均可进入 RISK/WATCH 或合规观察；零值只能说明对应统计范围内记录数为零，不能证明无风险。
+- 明确为零、纳税评级和许可状态均可按证据状态进入相应风险类型的 RISK 或合规观察；零值只能说明对应统计范围内记录数为零，不能证明无风险。
 - `D.visit_questions[]` 必须按“经营与计划 → 融资用途 → 金额与期限 → 还款来源 → 现有融资 → 增信资源 → 风险化解 → 合作意愿”的漏斗排序。每个问题都要写明建议沟通对象、已知依据和答案对候选产品的影响；不得预设答案，不得把公开线索写成客户已确认需求。
 - `D.coverage_summary` 只用工商登记、关键决策人及公开职业背景、股权与关联关系、上市公司财务、土地及外部设施资产、行业统计与排名、知识产权、备案许可、荣誉资质、纳税评级、近期公开动态、外部企业动态、外部行业背景和近两年风险等业务名称概括资料范围；内部已覆盖内容写“报告已覆盖……”，内部无可展示内容写“公开资料中暂无可供展示的……”，内部失败写“相关资料尚待补充”。`WEB.status="empty"` 时写“外部公开资料未形成可用补充”，`WEB.status="unavailable"` 时写“外部公开资料检索尚待补充”。不得出现企业 ID 解析、工商简项、产品码、工具名、内部别名或原始状态代码。
-- “客户全景画像”与“产业画像与行业洞察”可以同时使用内部、外部、候选和模型分析；外部行业定量、竞争对手、上下游、市场与政策信息可以映射为 OPP/LEAD/SERVICE/RISK/WATCH，必须标明从行业到企业的传导假设。
+- “客户全景画像”与“产业画像与行业洞察”可以同时使用内部、外部、候选和模型分析；外部行业定量、竞争对手、上下游、市场与政策信息可以映射为相应类型的 OPP 或 RISK，必须标明从行业到企业的传导假设。
 - `D.risk_interpretation` 始终必填；有命中时总结事实、范围、贷款营销影响和需核实事项，无命中时说明资料边界与基础准入材料要求，不评级、不推演未来损失。
 - 每个非空 `D` 文案字段都必须在 `EVIDENCE` 中登记来源；内部来源写成 `internal:B/ID/OV_*/LAND/IND/REL/FIN_*/TM...OP.<字段或状态>`，外部来源写成 `external:Wn`。任何 `external:Wn` 都必须能在 `WEB.sources` 找到完整元数据并出现在对应章节的 `D.source_attributions.<section>.external_source_ids[]`。
 
@@ -479,7 +422,7 @@
 
 1. 本节展示内部直接股东、外部当前股东候选、历史股东、多层穿透、实际控制人、最终受益人、一致行动、表决权、管理人、出资人、关联交易和控制关系分析，不设层级或数量上限。
 2. 内部 `B.shareholderList[]` 原值逐条保留；外部名称、比例、认缴额、出资日期和控制关系作为独立外部口径进入同表或附表。允许计算合计、集中度和穿透比例，但必须展示公式和输入来源。
-3. 一级至四级来源、搜索摘要和模型推断均可生成股东或控制关系候选；分别标记证据状态、关系路径、时点和置信度。名称推断、机构性质推断和控制权推断允许进入 WATCH/QUESTION。
+3. 一级至四级来源、搜索摘要和模型推断均可生成股东或控制关系候选；分别标记证据状态、关系路径、时点和置信度。名称推断、机构性质推断和控制权推断允许进入“风险观察”或“待核实事项”类 RISK。
 4. 历史与当前信息分列；内外部冲突全部保留并标记 `conflicting`，不得删除任何一方。只有完全重复项去重。
 5. `D.has_shareholder_notes=true` 在存在任何外部说明、推断、冲突或资料缺口时成立。缺少说明的行显示“暂无补充”，不得隐藏其他行。
 6. `D.equity_interpretation` 可以分析集中度、控制权、支持能力、关联交易和治理影响，但必须区分事实、外部口径和模型分析。
@@ -488,7 +431,7 @@
 #### 有形资产生成规则
 
 1. `D.tangible_asset_rows[] = {asset_type, fact, boundary, source_ids}`，不设数量上限。土地、建筑、设施、设备、产线、项目、地址、门店、服务网点、分支、展厅、客户现场、招商、产能、经营范围和一般资产宣传均可进入，按证据状态和资产明确程度排序。
-2. 直接描述具体资产的进入 FACT；行业、经营范围、注册地址、网站、分支、资本、许可、荣誉、知识产权、招投标、客户项目和一般产品信息可以形成资产 LEAD，不作硬排除。
+2. 直接描述具体资产的进入 FACT；行业、经营范围、注册地址、网站、分支、资本、许可、荣誉、知识产权、招投标、客户项目和一般产品信息可以形成“融资线索”类 OPP，不作硬排除。
 3. 内部土地记录按页码顺序全量合并；只删除 JSON 内容完全一致的重复对象。每条记录均可成行，并可计算面积、成交价格和抵押金额合计，显示公式、口径和重复处理方法。
 4. 土地供应记录按可解析的 `supplyArea` 从大到小排序，面积相同时按有效 `contractDate` 从新到旧排序；土地出让按 `landArea` 从大到小、再按 `pubDate` 从新到旧排序；土地抵押按 `pubDate`、再按 `boardStartDate` 从新到旧排序。排序只决定展示顺序，不删除任何记录或字段，解析值不得替换原值。执行摘要可以引用排序靠前的代表记录，完整资产表必须保留全部记录及全部有值字段。
 5. `B` 中的工商抵押、司法协助或其他记录无论是否写明具体抵押物均进入资产或权利负担表；对象不明时标记“资产对象待核验”。
@@ -496,11 +439,11 @@
 7. 外部事实可以展示设施名称、位置、证号、宗地编号、面积、价格、投资额、账面/评估价值、产能、设备数量、抵押金额和权属口径；来源之间分列，企业自述和平台数值注明未独立核验。
 8. 企业官网内容必须写“企业官网披露”，并在 `boundary` 写明“企业自述仅确认公开披露的设施或使用场景，不证明产权、租赁关系、账面价值或当前状态”。政府、监管、规划或交易所页面只确认其直接披露的审批、备案、建设、交易或公告节点；未明确完工、投产、使用或持有时不得升级状态。
 9. 历史外部页面必须保留原始日期并写成“于{日期}披露/备案/公告”；不得据此使用“现有”“目前”“正在”“已投产”等当前时态。外部来源之间或与内部记录冲突时优先直接一级原始页面作为主口径，同时完整保留其他口径并列写入 `boundary`，不由模型选择性删除产权、面积或状态信息。
-10. 地址、行业、经营范围、门店、服务网络、终端数量、分支、展厅、客户现场、合作园区、产品交付、订单、融资、荣誉、招商、“建设基地”“计划投资”和“拟购置设备”均可进入资产线索；不证明产权或当前状态时明确标为 LEAD。
+10. 地址、行业、经营范围、门店、服务网络、终端数量、分支、展厅、客户现场、合作园区、产品交付、订单、融资、荣誉、招商、“建设基地”“计划投资”和“拟购置设备”均可进入资产线索；不证明产权或当前状态时，其金融机会明确标为“融资线索”类 OPP。
 11. 土地供应、土地出让只称“公开土地记录”或“涉及土地供应/土地出让”，不得称为当前产权、当前持有土地或自有土地；土地抵押和具体抵押物只说明公开登记事实，不得推导当前仍有效、已经解除、资产价值或企业偿债能力。不得用任何内部或外部事实推导“轻资产”“重资产”“自有房产”“自有厂房”或“资产实力”。
 12. `D.has_assets=true` 仅在 `D.tangible_asset_rows` 至少一行，或任一无形资产事实非空时成立。有形资产没有合格事实、但存在无形资产时，仅显示无形资产；两者均为空时隐藏整个资产章节。不得为了保留“有形资产”标题输出空段、通用边界句或“暂无记录”。
 13. `D.assets_interpretation` 接收全部资产事实、线索、地址、经营范围、行业、注册资本、项目宣传、估值和资料缺口，按证据状态分层解释。
-14. `EVIDENCE.tangible_asset_rows` 逐行登记 `internal:LAND/B.<字段>`、`external:Wn` 或 `candidate:Cn`、主体、日期、对象、边界、计算和证据状态；空结果、失败状态和未打开候选也可支持资料缺口或 QUESTION。
+14. `EVIDENCE.tangible_asset_rows` 逐行登记 `internal:LAND/B.<字段>`、`external:Wn` 或 `candidate:Cn`、主体、日期、对象、边界、计算和证据状态；空结果、失败状态和未打开候选也可支持资料缺口或“待核实事项”类 RISK。
 
 #### 产业画像生成规则
 
@@ -515,14 +458,14 @@
 5. `IND.query_scope.region_id/nic_id` 及各行业记录的 `regionId/nicId` 仅用于查询、范围一致性核验和 `EVIDENCE`，禁止进入最终报告。不得显示“三级行业C382”“行业代码 C382”或在中文行业名后括注内部编码。
 6. `financialRegionRank` 和其他行业数据全量展示有效及缺失记录，可计算企业数变化、市场结构、增长率和景气观察；所有计算显示期间、范围和公式。
 7. `locfin.data[]` 全量保留并展示全部记录、字段、零值、缺失值、异常值和冲突值；分别标记 `valid|zero|missing|anomalous|conflicting`。金额保留“万元”单位和原始精度，比率按精确百分比规则展示。没有年度字段时固定标注“时间未标明；以{D.industry_scope_display}范围为准”，跨口径比较必须同时显示不可比边界。
-8. `property.data[]` 全量保留全部排名、行业平均值、知识产权维度和 `*RankFour` 字段。有效正整数可直接进入行业对标；零值、空值、非正整数、未知四分位定义或异常值进入 WATCH/QUESTION，并保留原字段名、原值和口径限制，不因无法解释而省略。
+8. `property.data[]` 全量保留全部排名、行业平均值、知识产权维度和 `*RankFour` 字段。有效正整数可直接进入行业对标；零值、空值、非正整数、未知四分位定义或异常值进入“风险观察”或“待核实事项”类 RISK，并保留原字段名、原值和口径限制，不因无法解释而省略。
 9. `indLocOpr.data[]` 全年度、全指标展示，不设行数上限；零值、正值、缺失和冲突均可进入行业观察，并注明不能由零值证明无风险。
 10. `D.industry_cycle_rows[]` 接收内部、外部、候选和模型分析中的全部周期、季节、库存、账期、回款和资本开支信号；缺项不阻止成行。
 11. `D.industry_benchmark_rows[]` 接收跨年度、跨地区、跨口径的内部与外部排名、竞争对手、营收、销量、产能、市场份额和评价；必须显示可比性差异和来源口径。
 12. `D.industry_policy_rows[]` 接收现行、历史、拟议、政府、媒体、协会、平台和摘要中的政策或融资环境线索；标明有效期、适用范围和证据状态。可以分析企业可能适用性和申报路径，但不得把分析写成银行正式审批结果。
 13. `D.industry_risk_rows[]` 接收内部、外部、候选摘要和模型分析中的全部行业风险；即使缺少传导或企业指标也保留该行，并把缺项转为核验问题。
 14. `D.industry_external_context` 接收所有行业来源和候选，可展示市场规模、CAGR、市场份额、竞争对手经营值、上下游名单及对企业的映射；外部事实与模型映射分列。
-15. 行业事实可以单独形成 LEAD、SERVICE、WATCH，也可以形成观察级 OPP 或产品探索建议；缺少企业专属事实时标明“行业到企业的传导假设”和需核验条件。
+15. 行业事实可以单独形成“融资线索”或“综合金融机会”类 OPP，也可形成“风险观察”类 RISK 或产品探索建议；缺少企业专属事实时标明“行业到企业的传导假设”和需核验条件。
 16. `EVIDENCE.industry_*` 逐项登记实际进入表格和文案的 `internal:B/IND` 字段、采用年度与地区行业范围及 `external:Wn`；`EVIDENCE.industry_scope_display` 同时登记中文地区名、中文行业名的内部来源字段和仅用于一致性核验的代码字段。未显示的排名、平均值、比率、空结果、失败状态和未采用网页不得作为行业结论证据。每行行业表都必须能够回指最小事实证据、范围和期间。
 
 #### 核心经营数据生成规则
@@ -550,15 +493,15 @@
    - `empty`：对应工具成功且该组明确无可展示记录；
    - `unavailable`：工具失败、未调用或无法确认主体。
 2. 主体与行政合规使用 `B.basicList[0].orgStatus`、`exceptionList`、`illegalList`、`caseInfoList`、`liquidations`，以及许可、资质中明确写明撤销、吊销、注销、暂停、失效、过期、异常或整改的记录。主体状态正常、列表为空或许可明确有效只作为背景，不生成“合规良好”“无行政风险”等结论。
-3. 司法与执行同时接收 `OV_RISK.list[0]`、`B.dishonestList`、`executedList`、法院/监管页面、媒体、平台和搜索摘要。主体自身、人员、股东、历史股东及关联主体分别标注关系路径；目标企业直接记录进入 RISK，其他主体记录进入 WATCH。统计与明细分列，可提供去重前总量、去重后事项数及去重方法，但不静默覆盖冲突值。
+3. 司法与执行同时接收 `OV_RISK.list[0]`、`B.dishonestList`、`executedList`、法院/监管页面、媒体、平台和搜索摘要。主体自身、人员、股东、历史股东及关联主体分别标注关系路径；目标企业直接记录归入“已核实风险”类 RISK，其他主体记录归入“风险观察”类 RISK。统计与明细分列，可提供去重前总量、去重后事项数及去重方法，但不静默覆盖冲突值。
 4. 股权及资产权利负担使用 `B.sharFrozList`、`sharePledgList`、`mortReg`、mortgage、judicial aid 和 `LAND.tddy.records[]`。股东质押记录写成“股东股权质押”，不得写成企业自身债务；股权冻结、司法协助和同一案号、金额、日期对应的记录可能指向同一事项，只分别说明各列表列示数量，不得相加为风险总数。没有明确注销、解除或当前状态时，只写登记日期、期限和公开状态，不得写“当前有效”“已经解除”。
-5. 税务与许可合规接收内部记录、税务/监管原始公告、媒体、平台和摘要线索；历史评级、欠税、许可状态和冲突口径均展示。原始公告进入 RISK，单一媒体或平台进入 WATCH，摘要进入 QUESTION。
+5. 税务与许可合规接收内部记录、税务/监管原始公告、媒体、平台和摘要线索；历史评级、欠税、许可状态和冲突口径均展示。原始公告归入“已核实风险”类 RISK，单一媒体或平台归入“风险观察”类 RISK，摘要归入“待核实事项”类 RISK。
 6. 财务经营关注同时接收内部财务、法定披露、企业自述、媒体数值、平台数值和模型测算。各口径分列并可计算派生比率、趋势和压力情景；所有计算显示公式、输入和口径，外部或推算结果不得冒充内部审计数据。
-7. 交易条款组接收关联交易、定价、付款、账期、退货、退款、回购、担保、质押、排他、终止、违约、验收、付款义务人和回款账户等事实或线索；凡可能改变第一还款来源、现金流闭环或授信结构，均可形成 RISK 或 WATCH。
-8. 关联方与治理组接收股东、历史股东、实控人候选、管理层履历、跨界经营、关联主体债务、控制权冲突、关键人依赖和决策链不清等事实或分析；行业与市场组接收需求、价格、库存、渠道、竞争、政策和区域风险。直接事实进入 RISK，间接或分析性内容进入 WATCH。
+7. 交易条款组接收关联交易、定价、付款、账期、退货、退款、回购、担保、质押、排他、终止、违约、验收、付款义务人和回款账户等事实或线索；凡可能改变第一还款来源、现金流闭环或授信结构，均可按证据状态形成相应风险类型的 RISK。
+8. 关联方与治理组接收股东、历史股东、实控人候选、管理层履历、跨界经营、关联主体债务、控制权冲突、关键人依赖和决策链不清等事实或分析；行业与市场组接收需求、价格、库存、渠道、竞争、政策和区域风险。直接事实归入“已核实风险”类 RISK，间接或分析性内容归入“风险观察”类 RISK。
 9. 近期公开事件接收所有内部舆情、外部正文、搜索摘要、行情、概念股、行业评论、顺带提及和无详情标题；按主体关系与证据状态分层，不作硬排除。
-10. 九组整理完成后，所有 `hit` 事实进入 `major_risk_register`，所有 `context`、间接、历史、行业、人物、冲突、弱来源和模型推断进入 `watch_register`。不设数量上限；仅完全重复项去重。允许输出严重、高、中、低、观察等分析等级，但必须同时显示评级依据和非审批结论边界。
+10. 九组整理完成后，全部风险内容进入唯一 `risk_register`：直接且已核实的风险事实标为“已核实风险”，`context`、间接、历史、行业、人物、冲突、弱来源和模型推断标为“风险观察”，只有摘要、同名可能、资料缺口或正文无法核验的标为“待核实事项”。全部按 `RISK-01...` 连续编号，不设数量上限；仅完全重复项去重。允许输出严重、高、中、低、观察等分析等级，但必须同时显示评级依据和非审批结论边界。
 11. `D.risk_compliance_context` 汇总内部和外部税务、许可、资质背景及冲突；没有事实时登记资料缺口。
-12. 近两年统计中的明确数字 `0`、空字符串、`null`、失败和未调用均可作为资料状态进入说明或 QUESTION，但不得把非零未知改写为零。
-13. `D.risk_interpretation` 接收全部风险组、RISK、WATCH、资料缺口、冲突和模型分析，按“事实/线索 → 主体与时点 → 可能影响 → 核验材料”生成。
+12. 近两年统计中的明确数字 `0`、空字符串、`null`、失败和未调用均可作为资料状态进入说明或“待核实事项”类 RISK，但不得把非零未知改写为零。
+13. `D.risk_interpretation` 接收全部风险组、统一 RISK 台账、资料缺口、冲突和模型分析，按“事实/线索 → 主体与时点 → 可能影响 → 核验材料”生成。
 14. `EVIDENCE.risk_*` 逐组、逐行登记 `internal:<字段>`、`external:Wn` 或 `candidate:Cn`；统计与明细不一致、跨列表重复、内外部冲突和状态未知均保留并显式展示。

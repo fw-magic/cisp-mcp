@@ -1,6 +1,6 @@
 <!-- resource-id: cisp://skill/client-pre-visit-one-pager/report-template -->
 <!-- resource-version: 0-dev -->
-<!-- source-skill-version: v4.1-open -->
+<!-- source-skill-version: v4.3-unified-risk -->
 
 # 最终报告固定骨架
 
@@ -14,7 +14,7 @@
 
 ## 报告输出格式（严格填空骨架 · 模型只填值、不造结构）
 
-> **使用约定**：以下是贷款及综合金融营销版完整报告骨架。七个大章节固定显示，模型使用内部原值、外部来源、候选摘要和分层分析填充 FACT/OPP/LEAD/SERVICE/RISK/WATCH/QUESTION。
+> **使用约定**：以下是贷款及综合金融营销版完整报告骨架。七个大章节固定显示，模型使用内部原值、外部来源、候选摘要和分层分析填充 FACT/OPP/RISK；全部贷款机会、融资线索和非贷款综合金融机会均使用 OPP-xx 统一编号，全部已核实风险、风险观察和待核实事项均使用 RISK-xx 统一编号。
 >
 > **结构纪律**：
 >
@@ -22,10 +22,10 @@
 > 2. 仅允许按骨架中已经写明的 `{{#if ...}}` 条件隐藏画像内部事实表或产业模块内的可选事实表；七个大章节不得隐藏或重编号。
 > 3. 不输出任何未被替换的占位符、条件标签、工具名、字段路径或内部状态。
 > 4. 表格某行所有事实字段均为空时删除该行；某条件板块无有效事实时隐藏整块。不得用模型常识、未通过准入的网页或示例值补齐。
-> 5. “核心观点”以内部主体为底座并引用优先 OPP/RISK；“执行摘要”固定展示核心特征、主要机会、主要风险和拜访建议，且在此首次定义全文唯一的 OPP/RISK 编号。
+> 5. “核心观点”以内部主体为底座并引用优先 OPP/RISK；“执行摘要”固定展示核心特征、主要机会、主要风险和拜访建议，且在此首次定义全文唯一的 OPP/RISK 编号及其类型。
 > 6. “客户全景画像”独立展示企业基本信息、关键决策人、股权、资产和核心经营数据；不得与产业画像合并。
 > 7. “产业画像与行业洞察”独立展示产业链位置、行业周期与资金占用、行业对标、政策融资环境和行业风险贷款启示；行业资料不足时保留章节并展示事实边界与核验问题，不生成空表。
-> 8. “定制化营销方案”固定展示贷款需求线索、产品候选和推进路径。产品候选是营销假设，不是客户已确认需求或授信结论。
+> 8. “定制化营销方案”固定展示机会台账深化、产品候选和推进路径。产品候选是营销假设，不是客户已确认需求或授信结论。
 > 9. “风险预警与合规提示”固定显示；无风险命中时只展示资料边界与必要准入核验，不生成空表或低风险结论。“拜访建议与话题清单”固定显示并与营销机会编号闭环。
 > 10. `D.company_overview_facts` 或 `D.company_overview_fallback` 验收失败时按确定性规则重新构建；`D.core_internal_baseline` 验收失败时只允许基于同一事实白名单重写一次，仍失败则使用回退文本；`D.core_viewpoint` 验收失败时只基于已经通过证据验收的核心观点分项重新生成，禁止重新搜索或补造事实；其他必填总结字段生成失败时才重写对应大模型派生字段。不得交付缺少核心观点、执行摘要或已显示小节信息解读的报告。
 > 11. 数据来源仅在全文结尾汇总展示，位置固定在“报告使用说明”之前，使用骨架中的两列表格，不在各章节末尾重复展示。
@@ -50,39 +50,21 @@
 ### 主要机会
 
 {{#if D.opportunity_register}}
-| 机会编号 | 主要机会 | 企业专属触发事实 | 可能贷款用途 | 时点 | 证据强度 |
+| 机会编号 | 主要机会 | 触发事实或信号 | 金融切入方向 | 研判与核验 | 机会类型 |
 | --- | --- | --- | --- | --- | --- |
-{{#each D.opportunity_register}}| **{{opportunity_id}}** | {{opportunity_title}} | {{trigger_fact}}；边界：{{boundary}} | {{likely_use_of_funds}} | {{timing}} | {{evidence_strength}} |{{/each}}
+{{#each D.opportunity_register}}| **{{opportunity_id}}** | {{opportunity_title}} | {{trigger_signal}}；边界：{{boundary}} | {{financial_direction}} | {{timing}}；{{evidence_strength}}；{{verification_focus}} | {{opportunity_type}} |{{/each}}
 {{else}}
-现有资料尚未形成可核验的企业专属贷款机会，本次拜访以融资需求、用途、金额期限、还款来源和增信条件诊断为主，不创建模拟 OPP。
-{{/if}}
-
-{{#if D.lead_register}}
-| 线索编号 | 需求发现线索 | 可能金融需求 | 尚缺环节 | 证据强度 |
-| --- | --- | --- | --- | --- |
-{{#each D.lead_register}}| **{{lead_id}}** | {{lead_title}}：{{signal}} | {{possible_financial_need}} | {{missing_links}} | {{evidence_strength}} |{{/each}}
-{{/if}}
-
-{{#if D.service_register}}
-| 服务编号 | 综合金融机会 | 类型 | 触发信号 | 核验方向 |
-| --- | --- | --- | --- | --- |
-{{#each D.service_register}}| **{{service_id}}** | {{service_title}} | {{service_type}} | {{trigger_signal}}；{{fit_logic}} | {{verification}} |{{/each}}
+现有资料尚未形成可列示的营销机会，本次拜访以融资需求、非贷款金融服务、用途、金额期限、还款来源和合作条件诊断为主，不创建模拟 OPP。
 {{/if}}
 
 ### 主要风险
 
-{{#if D.major_risk_register}}
-| 风险编号 | 主要风险 | 已核实事实与边界 | 影响机会 | 对贷款营销的可能影响 |
-| --- | --- | --- | --- | --- |
-{{#each D.major_risk_register}}| **{{risk_id}}** | {{risk_title}} | {{fact_boundary}} | {{#if affected_opportunity_ids}}{{join affected_opportunity_ids|separator="、"}}{{else}}企业级{{/if}} | {{loan_impact}} |{{/each}}
+{{#if D.risk_register}}
+| 风险编号 | 主要风险 | 事实、信号与边界 | 影响机会 | 研判与核验 | 风险类型 |
+| --- | --- | --- | --- | --- | --- |
+{{#each D.risk_register}}| **{{risk_id}}** | {{risk_title}} | {{fact_or_signal_boundary}} | {{#if affected_opportunity_ids}}{{join affected_opportunity_ids|separator="、"}}{{else}}企业级{{/if}} | {{possible_impact}}；{{evidence_strength}}；{{verification}} | {{risk_type}} |{{/each}}
 {{else}}
-现有资料未形成可列示的主要风险事实；这不等同于不存在风险，仍需取得基础准入资料并核验当前状态。
-{{/if}}
-
-{{#if D.watch_register}}
-| 观察编号 | 风险观察 | 信号与边界 | 潜在影响 | 证据强度与核验方向 |
-| --- | --- | --- | --- | --- |
-{{#each D.watch_register}}| **{{watch_id}}** | {{watch_title}} | {{signal_boundary}} | {{possible_impact}} | {{evidence_strength}}；{{verification}} |{{/each}}
+现有资料未形成可列示的风险、观察或待核实事项；这不等同于不存在风险，仍需取得基础准入资料并核验当前状态。
 {{/if}}
 
 ### 拜访建议
@@ -243,26 +225,14 @@
 
 ## {{D.section_numbers.marketing}}、定制化营销方案
 
-### （一）融资需求线索
+### （一）机会台账深化
 
-{{#if D.financing_need_rows}}
-| 机会 | 贷款需求场景 | 触发事实 | 可能资金用途 | 时点 | 证据强度 | 现场核验重点 |
-| --- | --- | --- | --- | --- | --- | --- |
-{{#each D.financing_need_rows}}| **{{opportunity_id}}** | {{need_scenario}} | {{trigger_fact}} | {{likely_use_of_funds}} | {{timing}} | {{evidence_strength}} | {{verification_focus}} |{{/each}}
-{{else}}
-现有资料尚未形成可核验的企业专属融资触发，本次拜访先完成融资用途、金额、期限、还款来源和增信条件诊断。
-{{/if}}
-
-{{#if D.lead_register}}
-| 线索 | 信号 | 可能金融需求 | 缺失环节 | 证据强度 | 现场核验重点 |
-| --- | --- | --- | --- | --- | --- |
-{{#each D.lead_register}}| **{{lead_id}}** | {{lead_title}}：{{signal}} | {{possible_financial_need}} | {{missing_links}} | {{evidence_strength}} | 围绕缺失环节逐项确认 |{{/each}}
-{{/if}}
-
-{{#if D.service_register}}
-| 综合金融机会 | 类型 | 触发信号 | 匹配逻辑 | 核验重点 |
+{{#if D.opportunity_register}}
+| 机会编号 | 主要机会 | 匹配逻辑 | 现场核验重点 | 机会类型 |
 | --- | --- | --- | --- | --- |
-{{#each D.service_register}}| **{{service_id}}｜{{service_title}}** | {{service_type}} | {{trigger_signal}} | {{fit_logic}} | {{verification}} |{{/each}}
+{{#each D.opportunity_register}}| **{{opportunity_id}}** | {{opportunity_title}} | {{fit_logic}} | {{verification_focus}} | {{opportunity_type}} |{{/each}}
+{{else}}
+现有资料尚未形成可列示的营销机会，本次拜访先完成融资需求与非贷款金融服务诊断。
 {{/if}}
 
 ### （二）贷款产品候选
@@ -278,7 +248,7 @@
 {{#if D.service_product_candidates}}
 | 优先级与综合金融产品 | 匹配逻辑 | 合作缺口与开场话术 |
 | --- | --- | --- |
-{{#each D.service_product_candidates}}| **{{priority}}｜{{product_family}}（{{service_id}}）** | {{fit_logic}} | {{qualification_gaps}}；建议开场：{{opening_pitch}} |{{/each}}
+{{#each D.service_product_candidates}}| **{{priority}}｜{{product_family}}（{{opportunity_id}}）** | {{fit_logic}} | {{qualification_gaps}}；建议开场：{{opening_pitch}} |{{/each}}
 {{/if}}
 
 信息边界：{{D.marketing_boundary}}
@@ -291,18 +261,12 @@
 
 ## {{D.section_numbers.risk}}、风险预警与合规提示
 
-{{#if D.has_risks}}
-| 风险编号 | 影响机会 | 关注事项 | 已核实事实与边界 | 对贷款营销的可能影响 | 现场核验与缓释方向 |
+{{#if D.risk_register}}
+| 风险编号 | 主要风险 | 事实、信号与边界 | 影响机会 | 研判与核验 | 风险类型 |
 | --- | --- | --- | --- | --- | --- |
-{{#each D.risks}}| **{{risk_id}}** | {{#if affected_opportunity_ids}}{{join affected_opportunity_ids|separator="、"}}{{else}}企业级{{/if}} | {{topic}} | {{detail}} | {{sales_implication}} | {{verification}} |{{/each}}
+{{#each D.risk_register}}| **{{risk_id}}** | {{risk_title}} | {{fact_or_signal_boundary}} | {{#if affected_opportunity_ids}}{{join affected_opportunity_ids|separator="、"}}{{else}}企业级{{/if}} | {{possible_impact}}；{{evidence_strength}}；{{verification}} | {{risk_type}} |{{/each}}
 {{else}}
-已核实风险事实：现有资料未形成可进入风险表的明确命中；这不等同于不存在相关事项，仍需按本章资料范围完成准入核验。
-{{/if}}
-
-{{#if D.watch_register}}
-| 观察编号 | 观察事项 | 信号、主体与边界 | 潜在影响 | 证据强度 | 核验方向 |
-| --- | --- | --- | --- | --- | --- |
-{{#each D.watch_register}}| **{{watch_id}}** | {{watch_title}} | {{signal_boundary}} | {{possible_impact}} | {{evidence_strength}} | {{verification}} |{{/each}}
+现有资料未形成可进入统一风险台账的风险、观察或待核实事项；这不等同于不存在相关事项，仍需按本章资料范围完成准入核验。
 {{/if}}
 
 **信息解读：** {{D.risk_interpretation}}
@@ -358,4 +322,4 @@
 
 ### 标题白名单
 
-最终报告只能出现骨架中实际存在的标题，标题名称必须逐字使用，禁止同义替换：`核心观点`、`执行摘要`、`核心特征`、`主要机会`、`主要风险`、`拜访建议`、`客户全景画像`、`（一）企业基本信息`、`（二）关键决策人信息`、`（三）股权结构与关联关系`、`（四）企业资产状况`、`（五）核心经营数据`、`产业画像与行业洞察`、`（一）产业链位置与经营模式`、`（二）行业周期与资金占用`、`（三）行业对标与经营参照`、`（四）政策与融资环境`、`（五）行业风险与贷款启示`、`定制化营销方案`、`（一）融资需求线索`、`（二）贷款产品候选`、`（三）推进路径`、`风险预警与合规提示`、`拜访建议与话题清单`、`（一）本次拜访目标`、`（二）推荐话题`、`（三）关键问题`、`（四）建议取得的资料`、`（五）禁忌提示`、`数据来源`、`报告使用说明`。
+最终报告只能出现骨架中实际存在的标题，标题名称必须逐字使用，禁止同义替换：`核心观点`、`执行摘要`、`核心特征`、`主要机会`、`主要风险`、`拜访建议`、`客户全景画像`、`（一）企业基本信息`、`（二）关键决策人信息`、`（三）股权结构与关联关系`、`（四）企业资产状况`、`（五）核心经营数据`、`产业画像与行业洞察`、`（一）产业链位置与经营模式`、`（二）行业周期与资金占用`、`（三）行业对标与经营参照`、`（四）政策与融资环境`、`（五）行业风险与贷款启示`、`定制化营销方案`、`（一）机会台账深化`、`（二）贷款产品候选`、`（三）推进路径`、`风险预警与合规提示`、`拜访建议与话题清单`、`（一）本次拜访目标`、`（二）推荐话题`、`（三）关键问题`、`（四）建议取得的资料`、`（五）禁忌提示`、`数据来源`、`报告使用说明`。
