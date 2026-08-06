@@ -1,6 +1,6 @@
 <!-- resource-id: cisp://skill/client-pre-visit-one-pager/evidence-model -->
 <!-- resource-version: 0-dev -->
-<!-- source-skill-version: v4.4-summary-lines -->
+<!-- source-skill-version: v5.0-structured-core-viewpoint -->
 
 # 统一证据模型与业务维度整理规则
 
@@ -163,7 +163,11 @@
     "core_visit_focus": "围绕需求金额、用途、期限、还款来源、现有融资、增信资源和准入障碍形成的 2 至 3 项拜访核验重点",
     "core_opportunity_ids": ["OPP-01"],
     "core_risk_ids": ["RISK-01"],
-    "core_viewpoint": "按‘客户与经营阶段→OPP 机会主线→用途与还款增信→RISK 约束→本次拜访目标’形成的最终贷款营销核心观点，并显式引用相关编号",
+    "core_company_profile": "企业定位、代表性荣誉、品牌和业务基础形成的企业简介定位段，不含评价性拔高",
+    "core_history_evolution": "按时间组织的关键沿革、重大转折与当前状态；可靠证据不足时为 null 并整段省略",
+    "core_development_direction": "当前聚焦方向及已经采取的实际行动；无法同时核实方向与行动时说明资料边界",
+    "core_risk_prompt": "主要风险事实总结及其带来的关注事项；无明确风险命中时说明资料覆盖边界和基础核验要求",
+    "core_visit_objective": "围绕 OPP 提炼贷款及综合金融服务场景；无明确 OPP 时转为融资需求和合作条件诊断",
     "executive_core_features": "用已核实事实概括客户身份、经营阶段、近期转折及贷款营销价值，不提前展开产品方案",
     "opportunity_register": [
       {
@@ -344,9 +348,13 @@
     "core_repayment_logic": ["实际支持可能还款来源的 internal:<字段> 或 external:Wn；无事实时登记资料缺口"],
     "core_credit_support": ["实际支持可核验增信资源的 internal:<字段> 或 external:Wn；不得登记推测"],
     "core_visit_focus": ["支持核验重点的 internal:<事实和数据缺口> 或 external:Wn"],
-    "core_viewpoint": ["逐句登记上述核心观点分项实际使用的 internal:<字段或状态> 与 external:Wn"],
-    "core_opportunity_ids": ["逐项回指 opportunity_register 中实际进入核心观点的 OPP 编号"],
-    "core_risk_ids": ["逐项回指 risk_register 中实际进入核心观点的 RISK 编号"],
+    "core_company_profile": ["逐句登记企业定位、代表性荣誉、品牌和业务基础实际使用的 internal:<字段或状态> 与 external:Wn"],
+    "core_history_evolution": ["按时间逐项登记关键沿革、重大转折和当前状态实际使用的 internal:<字段或状态> 与 external:Wn；字段为 null 时使用空数组"],
+    "core_development_direction": ["逐句登记当前聚焦方向和已采取行动实际使用的 internal:<字段或状态> 与 external:Wn；资料不足回退时登记对应资料边界"],
+    "core_risk_prompt": ["逐句登记风险事实、资料边界和由此形成的关注事项所使用的 internal:<归一化风险事实或状态> 与 external:Wn"],
+    "core_visit_objective": ["逐句登记服务场景、融资诊断或合作条件所依据的 internal:<字段或资料缺口>、external:Wn 与相关 OPP 主数据"],
+    "core_opportunity_ids": ["逐项回指生成重点发展方向或拜访目标时实际使用的 opportunity_register 编号；编号不进入核心观点正文"],
+    "core_risk_ids": ["逐项回指生成风险提示时实际使用的 risk_register 编号；编号不进入核心观点正文"],
     "coverage_summary": ["internal:META 中各业务维度状态和 web_search_status"],
     "source_attributions": ["逐章节登记实际显示的内部业务维度和 external:Wn；外部 ID 必须存在于 WEB.sources"],
     "person_rows": ["逐行登记姓名和职务对应的 internal:B.personList 或 internal:B.basicList[0].legRepName；背景事实另登记 external:Wn"],

@@ -1,6 +1,6 @@
 <!-- resource-id: cisp://skill/client-pre-visit-one-pager/tool-binding -->
 <!-- resource-version: 0-dev -->
-<!-- source-skill-version: v4.1-open -->
+<!-- source-skill-version: v5.1-numbered-summary -->
 
 # 内部工具绑定、字段映射与查询顺序
 
@@ -80,6 +80,7 @@
 
 - 直接字段：`{{B.basicList[0].orgName}}`
 - 列表循环：`{{#each B.shareholderList}}...{{/each}}`；开放纳入模式不设置条目上限
+- 循环内一基序号：`{{add @index 1}}`；当前 `each` 循环第一项输出 `1`，每进入一个新的 `each` 循环重新从 `1` 起编
 - 条件板块：`{{#if B.personList}}...{{/if}}`
 - 列表计数：`{{count(B.dishonestList)}}`
 - 内部来源维度连接：`{{join D.source_attributions.basic.internal_dimensions|separator="、"}}`
@@ -87,7 +88,11 @@
 - 内部主体事实白名单：`D.company_overview_facts`
 - 内部确定性回退文本：`{{D.company_overview_fallback}}`
 - AI 内部主体描述：`{{D.core_internal_baseline}}`
-- 最终综合核心观点：`{{D.core_viewpoint}}`
+- 核心观点企业简介：`{{D.core_company_profile}}`
+- 核心观点关键沿革（可选）：`{{D.core_history_evolution}}`
+- 核心观点重点发展方向：`{{D.core_development_direction}}`
+- 核心观点风险提示：`{{D.core_risk_prompt}}`
+- 核心观点拜访目标：`{{D.core_visit_objective}}`
 - 固定大章节编号：`{{D.section_numbers.core}}`、`{{D.section_numbers.summary}}`、`{{D.section_numbers.profile}}`、`{{D.section_numbers.industry}}`、`{{D.section_numbers.marketing}}`、`{{D.section_numbers.risk}}`、`{{D.section_numbers.visit}}`
 - 缺失字段：删除所在行；整块无有效内容时仅按骨架中的预定义条件隐藏。条件隐藏完成后按实际可见顺序连续重编号大章节，小节编号保持不变。
 
@@ -165,4 +170,3 @@
 8. 同时并行调用土地资产、商标、专利、软件著作权、作品著作权、ICP、工商许可、荣誉资质和近 90 天舆情。土地资产以规范企业全称分别调用 `land_type="tdgy"`、`"tdcr"`、`"tddy"`，三类第一页均固定 `page_no="1"`、`page_size="10"`；默认不调用 `dkgs`。舆情日期使用执行日为 `end_date`，向前推 90 个自然日为 `start_date`，格式 `yyyy-MM-dd`，不设置情感过滤。
 9. 土地供应读取 `detailListMeta.tdgyPageNum`，土地出让读取 `detailListMeta.tdcrPageNum`，土地抵押读取 `detailListMeta.tddyPageNum`。类别页数为有效正整数且大于 1 时，以相同 `ent_info`、`land_type` 和 `page_size` 继续请求第 2 页至末页。不得使用聚合的 `totalPage` 代替类别页数，不得因其他类别还有页数而重复请求当前类别。
 10. 土地三类结果和状态相互独立：任一类别失败只将该类别记为 `failed`；成功但对应结果列表为空记为 `empty`；成功且存在有效记录记为 `success`。土地供应、土地出让、土地抵押分别进入 `META`，不得用一个汇总状态覆盖另外两类。
-
