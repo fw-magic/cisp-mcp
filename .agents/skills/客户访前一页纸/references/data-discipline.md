@@ -1,6 +1,6 @@
 <!-- resource-id: cisp://skill/client-pre-visit-one-pager/data-discipline -->
 <!-- resource-version: 0-dev -->
-<!-- source-skill-version: v5.5-history-founded-at -->
+<!-- source-skill-version: v5.6-core-cooperation-focus -->
 
 # 数据纪律与 MCP 依赖
 

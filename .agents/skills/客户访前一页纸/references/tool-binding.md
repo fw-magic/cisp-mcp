@@ -1,6 +1,6 @@
 <!-- resource-id: cisp://skill/client-pre-visit-one-pager/tool-binding -->
 <!-- resource-version: 0-dev -->
-<!-- source-skill-version: v5.5-history-founded-at -->
+<!-- source-skill-version: v5.6-core-cooperation-focus -->
 
 # 内部工具绑定、字段映射与查询顺序
 

@@ -1,6 +1,6 @@
 <!-- resource-id: cisp://skill/client-pre-visit-one-pager/web-evidence-policy -->
 <!-- resource-version: 0-dev -->
-<!-- source-skill-version: v5.5-history-founded-at -->
+<!-- source-skill-version: v5.6-core-cooperation-focus -->
 
 # 外部检索与证据准入
 
