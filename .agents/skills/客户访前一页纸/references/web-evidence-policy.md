@@ -1,6 +1,6 @@
 <!-- resource-id: cisp://skill/client-pre-visit-one-pager/web-evidence-policy -->
 <!-- resource-version: 0-dev -->
-<!-- source-skill-version: v4.3-unified-risk -->
+<!-- source-skill-version: v5.2-source-free-core-profile -->
 
 # 外部检索与证据准入
 
@@ -22,9 +22,10 @@
    - 三级：具有编辑审核机制的主流媒体。能追溯或交叉验证时升级为 `verified_cross_source`；否则以 `single_source` 纳入并明确边界。
    - 四级：商业企业信息聚合平台、百科、问答、论坛、个人博客、自媒体、社交平台、内容平台、新闻聚合与转载站、招聘、地图、招商和其他开放网络页面。全部可以纳入；完成交叉支持时提升置信度，否则标记 `platform_clue`、`低` 置信度，并按业务性质进入“融资线索”或“综合金融机会”类 OPP，或“风险观察”“待核实事项”类 RISK。
 4. 所有来源类型、搜索结果和打不开的候选链接都进入 `WEB.candidates`。能打开正文的进入 `WEB.sources`；无法打开、无稳定 URL、付费墙或登录墙页面仍保留候选元数据和限制说明。没有发布日期时记录访问日期并标记 `undated`，不自动删除。
-5. 企业官网自述必须写成“企业官网披露”，不得改写为第三方核验结论。外部来源冲突时优先一级来源和直接原始页面；仍无法消解时并列说明冲突和日期，不由模型判断真伪，不把冲突值合并。
+5. 除本节第 8 条规定的核心观点外，企业官网自述必须写成“企业官网披露”，不得改写为第三方核验结论。外部来源冲突时优先一级来源和直接原始页面；仍无法消解时并列说明冲突和日期，不由模型判断真伪，不把冲突值合并。
 6. 网络工具不可用或搜索失败时，将 `WEB.status` 记为 `unavailable`，继续使用内部证据生成报告，并把风险相关未完成主题登记为“待核实事项”类 RISK，其他资料缺口转为普通拜访问题；不得因此降低内部必选工具要求。
 7. 每个外部事实或线索绑定唯一 `source_id` 或 `candidate_id`。主体精确匹配、别名匹配、两跳关系、间接关系和歧义关系均可纳入，分别记录 `relationship_path`；只有 `direct/verified_alias/two_hop` 可以直接支持 FACT，`indirect/ambiguous` 的机会内容按业务性质进入后两种 OPP，风险内容按证据状态进入“风险观察”或“待核实事项”类 RISK。
+8. **核心观点来源隐藏规则（优先于本文件其他归因措辞要求）**：`D.core_company_profile`、`D.core_history_evolution`、`D.core_development_direction`、`D.core_risk_prompt` 和 `D.core_visit_objective` 的报告正文只呈现研判结论，不写来源名称、平台属性或“据……”“……显示”等来源话术。企业简介可独立使用已通过主体、正文、时点和证据状态验收的网络描述，不以 `D.core_internal_baseline` 为必选前置。所有使用证据仍必须逐句记录到 `EVIDENCE` 和 `source_attributions.core`；不满足核心观点确定性表达要求的单一弱来源、冲突候选和未核验摘要，不得因去除归因而写成事实。
 
 ### 外网搜索范围（广义来源池）
 

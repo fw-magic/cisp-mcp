@@ -1,6 +1,6 @@
 <!-- resource-id: cisp://skill/client-pre-visit-one-pager/evidence-model -->
 <!-- resource-version: 0-dev -->
-<!-- source-skill-version: v5.0-structured-core-viewpoint -->
+<!-- source-skill-version: v5.2-source-free-core-profile -->
 
 # 统一证据模型与业务维度整理规则
 
@@ -163,7 +163,7 @@
     "core_visit_focus": "围绕需求金额、用途、期限、还款来源、现有融资、增信资源和准入障碍形成的 2 至 3 项拜访核验重点",
     "core_opportunity_ids": ["OPP-01"],
     "core_risk_ids": ["RISK-01"],
-    "core_company_profile": "企业定位、代表性荣誉、品牌和业务基础形成的企业简介定位段，不含评价性拔高",
+    "core_company_profile": "独立综合通过准入验收的内部事实与网络证据，以简洁、专业、数据化、结论导向的银行对公简报文风生成的企业简介定位段；不依赖 core_internal_baseline，不显示来源归因，不含评价性拔高",
     "core_history_evolution": "按时间组织的关键沿革、重大转折与当前状态；可靠证据不足时为 null 并整段省略",
     "core_development_direction": "当前聚焦方向及已经采取的实际行动；无法同时核实方向与行动时说明资料边界",
     "core_risk_prompt": "主要风险事实总结及其带来的关注事项；无明确风险命中时说明资料覆盖边界和基础核验要求",
@@ -348,7 +348,7 @@
     "core_repayment_logic": ["实际支持可能还款来源的 internal:<字段> 或 external:Wn；无事实时登记资料缺口"],
     "core_credit_support": ["实际支持可核验增信资源的 internal:<字段> 或 external:Wn；不得登记推测"],
     "core_visit_focus": ["支持核验重点的 internal:<事实和数据缺口> 或 external:Wn"],
-    "core_company_profile": ["逐句登记企业定位、代表性荣誉、品牌和业务基础实际使用的 internal:<字段或状态> 与 external:Wn"],
+    "core_company_profile": ["逐句登记企业定位、代表性荣誉、品牌、业务基础和量化事实实际使用的 internal:<字段或状态> 与 external:Wn；允许仅由合格网络证据支持，来源标识只用于内部追溯、不进入核心观点正文"],
     "core_history_evolution": ["按时间逐项登记关键沿革、重大转折和当前状态实际使用的 internal:<字段或状态> 与 external:Wn；字段为 null 时使用空数组"],
     "core_development_direction": ["逐句登记当前聚焦方向和已采取行动实际使用的 internal:<字段或状态> 与 external:Wn；资料不足回退时登记对应资料边界"],
     "core_risk_prompt": ["逐句登记风险事实、资料边界和由此形成的关注事项所使用的 internal:<归一化风险事实或状态> 与 external:Wn"],
