@@ -29,6 +29,7 @@ from .interfaces import (
     P0020019,
     P0020021,
     P0020023,
+    P0020024,
     P0020031,
     P0020044,
     P0020129,
@@ -36,7 +37,10 @@ from .interfaces import (
     P0050008,
     P0060007,
     P0060008,
+    P0090001,
+    P0090008,
     P0090011,
+    P0090012,
     P0110003,
     P0130025,
     P0130036,
@@ -165,6 +169,11 @@ P0020023Level = Literal[
     "3",
     "4",
     "5",
+]
+
+UboQueryEdition = Literal[
+    "detailed",
+    "standard",
 ]
 
 NonBlankString = Annotated[
@@ -316,6 +325,29 @@ EquityRatioThresholdParameter = Annotated[
             "只返回持股比例大于等于该值的企业股东节点，默认 5。"
         ),
         examples=["5", "0", "30.5"],
+    ),
+]
+
+UboQueryEditionParameter = Annotated[
+    UboQueryEdition,
+    Field(
+        description=(
+            "最终受益人产品版本：detailed=详版 P0090001，适合完整 UBO 报告、"
+            "审计留档和关键管理人员兜底；standard=非详版 P0090012，适合快速识别、"
+            "独立互证或需要 bnfCat 判定依据时。由 AI 按任务目的选择。"
+        ),
+        examples=["detailed", "standard"],
+    ),
+]
+
+UboIncludePathsParameter = Annotated[
+    bool,
+    Field(
+        description=(
+            "是否返回股权穿透路径。standard 模式下设为 false 会向底层发送 "
+            "onlyFinalBef=1，仅返回最终受益人；detailed 模式固定包含路径，必须为 true。"
+        ),
+        examples=[True, False],
     ),
 ]
 
@@ -889,6 +921,31 @@ async def p0020023_query_equity_penetration(
 
 
 @mcp.tool()
+async def p0020024_query_beneficial_shareholders_detailed(
+    ent_info: NameOrCreditCodeIdentifier,
+    extra_params: AdvancedExtraParams = None,
+) -> dict[str, Any]:
+    """企业受益股东详细查询。
+
+    根据企业全称或统一社会信用代码查询企业照面、受益股东、最终受益人和实际控制人
+    节点。data.basicList[] 是目标企业照面；data.nodeList[] 是穿透节点，其中
+    percentTotal 为间接占比，pathLevel 为节点出现的路径层数，pathCount 为路径总数，
+    type 为 P=自然人、E=非自然人，benifitTag（底层接口原始拼写）可包含“受益股东”、
+    “最终受益人”或“实际控制人”。节点列表是聚合标签结果，不应据此自行重算比例或
+    还原产品未返回的完整有向路径。
+    """
+    client = get_client()
+    return await client.query_product(
+        prod_code=P0020024.product_code,
+        params=with_guarded_extra_params(
+            {"entInfo": ent_info},
+            extra_params,
+            ("entInfo",),
+        ),
+    )
+
+
+@mcp.tool()
 async def p0020031_query_multi_point_relationships(
     ent_info: OptionalCompanyCollection = None,
     person_names: OptionalPersonCollection = None,
@@ -989,6 +1046,65 @@ async def p0020129_query_controller_and_ubo(
             {"entInfo": ent_info},
             extra_params,
             ("entInfo",),
+        ),
+    )
+
+
+@mcp.tool()
+async def p0090008_query_actual_controller(
+    ent_name: UboEnterpriseIdentifier,
+    extra_params: AdvancedExtraParams = None,
+) -> dict[str, Any]:
+    """企业实际控制人信息查询。
+
+    根据企业全称、统一社会信用代码或工商注册号查询实际控制人、股权占比和控制路径；
+    注意底层请求字段是 entName。data.actualController[].controllerList[] 给出实际控制人
+    controller 及聚合股权占比 percent；controlPathList[] 给出每段股东名称
+    stockHolderName、被投资企业名称 investedCompanyName、认缴出资额 shouldCapital 和
+    该段股权占比 percent。应逐字保留产品比例，不自行相乘、求和或改写控制口径。
+    """
+    client = get_client()
+    return await client.query_product(
+        prod_code=P0090008.product_code,
+        params=with_guarded_extra_params(
+            {"entName": ent_name},
+            extra_params,
+            ("entName",),
+        ),
+    )
+
+
+@mcp.tool()
+async def p0090001_p0090012_query_ubo(
+    ent_name: UboEnterpriseIdentifier,
+    edition: UboQueryEditionParameter,
+    include_paths: UboIncludePathsParameter = True,
+    extra_params: AdvancedExtraParams = None,
+) -> dict[str, Any]:
+    """企业最终受益人查询（详版/非详版二选一）。
+
+    这是 P0090001 与 P0090012 的统一入口。完整报告、审计留档、关键管理人员兜底或
+    需要完整递归股权树时选 edition="detailed"；快速识别、独立互证或需要受益所有人
+    判定依据 bnfCat 时选 edition="standard"。两版均返回 data.finalList[]，其中
+    finalBefList[] 是受益所有人，equlityProcessList[] 是股权穿透过程（equlity 为底层
+    原始拼写）。standard 可用 include_paths=false 发送 onlyFinalBef=1 省略路径；详版
+    固定包含路径。保留原始比例和角色，不自行重算或把关键管理人员改写为持股受益人。
+    """
+    if edition == "detailed" and not include_paths:
+        raise ValueError("detailed edition always includes paths")
+
+    interface = P0090001 if edition == "detailed" else P0090012
+    params: dict[str, Any] = {"entName": ent_name}
+    if edition == "standard" and not include_paths:
+        params["onlyFinalBef"] = "1"
+
+    client = get_client()
+    return await client.query_product(
+        prod_code=interface.product_code,
+        params=with_guarded_extra_params(
+            params,
+            extra_params,
+            ("entName", "onlyFinalBef"),
         ),
     )
 

@@ -92,10 +92,14 @@ class NewInterfaceMetadataTests(unittest.TestCase):
             "P0020014": ("P0020014Status", "P0020014Data", "suspectList"),
             "P0020019": ("P0020019Status", "P0020019Data", "controlNodeList"),
             "P0020023": ("P0020023Status", "P0020023Data", "upList"),
+            "P0020024": ("P0020024Status", "P0020024Data", "nodeList"),
             "P0020031": ("P0020031Status", "P0020031Data", "nodes"),
             "P0020044": ("P0020044Status", "P0020044Data", "relationship"),
             "P0020129": ("P0020129Status", "P0020129Data", "dataList"),
+            "P0090001": ("P0090001Status", "P0090001Data", "finalList"),
+            "P0090008": ("P0090008Status", "P0090008Data", "actualController"),
             "P0090011": ("P0090011Status", "P0090011Data", "MatchInfoList"),
+            "P0090012": ("P0090012Status", "P0090012Data", "finalList"),
         }
 
         for product_code, fields in expected.items():
@@ -111,10 +115,14 @@ class NewInterfaceMetadataTests(unittest.TestCase):
             "P0020014",
             "P0020019",
             "P0020023",
+            "P0020024",
             "P0020031",
             "P0020044",
             "P0020129",
+            "P0090001",
+            "P0090008",
             "P0090011",
+            "P0090012",
         ):
             with self.subTest(product_code=product_code):
                 interface = interfaces.INTERFACES[product_code]
@@ -442,6 +450,21 @@ class NewInterfaceToolTests(unittest.IsolatedAsyncioTestCase):
         await server.p0090011_query_ubo_full_paths(
             ent_name="911000001000013428",
         )
+        await server.p0020024_query_beneficial_shareholders_detailed(
+            ent_info="证通股份有限公司",
+        )
+        await server.p0090008_query_actual_controller(
+            ent_name="911000001000013428",
+        )
+        await server.p0090001_p0090012_query_ubo(
+            ent_name="证通股份有限公司",
+            edition="detailed",
+        )
+        await server.p0090001_p0090012_query_ubo(
+            ent_name="911000001000013428",
+            edition="standard",
+            include_paths=False,
+        )
         await server.p0020014_query_suspected_relationships(
             ent_info="证通股份有限公司",
             relation_type="emailSus",
@@ -457,6 +480,13 @@ class NewInterfaceToolTests(unittest.IsolatedAsyncioTestCase):
             [
                 ("P0020129", {"entInfo": "证通股份有限公司"}),
                 ("P0090011", {"entName": "911000001000013428"}),
+                ("P0020024", {"entInfo": "证通股份有限公司"}),
+                ("P0090008", {"entName": "911000001000013428"}),
+                ("P0090001", {"entName": "证通股份有限公司"}),
+                (
+                    "P0090012",
+                    {"entName": "911000001000013428", "onlyFinalBef": "1"},
+                ),
                 (
                     "P0020014",
                     {"entInfo": "证通股份有限公司", "type": "emailSus"},
@@ -507,6 +537,16 @@ class NewInterfaceToolTests(unittest.IsolatedAsyncioTestCase):
         )
         self.assertEqual(default_result["prod_code"], "P0020023")
         self.assertEqual(filtered_result["prod_code"], "P0020023")
+
+    async def test_unified_ubo_rejects_pathless_detailed_mode(self) -> None:
+        with self.assertRaisesRegex(ValueError, "always includes paths"):
+            await server.p0090001_p0090012_query_ubo(
+                ent_name="测试企业",
+                edition="detailed",
+                include_paths=False,
+            )
+
+        self.assertEqual(self.client.calls, [])
 
     async def test_relationship_tools_normalize_lists_and_defaults(self) -> None:
         await server.p0020044_query_intercompany_relationship(
@@ -596,6 +636,17 @@ class NewInterfaceToolTests(unittest.IsolatedAsyncioTestCase):
             "data.MatchInfoList[]",
             tools["p0090011_query_ubo_full_paths"].description or "",
         )
+        unified_ubo_schema = tools[
+            "p0090001_p0090012_query_ubo"
+        ].inputSchema["properties"]
+        self.assertEqual(
+            unified_ubo_schema["edition"]["enum"],
+            list(get_args(server.UboQueryEdition)),
+        )
+        self.assertIn(
+            "由 AI 按任务目的选择",
+            unified_ubo_schema["edition"]["description"],
+        )
 
     async def test_equity_tool_input_schemas_are_self_describing(self) -> None:
         tools = {tool.name: tool for tool in await server.mcp.list_tools()}
@@ -603,9 +654,12 @@ class NewInterfaceToolTests(unittest.IsolatedAsyncioTestCase):
             "p0020014_query_suspected_relationships",
             "p0020019_query_suspected_controller",
             "p0020023_query_equity_penetration",
+            "p0020024_query_beneficial_shareholders_detailed",
             "p0020031_query_multi_point_relationships",
             "p0020044_query_intercompany_relationship",
             "p0020129_query_controller_and_ubo",
+            "p0090001_p0090012_query_ubo",
+            "p0090008_query_actual_controller",
             "p0090011_query_ubo_full_paths",
         )
 
@@ -625,7 +679,10 @@ class NewInterfaceToolTests(unittest.IsolatedAsyncioTestCase):
             ("p0020014_query_suspected_relationships", "ent_info"),
             ("p0020019_query_suspected_controller", "ent_info"),
             ("p0020023_query_equity_penetration", "ent_info"),
+            ("p0020024_query_beneficial_shareholders_detailed", "ent_info"),
             ("p0020129_query_controller_and_ubo", "ent_info"),
+            ("p0090001_p0090012_query_ubo", "ent_name"),
+            ("p0090008_query_actual_controller", "ent_name"),
             ("p0090011_query_ubo_full_paths", "ent_name"),
         ):
             with self.subTest(tool_name=tool_name):
@@ -684,6 +741,10 @@ class NewInterfaceToolTests(unittest.IsolatedAsyncioTestCase):
                 "测试企业",
                 extra_params={"level": "1"},
             ),
+            server.p0020024_query_beneficial_shareholders_detailed(
+                "测试企业",
+                extra_params={"entInfo": "覆盖企业"},
+            ),
             server.p0020031_query_multi_point_relationships(
                 ent_info="测试企业",
                 extra_params={"depth": "2"},
@@ -695,6 +756,15 @@ class NewInterfaceToolTests(unittest.IsolatedAsyncioTestCase):
             server.p0020129_query_controller_and_ubo(
                 "测试企业",
                 extra_params={"entInfo": "覆盖企业"},
+            ),
+            server.p0090008_query_actual_controller(
+                "测试企业",
+                extra_params={"entName": "覆盖企业"},
+            ),
+            server.p0090001_p0090012_query_ubo(
+                "测试企业",
+                "standard",
+                extra_params={"onlyFinalBef": "1"},
             ),
             server.p0090011_query_ubo_full_paths(
                 "测试企业",
@@ -713,6 +783,18 @@ class NewInterfaceToolTests(unittest.IsolatedAsyncioTestCase):
             (
                 "p0020129_query_controller_and_ubo",
                 {"ent_info": ""},
+            ),
+            (
+                "p0020024_query_beneficial_shareholders_detailed",
+                {"ent_info": ""},
+            ),
+            (
+                "p0090008_query_actual_controller",
+                {"ent_name": ""},
+            ),
+            (
+                "p0090001_p0090012_query_ubo",
+                {"ent_name": "测试企业", "edition": "unknown"},
             ),
             (
                 "p0020044_query_intercompany_relationship",
@@ -1475,6 +1557,9 @@ class NewInterfaceToolTests(unittest.IsolatedAsyncioTestCase):
             "p0020023_query_equity_penetration": (
                 server.p0020023_query_equity_penetration
             ),
+            "p0020024_query_beneficial_shareholders_detailed": (
+                server.p0020024_query_beneficial_shareholders_detailed
+            ),
             "p0020031_query_multi_point_relationships": (
                 server.p0020031_query_multi_point_relationships
             ),
@@ -1498,6 +1583,12 @@ class NewInterfaceToolTests(unittest.IsolatedAsyncioTestCase):
             ),
             "p0060008_verify_business_three_elements": (
                 server.p0060008_verify_business_three_elements
+            ),
+            "p0090001_p0090012_query_ubo": (
+                server.p0090001_p0090012_query_ubo
+            ),
+            "p0090008_query_actual_controller": (
+                server.p0090008_query_actual_controller
             ),
             "p0090011_query_ubo_full_paths": server.p0090011_query_ubo_full_paths,
             "p0110003_query_honor_qualification_info": (
@@ -1541,20 +1632,23 @@ class NewInterfaceToolTests(unittest.IsolatedAsyncioTestCase):
                     inspect.getdoc(tool_function),
                 )
 
-    async def test_mcp_lists_all_thirty_four_tools(self) -> None:
+    async def test_mcp_lists_all_thirty_seven_tools(self) -> None:
         tools = await server.mcp.list_tools()
         names = {tool.name for tool in tools}
 
-        self.assertEqual(len(names), 34)
+        self.assertEqual(len(names), 37)
         self.assertTrue(
             {
                 "p0010059_query_business_basic_brief",
                 "p0020014_query_suspected_relationships",
                 "p0020019_query_suspected_controller",
                 "p0020023_query_equity_penetration",
+                "p0020024_query_beneficial_shareholders_detailed",
                 "p0020031_query_multi_point_relationships",
                 "p0020044_query_intercompany_relationship",
                 "p0020129_query_controller_and_ubo",
+                "p0090001_p0090012_query_ubo",
+                "p0090008_query_actual_controller",
                 "p0090011_query_ubo_full_paths",
                 "p0130025_query_company_key_indicators",
                 "p0130036_query_land_info",

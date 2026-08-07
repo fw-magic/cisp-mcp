@@ -16,6 +16,7 @@ from cisp_mcp.config import CispSettings, load_settings
 class RecordingHttpClient:
     def __init__(self) -> None:
         self.headers: dict[str, str] | None = None
+        self.urls: list[str] = []
 
     async def __aenter__(self) -> RecordingHttpClient:
         return self
@@ -31,6 +32,7 @@ class RecordingHttpClient:
         headers: dict[str, str],
     ) -> httpx.Response:
         self.headers = headers
+        self.urls.append(url)
         return httpx.Response(
             200,
             json={"resultCode": "00000", "resultData": {}},
@@ -173,6 +175,30 @@ class CispApiClientAuthTests(unittest.IsolatedAsyncioTestCase):
             verify=True,
             proxy="http://proxy.example.test:8080",
             trust_env=False,
+        )
+
+    async def test_product_can_override_sync_request_uri(self) -> None:
+        http_client = RecordingHttpClient()
+        client = CispApiClient(
+            CispSettings(
+                endpoint="https://cisp.example.test",
+                request_uri="/ectcispserver/api/entcreditapi/query",
+                api_key="customer-request-key",
+            )
+        )
+
+        with patch(
+            "cisp_mcp.client.httpx.AsyncClient",
+            return_value=http_client,
+        ):
+            await client.query_product("P0090001", {"entName": "测试企业"})
+
+        self.assertEqual(
+            http_client.urls,
+            [
+                "https://cisp.example.test/ectcispserver/api/entcreditapi/"
+                "asyncQueryApply"
+            ],
         )
 
 

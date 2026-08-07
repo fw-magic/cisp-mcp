@@ -1,0 +1,4 @@
+interface:
+  display_name: "UBO受益所有人"
+  short_description: "基于 CISP MCP 识别企业 UBO 并生成固定篇章报告"
+  default_prompt: "使用 $ubo-beneficial-owner 查询目标企业的 UBO 受益所有人并生成完整 Markdown 报告。"

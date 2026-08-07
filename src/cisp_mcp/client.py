@@ -12,7 +12,11 @@ class CispApiClient:
     def __init__(self, settings: CispSettings) -> None:
         self._settings = settings
 
-    async def post_json(self, payload: dict[str, Any]) -> dict[str, Any]:
+    async def post_json(
+        self,
+        payload: dict[str, Any],
+        request_uri: str | None = None,
+    ) -> dict[str, Any]:
         headers = {
             "Content-Type": "application/json;charset=UTF-8",
             "X-API-Key": self._settings.api_key,
@@ -25,7 +29,7 @@ class CispApiClient:
             trust_env=False,
         ) as client:
             response = await client.post(
-                self._settings.query_url,
+                self._settings.query_url_for(request_uri),
                 json=payload,
                 headers=headers,
             )
@@ -58,8 +62,11 @@ class CispApiClient:
             **cleaned_params,
         }
 
-        raw_response = await self.post_json(payload)
         interface = INTERFACES.get(prod_code)
+        raw_response = await self.post_json(
+            payload,
+            request_uri=interface.request_uri if interface else None,
+        )
         if interface is None:
             return raw_response
 

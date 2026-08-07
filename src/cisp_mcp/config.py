@@ -24,7 +24,11 @@ class CispSettings:
 
     @property
     def query_url(self) -> str:
-        return f"{self.endpoint.rstrip('/')}/{self.request_uri.lstrip('/')}"
+        return self.query_url_for()
+
+    def query_url_for(self, request_uri: str | None = None) -> str:
+        resolved_uri = request_uri or self.request_uri
+        return f"{self.endpoint.rstrip('/')}/{resolved_uri.lstrip('/')}"
 
 
 def load_settings(api_key: str | None = None) -> CispSettings:

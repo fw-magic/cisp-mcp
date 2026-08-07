@@ -860,9 +860,14 @@ class SkillToolBindingTests(unittest.IsolatedAsyncioTestCase):
 
 
 class EquityStructureSkillTests(unittest.TestCase):
-    def test_skill_binds_all_seven_core_equity_tools(self) -> None:
+    def test_skill_binds_only_existing_equity_tools(self) -> None:
         skill_text = EQUITY_SKILL_PATH.read_text(encoding="utf-8")
         for tool_name in (
+            "p0010068_fuzzy_search_company_name",
+            "p0010010_query_business_profile",
+            "p0010058_query_business_basic_deep",
+            "p0010059_query_business_basic_brief",
+            "p0020021_query_single_point_related_info",
             "p0020023_query_equity_penetration",
             "p0020129_query_controller_and_ubo",
             "p0090011_query_ubo_full_paths",
@@ -874,66 +879,85 @@ class EquityStructureSkillTests(unittest.TestCase):
             with self.subTest(tool_name=tool_name):
                 self.assertIn(tool_name, skill_text)
 
+        for unintegrated_product in (
+            "P0990041",
+            "P0090008",
+            "P0020024",
+            "P0090012",
+        ):
+            with self.subTest(unintegrated_product=unintegrated_product):
+                self.assertNotIn(unintegrated_product, skill_text)
+
     def test_skill_preserves_real_response_parsing_rules(self) -> None:
         skill_text = EQUITY_SKILL_PATH.read_text(encoding="utf-8")
         for expected_rule in (
-            'product_status`：`4`=有结果，`1`=无结果，`3`=产品查询失败',
+            '`4` 表示有结果，`1` 表示本次未返回结果，`3` 表示产品查询失败',
             'direction="-1"',
             "`endId → startId`",
             "按 `roadId` 和原始顺序还原完整路径",
             "`suspectList[].sus.<type>`",
             "`suspectList[].<type>[]`",
             'depth="2", relation_type="2"',
-            'level="1", ratio="5"',
+            'level="1", ratio="0"',
             'final_flag="1"',
         ):
             with self.subTest(expected_rule=expected_rule):
                 self.assertIn(expected_rule, skill_text)
 
-    def test_skill_uses_chinese_due_diligence_wording(self) -> None:
+    def test_skill_queries_full_existing_business_dimensions(self) -> None:
         skill_text = EQUITY_SKILL_PATH.read_text(encoding="utf-8")
-        self.assertIn("投资尽职调查", skill_text)
-        self.assertIn("待补证事项与尽调建议", skill_text)
-        self.assertNotRegex(skill_text, r"(?<![A-Za-z])DD(?![A-Za-z])")
+        for data_type in (
+            "yearReportPaidUpCapital",
+            "yearReportSubCapitals",
+            "foreignInvestment",
+            "originalShareholder",
+            "changeRecords",
+            "changeStockRights",
+            "provideGuarantee",
+            "sharFroz",
+            "sharePledg",
+            "sharePledgAlt",
+            "sharePledgCan",
+        ):
+            with self.subTest(data_type=data_type):
+                self.assertIn(data_type, skill_text)
+        self.assertIn("不得跨年累加实缴额", skill_text)
+
+    def test_skill_requires_ratio_and_control_cross_checks(self) -> None:
+        skill_text = EQUITY_SKILL_PATH.read_text(encoding="utf-8")
+        self.assertIn("股东金额 ÷ 注册资本", skill_text)
+        self.assertIn("校验值只用于发现异常，不覆盖接口原始持股比例", skill_text)
+        self.assertIn("股比口径待复核", skill_text)
+        self.assertIn("控制权核验矩阵", skill_text)
+        self.assertIn("本次路径未完成互证", skill_text)
+
+    def test_skill_recursively_penetrates_low_ratio_platforms(self) -> None:
+        skill_text = EQUITY_SKILL_PATH.read_text(encoding="utf-8")
+        self.assertIn("不得因任一直接股东持股低于 5% 而跳过", skill_text)
+        self.assertIn("所有疑似同系平台", skill_text)
+        self.assertIn("穿透全部非自然人直接股东", skill_text)
+        self.assertIn("共同 GP 必须由穿透树或工商股东事实支持", skill_text)
         self.assertIn("最多 5 层", skill_text)
-        self.assertNotIn("默认最大 6 层", skill_text)
 
-    def test_report_header_omits_penetration_scope(self) -> None:
+    def test_skill_preserves_report_and_pdf_contract(self) -> None:
         skill_text = EQUITY_SKILL_PATH.read_text(encoding="utf-8")
-        self.assertIn("### 报告头部", skill_text)
-        self.assertIn("不得出现“穿透范围：”字段", skill_text)
-        self.assertIn("报告标题下方只展示以下四项", skill_text)
-        self.assertIn("**主体与数据基准**", skill_text)
-        self.assertNotIn("**范围与基准**", skill_text)
-
-    def test_control_path_tables_omit_status_column(self) -> None:
-        skill_text = EQUITY_SKILL_PATH.read_text(encoding="utf-8")
-        path_table = skill_text.split("### 关键控制路径表", 1)[1]
-        path_table = path_table.split("### 控制权核验表", 1)[0]
-        self.assertIn("都不得设置“状态”列", path_table)
-        self.assertIn("证据性质合并到“证据”列", path_table)
-        self.assertNotIn("| 状态 |", path_table)
-        self.assertNotIn("| 事实/计算 |", path_table)
-
-    def test_report_omits_evidence_index_chapter(self) -> None:
-        skill_text = EQUITY_SKILL_PATH.read_text(encoding="utf-8")
-        narrative = skill_text.split("### 叙述逻辑", 1)[1]
-        narrative = narrative.split("### 报告头部", 1)[0]
-        self.assertIn("最终报告到第八章结束", narrative)
-        self.assertIn("不得生成“证据索引”章节", narrative)
-        self.assertNotIn("9. **证据索引**", narrative)
-        self.assertNotIn("### 证据索引", skill_text)
-        self.assertIn("### 内部证据工作底稿（不进入报告）", skill_text)
-        self.assertIn("不得进入最终报告、附录或聊天交付", skill_text)
-
-    def test_skill_records_real_validation_and_upstream_failure(self) -> None:
-        skill_text = EQUITY_SKILL_PATH.read_text(encoding="utf-8")
-        self.assertIn("### 真实接口验证基线", skill_text)
-        self.assertIn("阳光电源股份有限公司", skill_text)
-        self.assertIn("招商银行股份有限公司", skill_text)
-        self.assertIn("名称和信用代码均返回状态 `3`", skill_text)
-        self.assertIn("深度 5、投资+任职产生 14 条 road", skill_text)
-        self.assertIn("`domainSus` 返回 200 个候选", skill_text)
+        for heading in (
+            "## 执行摘要",
+            "## 一、数据来源与互证方法",
+            "## 二、穿透起点：核心运营主体基本信息",
+            "## 三、当前股权结构",
+            "## 四、实际控制人与受益所有人穿透",
+            "## 五、历史股权变迁",
+            "## 六、一致行动人与关联关系识别",
+            "## 七、控制权脆弱性评估",
+            "## 八、潜在关联交易风险清单",
+            "## 数据来源与免责声明",
+        ):
+            with self.subTest(heading=heading):
+                self.assertIn(heading, skill_text)
+        self.assertIn("[PDF 交付规范](references/pdf-delivery.md)", skill_text)
+        self.assertIn("Letter 尺寸 PDF", skill_text)
+        self.assertIn("**SKILL 版本**：v3.1", skill_text)
 
 
 if __name__ == "__main__":

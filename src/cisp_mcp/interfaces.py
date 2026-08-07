@@ -11,6 +11,7 @@ class CispInterface:
     status_field: str
     data_field: str
     shortcut_field: str | None = None
+    request_uri: str | None = None
 
 
 INTERFACES = {
@@ -126,6 +127,14 @@ INTERFACES = {
         data_field="P0020023Data",
         shortcut_field="upList",
     ),
+    "P0020024": CispInterface(
+        product_code="P0020024",
+        name="企业受益股东详细查询",
+        description="根据企业名称或统一社会信用代码查询企业照面、受益股东、最终受益人和实际控制人节点。",
+        status_field="P0020024Status",
+        data_field="P0020024Data",
+        shortcut_field="nodeList",
+    ),
     "P0020031": CispInterface(
         product_code="P0020031",
         name="企业多点关联信息查询",
@@ -182,6 +191,23 @@ INTERFACES = {
         data_field="P0060008Data",
         shortcut_field="matchList",
     ),
+    "P0090001": CispInterface(
+        product_code="P0090001",
+        name="企业最终受益人信息查询-详版",
+        description="根据企业名称、统一社会信用代码或注册号查询最终受益人完整信息和递归股权路径。",
+        status_field="P0090001Status",
+        data_field="P0090001Data",
+        shortcut_field="finalList",
+        request_uri="/ectcispserver/api/entcreditapi/asyncQueryApply",
+    ),
+    "P0090008": CispInterface(
+        product_code="P0090008",
+        name="企业实际控制人信息查询",
+        description="根据企业名称、统一社会信用代码或注册号查询实际控制人、股权占比和控制路径。",
+        status_field="P0090008Status",
+        data_field="P0090008Data",
+        shortcut_field="actualController",
+    ),
     "P0090011": CispInterface(
         product_code="P0090011",
         name="企业最终受益人信息查询-全路径版",
@@ -189,6 +215,14 @@ INTERFACES = {
         status_field="P0090011Status",
         data_field="P0090011Data",
         shortcut_field="MatchInfoList",
+    ),
+    "P0090012": CispInterface(
+        product_code="P0090012",
+        name="企业最终受益人信息查询",
+        description="根据企业名称、统一社会信用代码或注册号查询最终受益人，可选择是否返回股权穿透路径。",
+        status_field="P0090012Status",
+        data_field="P0090012Data",
+        shortcut_field="finalList",
     ),
     "P0110003": CispInterface(
         product_code="P0110003",
@@ -285,6 +319,7 @@ P0020014 = INTERFACES["P0020014"]
 P0020019 = INTERFACES["P0020019"]
 P0020021 = INTERFACES["P0020021"]
 P0020023 = INTERFACES["P0020023"]
+P0020024 = INTERFACES["P0020024"]
 P0020031 = INTERFACES["P0020031"]
 P0020044 = INTERFACES["P0020044"]
 P0020129 = INTERFACES["P0020129"]
@@ -292,7 +327,10 @@ P0050007 = INTERFACES["P0050007"]
 P0050008 = INTERFACES["P0050008"]
 P0060007 = INTERFACES["P0060007"]
 P0060008 = INTERFACES["P0060008"]
+P0090001 = INTERFACES["P0090001"]
+P0090008 = INTERFACES["P0090008"]
 P0090011 = INTERFACES["P0090011"]
+P0090012 = INTERFACES["P0090012"]
 P0110003 = INTERFACES["P0110003"]
 P0130025 = INTERFACES["P0130025"]
 P0130036 = INTERFACES["P0130036"]

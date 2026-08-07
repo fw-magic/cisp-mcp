@@ -148,7 +148,7 @@ Discovered MCP tools:
 - p0010058_query_business_basic_deep
 ...
 - query_cisp_product
-Total: 34
+Total: 37
 Smoke test passed.
 ```
 
@@ -208,6 +208,7 @@ Authorization: Bearer <测试用CISP_API_KEY>
 | `P0020019` | 企业疑似实际控制人信息查询 | `p0020019_query_suspected_controller` |
 | `P0020021` | 企业单点关联信息查询 | `p0020021_query_single_point_related_info` |
 | `P0020023` | 企业股权穿透信息查询 | `p0020023_query_equity_penetration` |
+| `P0020024` | 企业受益股东详细查询 | `p0020024_query_beneficial_shareholders_detailed` |
 | `P0020031` | 企业多点关联信息查询 | `p0020031_query_multi_point_relationships` |
 | `P0020044` | 企业间关联关系查询 | `p0020044_query_intercompany_relationship` |
 | `P0020129` | 企业实控人和最终受益人查询 | `p0020129_query_controller_and_ubo` |
@@ -216,6 +217,8 @@ Authorization: Bearer <测试用CISP_API_KEY>
 | `P0050007+P0050008` | 企业舆情信息查询（列表+详情） | `p0050007_p0050008_query_public_opinion_info` |
 | `P0060007` | 企业工商二要素验证 | `p0060007_verify_business_two_elements` |
 | `P0060008` | 企业工商三要素验证 | `p0060008_verify_business_three_elements` |
+| `P0090001` / `P0090012` | 企业最终受益人信息查询（详版/非详版） | `p0090001_p0090012_query_ubo` |
+| `P0090008` | 企业实际控制人信息查询 | `p0090008_query_actual_controller` |
 | `P0090011` | 企业最终受益人信息查询-全路径版 | `p0090011_query_ubo_full_paths` |
 | `P0110003` | 企业荣誉资质信息查询 | `p0110003_query_honor_qualification_info` |
 | `P0130025` | 企业关键指标信息查询 | `p0130025_query_company_key_indicators` |
@@ -255,9 +258,12 @@ Authorization: Bearer <测试用CISP_API_KEY>
 - `suspectList`
 - `controlNodeList`
 - `entInvList`
+- `nodeList`（`P0020024`）
 - `nodes`
 - `relationship`
 - `dataList`
+- `finalList`（`P0090001`、`P0090012`）
+- `actualController`（`P0090008`）
 - `MatchInfoList`
 - `infoList`
 - `infoDetail`
@@ -318,6 +324,60 @@ p0010058_query_business_basic_deep
 
 ```text
 p0010059_query_business_basic_brief
+```
+
+### 查询企业受益股东详细信息
+
+`ent_info` 支持企业全称或统一社会信用代码。结果通过 `nodeList` 快捷字段返回；
+`benifitTag` 是底层接口原始拼写，可包含“受益股东”“最终受益人”或“实际控制人”。
+
+```json
+{
+  "ent_info": "证通股份有限公司"
+}
+```
+
+对应工具：
+
+```text
+p0020024_query_beneficial_shareholders_detailed
+```
+
+### 查询企业实际控制人
+
+`ent_name` 支持企业全称、统一社会信用代码或工商注册号。结果通过
+`actualController` 快捷字段返回，包含实际控制人、产品聚合股权占比和控制路径。
+
+```json
+{
+  "ent_name": "证通股份有限公司"
+}
+```
+
+对应工具：
+
+```text
+p0090008_query_actual_controller
+```
+
+### 查询企业最终受益人（详版/非详版统一入口）
+
+AI 应按任务目的选择 `edition`：完整报告、审计留档或关键管理人员兜底使用
+`detailed`；快速识别、独立互证或需要 `bnfCat` 判定依据使用 `standard`。
+非详版可将 `include_paths` 设为 `false`，只返回最终受益人。
+
+```json
+{
+  "ent_name": "证通股份有限公司",
+  "edition": "detailed",
+  "include_paths": true
+}
+```
+
+对应工具：
+
+```text
+p0090001_p0090012_query_ubo
 ```
 
 ### 企业高级筛选
