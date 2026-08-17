@@ -1,0 +1,4 @@
+interface:
+  display_name: "报告 PDF 样式"
+  short_description: "新建中文报告 Skill 时可复制的 PDF 样式与验收参考"
+  default_prompt: "Use $report-pdf-style as a reference, then embed the required Letter PDF contract and toolkit inside the new report skill."

@@ -54,7 +54,7 @@ description: 面向银行对公客户经理的高召回访前准备 Skill。使�
 | 内外部资料收集完成后 | `references/evidence-model.md` | 构建统一证据 JSON、来源映射、开放编号台账与各业务维度事实模型 |
 | 生成 `D` 派生字段及业务文案前 | `references/derivation-and-generation-rules.md` | 按白名单、回退、编号和证据约束生成核心观点、营销方案、风险与拜访材料 |
 | 生成最终 Markdown 报告前 | `references/report-template.md` | 严格按固定七章骨架填充，不得自行创造或改变结构 |
-| 仅在生成或验收 PDF 时 | `references/pdf-style.md` | 执行 Letter 版式、字体、表格、分页、渲染和视觉验收 |
+| 仅在生成或验收 PDF 时 | `references/pdf-style.md`、`scripts/report_pdf_toolkit.py` | 执行本 Skill 内置的完整 PDF 样式、字体、分页、表格、页眉页脚与验收契约 |
 
 每个 reference 顶部都声明未来 MCP Resource URI 和调试期版本 `0-dev`。正式迁移 MCP 时优先保持正文不变，只把本表中的本地路径替换为对应的版本化 Resource URI。
 
@@ -68,7 +68,7 @@ description: 面向银行对公客户经理的高召回访前准备 Skill。使�
 4. 读取证据模型 reference，从同一份内外部资料构建统一 JSON、`D`、`EVIDENCE` 和开放机会/风险台账。
 5. 读取派生与生成规则 reference，先完成事实白名单和确定性回退，再生成四段式核心观点，并按编号闭环生成执行摘要、画像、营销、风险与拜访内容。
 6. 读取报告模板 reference，替换占位符并执行预定义条件；检查无未替换标签、字段路径、工具名、空表或骨架外标题。
-7. 用户指定 Markdown 时直接交付完整 Markdown。生成 PDF 时再读取 PDF 版式 reference，并复用完全相同的证据模型和条件结果完成排版与逐页验收。
+7. 用户指定 Markdown 时直接交付完整 Markdown。生成 PDF 时完整读取本 Skill 的 `references/pdf-style.md`，运行本地 `scripts/report_pdf_toolkit.py`，并复用完全相同的证据模型和条件结果完成排版与逐页验收；不得读取或导入其他 Skill 的 PDF 资源。
 8. PDF 生成并验收成功时只保留最终 PDF；仅在用户指定 Markdown 或 PDF 失败回退时保留完整 Markdown。删除统一证据 JSON 和其他中间文件，不得保留敏感个人信息或不完整交付物。
 
 ## Markdown 回退
@@ -88,4 +88,4 @@ description: 面向银行对公客户经理的高召回访前准备 Skill。使�
 7. 最终 PDF 必须经过逐页渲染验收；无法验收时不得交付 PDF，直接回退 Markdown。
 8. 工商深度成功后，最终报告必须包含贷款及综合金融核心观点、开放式执行摘要、客户全景画像、产业画像与行业洞察、定制化营销方案、风险预警与观察、拜访建议与话题清单。OPP/RISK 必须贯穿后续章节；全部贷款机会、融资线索和综合金融机会均用 OPP-xx 统一编号并显示机会类型，全部已核实风险、风险观察和待核实事项均用 RISK-xx 统一编号并显示风险类型。扩展事实不足时保留模型分析和资料缺口，但不得使用模拟数据或样例企业事实补齐。
 
-**SKILL 版本**：v5.6-core-cooperation-focus ｜ **适配数据源**：连接标识为 `cisp-mcp` 的水滴征信 MCP 当前工具版本 + AI 网络搜索的全部来源与候选 ｜ **纳入模式**：全量纳入、分层标注、不设数量上限 ｜ **外部窗口**：近期检索默认 12 个月，同时不限期检索历史、人物、股东、资产与风险 ｜ **页面规格**：Letter 215.9 × 279.4 mm ｜ **默认交付**：PDF，失败回退 Markdown
+**SKILL 版本**：v5.8-embedded-pdf-style ｜ **适配数据源**：连接标识为 `cisp-mcp` 的水滴征信 MCP 当前工具版本 + AI 网络搜索的全部来源与候选 ｜ **纳入模式**：全量纳入、分层标注、不设数量上限 ｜ **外部窗口**：近期检索默认 12 个月，同时不限期检索历史、人物、股东、资产与风险 ｜ **页面规格**：Letter ｜ **默认交付**：PDF，失败回退 Markdown

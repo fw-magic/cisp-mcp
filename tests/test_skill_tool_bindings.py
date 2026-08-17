@@ -955,9 +955,11 @@ class EquityStructureSkillTests(unittest.TestCase):
         ):
             with self.subTest(heading=heading):
                 self.assertIn(heading, skill_text)
-        self.assertIn("[PDF 交付规范](references/pdf-delivery.md)", skill_text)
+        self.assertIn("[本报告 PDF 样式与交付契约](references/pdf-delivery.md)", skill_text)
+        self.assertIn("`scripts/report_pdf_toolkit.py`", skill_text)
+        self.assertNotIn("report-pdf-style", skill_text)
         self.assertIn("Letter 尺寸 PDF", skill_text)
-        self.assertIn("**SKILL 版本**：v3.1", skill_text)
+        self.assertIn("**SKILL 版本**：v3.3", skill_text)
 
 
 if __name__ == "__main__":

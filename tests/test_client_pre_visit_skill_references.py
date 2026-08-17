@@ -49,7 +49,8 @@ class ClientPreVisitSkillReferenceTests(unittest.TestCase):
                 self.assertIn(f"<!-- resource-id: {resource_id} -->", text)
                 self.assertIn("<!-- resource-version: 0-dev -->", text)
                 self.assertIn("## 内容索引", text)
-                self.assertNotIn("references/", text)
+                if filename != "pdf-style.md":
+                    self.assertNotIn("references/", text)
                 discovered_ids.add(resource_id)
 
         self.assertEqual(len(discovered_ids), len(REFERENCE_FILES))
@@ -82,9 +83,9 @@ class ClientPreVisitSkillReferenceTests(unittest.TestCase):
             "web-evidence-policy.md": "定向搜索外部公开资料",
             "tool-binding.md": "p0010058_query_business_basic_deep",
             "evidence-model.md": '"opportunity_register"',
-            "derivation-and-generation-rules.md": "生成贷款营销核心观点",
+            "derivation-and-generation-rules.md": "贷款营销核心观点",
             "report-template.md": "结构纪律",
-            "pdf-style.md": "中文字体与加粗渲染（强制）",
+            "pdf-style.md": "客户访前专属段落",
         }
         for filename, sentinel in expected.items():
             with self.subTest(filename=filename):
@@ -98,21 +99,14 @@ class ClientPreVisitSkillReferenceTests(unittest.TestCase):
             encoding="utf-8"
         )
 
-        self.assertIn("所有可见列的硬最小宽度为 **18 mm**", pdf_style)
-        self.assertIn("table-layout: fixed; width: 165.9mm", pdf_style)
-        self.assertIn("<colgroup><col ...></colgroup>", pdf_style)
-        self.assertIn("colWidths=[...]", pdf_style)
-        self.assertIn("不得逐字换行", pdf_style)
+        self.assertIn("所有客户访前表格可见列的业务硬下限为 18 mm", pdf_style)
+        self.assertIn("不得逐字竖排", pdf_style)
 
-        allocation_line = next(
-            line
-            for line in pdf_style.splitlines()
-            if line.startswith("执行摘要主要机会 18 / 28")
-        )
         allocations = re.findall(
-            r"(?:^|；|,|，)([^；，]+?) "
+            r"(?:^|；)([^；\n：]+)："
             r"(\d+(?:\.\d+)?(?: / \d+(?:\.\d+)?)+)",
-            allocation_line,
+            pdf_style,
+            flags=re.MULTILINE,
         )
         self.assertGreaterEqual(len(allocations), 18)
         for table_name, widths_text in allocations:
@@ -120,6 +114,20 @@ class ClientPreVisitSkillReferenceTests(unittest.TestCase):
                 widths = [float(value) for value in widths_text.split(" / ")]
                 self.assertTrue(all(width >= 18 for width in widths))
                 self.assertAlmostEqual(sum(widths), 165.9, places=6)
+
+    def test_pdf_stage_is_self_contained(self) -> None:
+        skill_text = SKILL_PATH.read_text(encoding="utf-8")
+        pdf_style = (SKILL_DIR / "references" / "pdf-style.md").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertIn("`scripts/report_pdf_toolkit.py`", skill_text)
+        self.assertNotIn("report-pdf-style", skill_text)
+        self.assertNotIn("report-pdf-style", pdf_style)
+        self.assertTrue((SKILL_DIR / "scripts" / "report_pdf_toolkit.py").is_file())
+        for local_token in ("#4D6EEB", "#CED4EE", "215.9 × 279.4 mm"):
+            with self.subTest(local_token=local_token):
+                self.assertIn(local_token, pdf_style)
 
 
 if __name__ == "__main__":
