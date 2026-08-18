@@ -303,6 +303,54 @@ class ReportPdfStyleTests(unittest.TestCase):
                         dpi=72,
                     )
                     self.assertEqual(len(rendered), report["pages"])
+                    if pdf_path.name == "股权结构穿透分析-排版测试.pdf":
+                        markdown = markdown_path.read_text(encoding="utf-8")
+                        conclusion = re.search(
+                            r"> \*\*一句话结论：\*\* ([^\n]+)\n\n\|",
+                            markdown,
+                        )
+                        self.assertIsNotNone(conclusion)
+                        assert conclusion is not None
+                        conclusion_text = conclusion.group(1)
+                        self.assertEqual(conclusion_text.count("；"), 6)
+                        for raw_value in ("7.123456%", "34.567891%", "51.234567%"):
+                            self.assertIn(raw_value, conclusion_text)
+                        for unsupported in ("100%一致", "符合 IPO 申报条件", "具备 IPO 申报资格"):
+                            self.assertNotIn(unsupported, conclusion_text)
+
+                        machine_phrases = (
+                            "产品识别",
+                            "产品返回",
+                            "产品结论",
+                            "本次返回",
+                            "本次未返回",
+                            "本次未完成",
+                            "当前不可用",
+                            "0命中",
+                            "0 命中",
+                            "聚合值",
+                            "数据断点",
+                            "路径互证",
+                            "接口原值",
+                            "模型判定",
+                            "系统判定",
+                        )
+                        for machine_phrase in machine_phrases:
+                            self.assertNotIn(machine_phrase, markdown)
+
+                        pdf_text = "".join(
+                            page.extract_text() or ""
+                            for page in PdfReader(str(pdf_path)).pages
+                        )
+                        normalized_pdf_text = re.sub(r"\s+", "", pdf_text)
+                        for raw_value in ("7.123456%", "34.567891%", "51.234567%"):
+                            self.assertIn(raw_value, normalized_pdf_text)
+                        self.assertNotIn("具备IPO申报资格", normalized_pdf_text)
+                        for machine_phrase in machine_phrases:
+                            self.assertNotIn(
+                                re.sub(r"\s+", "", machine_phrase),
+                                normalized_pdf_text,
+                            )
                     for rendered_page in rendered:
                         self.assert_visible_page_chrome(toolkit, rendered_page, dpi=72)
                     markdown = markdown_path.read_text(encoding="utf-8")

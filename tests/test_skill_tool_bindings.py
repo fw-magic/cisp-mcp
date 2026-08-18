@@ -929,7 +929,7 @@ class EquityStructureSkillTests(unittest.TestCase):
         self.assertIn("校验值只用于发现异常，不覆盖接口原始持股比例", skill_text)
         self.assertIn("股比口径待复核", skill_text)
         self.assertIn("控制权核验矩阵", skill_text)
-        self.assertIn("本次路径未完成互证", skill_text)
+        self.assertIn("相关控制链条尚待交叉核验", skill_text)
 
     def test_skill_recursively_penetrates_low_ratio_platforms(self) -> None:
         skill_text = EQUITY_SKILL_PATH.read_text(encoding="utf-8")
@@ -959,7 +959,7 @@ class EquityStructureSkillTests(unittest.TestCase):
         self.assertIn("`scripts/report_pdf_toolkit.py`", skill_text)
         self.assertNotIn("report-pdf-style", skill_text)
         self.assertIn("Letter 尺寸 PDF", skill_text)
-        self.assertIn("**SKILL 版本**：v3.3", skill_text)
+        self.assertIn("**SKILL 版本**：v3.6", skill_text)
 
 
 if __name__ == "__main__":
